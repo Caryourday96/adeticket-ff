@@ -3,26 +3,23 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+env:
+  AZURE_WEBAPP_NAME: adeticket-ff
+  AZURE_CLIENT_ID: 28395708-62f0-43af-9320-4eeb93f83e2e
+  AZURE_TENANT_ID: eebc63f8-ba15-4204-b127-5b6c929e7c95
+  AZURE_SUBSCRIPTION_ID: bd83bca5-9234-4923-b95f-0dc160ec962c
 concurrency:
   group: azure-production
   cancel-in-progress: false
 jobs:
   deploy:
-    if: vars.AZURE_DEPLOY_ENABLED == 'true'
+    if: github.ref == 'refs/heads/main'
     environment: production
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
-      - name: Check deployment configuration
-        env:
-          APP: ${{ vars.AZURE_WEBAPP_NAME }}
-          CLIENT: ${{ vars.AZURE_CLIENT_ID }}
-          TENANT: ${{ vars.AZURE_TENANT_ID }}
-          SUBSCRIPTION: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-        run: |
-          test -n "$APP" && test -n "$CLIENT" && test -n "$TENANT" && test -n "$SUBSCRIPTION"
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
@@ -35,10 +32,11 @@ jobs:
       - run: pnpm build
       - uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
       - uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: dist/
+
