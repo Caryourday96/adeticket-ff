@@ -1,0 +1,228 @@
+{
+  "schemaVersion": 1,
+  "title": "Fast Money • sample set",
+  "scoringSource": "illustrative",
+  "notice": "Invented sample points, not survey results.",
+  "questions": [
+    {
+      "id": "fm-1",
+      "category": "fast-money",
+      "prompt": "Name a fruit people buy at a roadside stall.",
+      "hostNotes": "Judge equivalent meanings consistently. No duplicate meaning across the two players.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Banana",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Orange",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Mango",
+          "points": 18,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Pineapple",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Watermelon",
+          "points": 7,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Pawpaw",
+          "points": 3,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "fm-2",
+      "category": "fast-money",
+      "prompt": "Name something people drink with breakfast.",
+      "hostNotes": "Judge equivalent meanings consistently. No duplicate meaning across the two players.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Tea",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Water",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Coffee",
+          "points": 18,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Juice",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Milk",
+          "points": 7,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Hot chocolate",
+          "points": 3,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "fm-3",
+      "category": "fast-money",
+      "prompt": "Name something you take to a wedding.",
+      "hostNotes": "Judge equivalent meanings consistently. No duplicate meaning across the two players.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Phone",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Money",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Gift",
+          "points": 18,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Handbag",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Hand fan",
+          "points": 7,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Invitation",
+          "points": 3,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "fm-4",
+      "category": "fast-money",
+      "prompt": "Name a way people travel to another Nigerian city.",
+      "hostNotes": "Judge equivalent meanings consistently. No duplicate meaning across the two players.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Bus",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Car",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Plane",
+          "points": 18,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Train",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Boat",
+          "points": 7,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Motorcycle",
+          "points": 3,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "fm-5",
+      "category": "fast-money",
+      "prompt": "Name something you find in a school bag.",
+      "hostNotes": "Judge equivalent meanings consistently. No duplicate meaning across the two players.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Books",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Pens",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Lunch box",
+          "points": 18,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Water bottle",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Pencils",
+          "points": 7,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Ruler",
+          "points": 3,
+          "acceptedAlternatives": []
+        }
+      ]
+    }
+  ]
+}

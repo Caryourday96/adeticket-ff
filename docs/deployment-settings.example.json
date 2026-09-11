@@ -1,0 +1,11 @@
+{
+  "githubRepository": "",
+  "azureWebAppName": "",
+  "azureResourceGroup": "",
+  "azureClientId": "",
+  "azureTenantId": "",
+  "azureSubscriptionId": "",
+  "subdomain": "",
+  "persistentDataDirectory": "",
+  "enabled": false
+}

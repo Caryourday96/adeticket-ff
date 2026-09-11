@@ -1,0 +1,1071 @@
+{
+  "schemaVersion": 1,
+  "title": "Naija Family Showdown — Starter Bank",
+  "language": "en-NG",
+  "scoringSource": "illustrative",
+  "notice": "Original sample questions with invented game points. No survey was conducted. Answer order and points do not represent actual popularity. Do not announce that 100 people were surveyed.",
+  "hostPolicy": {
+    "judging": "Players answer aloud. The host decides whether a guess matches a board answer or an accepted alternative. Search suggestions must never automatically reveal answers.",
+    "clarification": "Ask for clarification on broad or ambiguous guesses. A factually valid answer may still be off-board.",
+    "scoring": "An accepted guess reveals at most one answer. Round multipliers and steal scoring belong to the game rules, not this bank.",
+    "editing": "Review notes before playing. Add accepted alternatives consistently; changing an answer's meaning should happen before the round begins."
+  },
+  "questions": [
+    {
+      "id": "ng-001",
+      "category": "food",
+      "prompt": "Name a rice dish you might be served at a Nigerian party.",
+      "hostNotes": "Ask for a dish if the player says only “rice.” Accept native rice as a dish name; do not treat every locally made rice dish as native rice.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Jollof rice",
+          "points": 32,
+          "acceptedAlternatives": ["Jollof", "Party jollof"]
+        },
+        {
+          "id": "a2",
+          "text": "Fried rice",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "White rice and stew",
+          "points": 18,
+          "acceptedAlternatives": ["Rice and stew", "White rice"]
+        },
+        {
+          "id": "a4",
+          "text": "Ofada rice",
+          "points": 12,
+          "acceptedAlternatives": ["Ofada"]
+        },
+        {
+          "id": "a5",
+          "text": "Coconut rice",
+          "points": 8,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Native rice",
+          "points": 5,
+          "acceptedAlternatives": ["Palm oil rice"]
+        }
+      ]
+    },
+    {
+      "id": "ng-002",
+      "category": "food",
+      "prompt": "Name a food you might buy from a roadside vendor in Nigeria.",
+      "hostNotes": "Ask for the food if a player names only an ingredient, such as corn or plantain.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Suya",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Akara",
+          "points": 24,
+          "acceptedAlternatives": ["Bean cakes"]
+        },
+        {
+          "id": "a3",
+          "text": "Roasted corn",
+          "points": 19,
+          "acceptedAlternatives": ["Roast corn"]
+        },
+        {
+          "id": "a4",
+          "text": "Boli",
+          "points": 13,
+          "acceptedAlternatives": ["Bole", "Roasted plantain"]
+        },
+        {
+          "id": "a5",
+          "text": "Puff-puff",
+          "points": 9,
+          "acceptedAlternatives": ["Puff puff"]
+        },
+        {
+          "id": "a6",
+          "text": "Roasted yam",
+          "points": 5,
+          "acceptedAlternatives": ["Roast yam"]
+        }
+      ]
+    },
+    {
+      "id": "ng-003",
+      "category": "food",
+      "prompt": "Name a Nigerian food made primarily from beans.",
+      "hostNotes": "Accept a clear description of the dish. Ewa agoyin is separate from general beans porridge for this board.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Moi moi",
+          "points": 35,
+          "acceptedAlternatives": ["Moin moin", "Moimoi"]
+        },
+        {
+          "id": "a2",
+          "text": "Akara",
+          "points": 23,
+          "acceptedAlternatives": ["Bean cakes"]
+        },
+        {
+          "id": "a3",
+          "text": "Ewa agoyin",
+          "points": 16,
+          "acceptedAlternatives": ["Ewa aganyin"]
+        },
+        {
+          "id": "a4",
+          "text": "Beans porridge",
+          "points": 12,
+          "acceptedAlternatives": ["Beans pottage", "Stewed beans"]
+        },
+        {
+          "id": "a5",
+          "text": "Gbegiri",
+          "points": 8,
+          "acceptedAlternatives": ["Bean soup"]
+        },
+        {
+          "id": "a6",
+          "text": "Ekuru",
+          "points": 6,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ng-004",
+      "category": "food",
+      "prompt": "Name a swallow someone might eat with soup.",
+      "hostNotes": "Ask for the prepared swallow rather than accepting a raw ingredient. Semolina and Semovita are grouped for this sample board.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Pounded yam",
+          "points": 28,
+          "acceptedAlternatives": ["Iyan"]
+        },
+        {
+          "id": "a2",
+          "text": "Eba",
+          "points": 25,
+          "acceptedAlternatives": ["Garri swallow"]
+        },
+        {
+          "id": "a3",
+          "text": "Amala",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Semovita",
+          "points": 14,
+          "acceptedAlternatives": ["Semo", "Semolina"]
+        },
+        {
+          "id": "a5",
+          "text": "Fufu",
+          "points": 8,
+          "acceptedAlternatives": ["Akpu"]
+        },
+        {
+          "id": "a6",
+          "text": "Tuwo shinkafa",
+          "points": 5,
+          "acceptedAlternatives": ["Rice tuwo"]
+        }
+      ]
+    },
+    {
+      "id": "ng-005",
+      "category": "food",
+      "prompt": "Name a snack you might find in a Nigerian small-chops box.",
+      "hostNotes": "Gizdodo means the combined gizzard-and-plantain dish; plain gizzard maps to peppered gizzard.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Puff-puff",
+          "points": 32,
+          "acceptedAlternatives": ["Puff puff"]
+        },
+        {
+          "id": "a2",
+          "text": "Spring rolls",
+          "points": 25,
+          "acceptedAlternatives": ["Spring roll"]
+        },
+        {
+          "id": "a3",
+          "text": "Samosa",
+          "points": 18,
+          "acceptedAlternatives": ["Samosas"]
+        },
+        {
+          "id": "a4",
+          "text": "Peppered chicken",
+          "points": 12,
+          "acceptedAlternatives": ["Chicken"]
+        },
+        {
+          "id": "a5",
+          "text": "Gizdodo",
+          "points": 8,
+          "acceptedAlternatives": ["Gizzard and plantain"]
+        },
+        {
+          "id": "a6",
+          "text": "Peppered gizzard",
+          "points": 5,
+          "acceptedAlternatives": ["Gizzard"]
+        }
+      ]
+    },
+    {
+      "id": "ng-006",
+      "category": "celebrations",
+      "prompt": "Name something guests do at a Nigerian wedding reception.",
+      "hostNotes": "Accept descriptions of the activity. Giving a gift is not automatically the same as spraying money.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Dance",
+          "points": 30,
+          "acceptedAlternatives": ["Dancing"]
+        },
+        {
+          "id": "a2",
+          "text": "Eat",
+          "points": 24,
+          "acceptedAlternatives": ["Eating"]
+        },
+        {
+          "id": "a3",
+          "text": "Take photos",
+          "points": 19,
+          "acceptedAlternatives": ["Take pictures", "Selfies"]
+        },
+        {
+          "id": "a4",
+          "text": "Spray money",
+          "points": 13,
+          "acceptedAlternatives": ["Money spraying"]
+        },
+        {
+          "id": "a5",
+          "text": "Greet people",
+          "points": 9,
+          "acceptedAlternatives": ["Greet relatives", "Socialise", "Socialize"]
+        },
+        {
+          "id": "a6",
+          "text": "Sing along",
+          "points": 5,
+          "acceptedAlternatives": ["Sing"]
+        }
+      ]
+    },
+    {
+      "id": "ng-007",
+      "category": "celebrations",
+      "prompt": "Name something a couple might book for their wedding.",
+      "hostNotes": "This board separates the DJ and MC. Ask which role the player means if they say entertainer.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Venue",
+          "points": 35,
+          "acceptedAlternatives": ["Hall", "Event centre", "Event center"]
+        },
+        {
+          "id": "a2",
+          "text": "Caterer",
+          "points": 23,
+          "acceptedAlternatives": ["Catering"]
+        },
+        {
+          "id": "a3",
+          "text": "Photographer",
+          "points": 16,
+          "acceptedAlternatives": ["Photography"]
+        },
+        {
+          "id": "a4",
+          "text": "DJ",
+          "points": 12,
+          "acceptedAlternatives": ["Disc jockey"]
+        },
+        {
+          "id": "a5",
+          "text": "Decorator",
+          "points": 8,
+          "acceptedAlternatives": ["Decoration"]
+        },
+        {
+          "id": "a6",
+          "text": "MC",
+          "points": 6,
+          "acceptedAlternatives": ["Emcee", "Master of ceremonies"]
+        }
+      ]
+    },
+    {
+      "id": "ng-008",
+      "category": "celebrations",
+      "prompt": "Name something you might receive in a party souvenir bag.",
+      "hostNotes": "Accept common equivalents. Ask what kind of opener if it is unclear.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Plastic bowl",
+          "points": 28,
+          "acceptedAlternatives": ["Bowl"]
+        },
+        {
+          "id": "a2",
+          "text": "Cup",
+          "points": 25,
+          "acceptedAlternatives": ["Mug"]
+        },
+        {
+          "id": "a3",
+          "text": "Hand fan",
+          "points": 20,
+          "acceptedAlternatives": ["Fan"]
+        },
+        {
+          "id": "a4",
+          "text": "Notebook",
+          "points": 14,
+          "acceptedAlternatives": ["Jotter"]
+        },
+        {
+          "id": "a5",
+          "text": "Towel",
+          "points": 8,
+          "acceptedAlternatives": ["Hand towel"]
+        },
+        {
+          "id": "a6",
+          "text": "Bottle opener",
+          "points": 5,
+          "acceptedAlternatives": ["Opener"]
+        }
+      ]
+    },
+    {
+      "id": "ng-009",
+      "category": "everyday",
+      "prompt": "Name something a passenger does during a long traffic jam.",
+      "hostNotes": "The question is about a passenger. Group texting and social-media use under phone use; talking means conversation with another person.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Use their phone",
+          "points": 32,
+          "acceptedAlternatives": ["Scroll", "Text", "Browse social media"]
+        },
+        {
+          "id": "a2",
+          "text": "Sleep",
+          "points": 25,
+          "acceptedAlternatives": ["Nap"]
+        },
+        {
+          "id": "a3",
+          "text": "Buy snacks",
+          "points": 18,
+          "acceptedAlternatives": ["Buy food", "Eat snacks"]
+        },
+        {
+          "id": "a4",
+          "text": "Listen to music",
+          "points": 12,
+          "acceptedAlternatives": ["Listen to the radio"]
+        },
+        {
+          "id": "a5",
+          "text": "Talk",
+          "points": 8,
+          "acceptedAlternatives": ["Chat"]
+        },
+        {
+          "id": "a6",
+          "text": "Complain",
+          "points": 5,
+          "acceptedAlternatives": ["Grumble"]
+        }
+      ]
+    },
+    {
+      "id": "ng-010",
+      "category": "everyday",
+      "prompt": "Name something you check before leaving home.",
+      "hostNotes": "For doors, lights and windows, accept checking their state. Phone accessories do not count as phone.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Phone",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Keys",
+          "points": 24,
+          "acceptedAlternatives": ["House keys", "Car keys"]
+        },
+        {
+          "id": "a3",
+          "text": "Money",
+          "points": 19,
+          "acceptedAlternatives": ["Wallet", "Purse"]
+        },
+        {
+          "id": "a4",
+          "text": "Door is locked",
+          "points": 13,
+          "acceptedAlternatives": ["Lock the door", "Doors"]
+        },
+        {
+          "id": "a5",
+          "text": "Lights",
+          "points": 9,
+          "acceptedAlternatives": ["Light switches"]
+        },
+        {
+          "id": "a6",
+          "text": "Windows",
+          "points": 5,
+          "acceptedAlternatives": ["Windows are closed"]
+        }
+      ]
+    },
+    {
+      "id": "ng-011",
+      "category": "everyday",
+      "prompt": "Name something people buy before a new school term.",
+      "hostNotes": "Books includes textbooks and exercise books; stationery covers writing supplies.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Books",
+          "points": 35,
+          "acceptedAlternatives": ["Textbooks", "Exercise books"]
+        },
+        {
+          "id": "a2",
+          "text": "Uniform",
+          "points": 23,
+          "acceptedAlternatives": ["School uniform"]
+        },
+        {
+          "id": "a3",
+          "text": "School bag",
+          "points": 16,
+          "acceptedAlternatives": ["Backpack"]
+        },
+        {
+          "id": "a4",
+          "text": "Shoes",
+          "points": 12,
+          "acceptedAlternatives": ["School shoes"]
+        },
+        {
+          "id": "a5",
+          "text": "Stationery",
+          "points": 8,
+          "acceptedAlternatives": ["Pens", "Pencils"]
+        },
+        {
+          "id": "a6",
+          "text": "Lunch box",
+          "points": 6,
+          "acceptedAlternatives": ["Lunchbox", "Food flask"]
+        }
+      ]
+    },
+    {
+      "id": "ng-012",
+      "category": "everyday",
+      "prompt": "Name something people bring to a friend's house to watch football.",
+      "hostNotes": "Food and drinks are separate. Ask what they bring if they name only a brand.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Snacks",
+          "points": 28,
+          "acceptedAlternatives": ["Food"]
+        },
+        {
+          "id": "a2",
+          "text": "Drinks",
+          "points": 25,
+          "acceptedAlternatives": ["Water", "Soft drinks"]
+        },
+        {
+          "id": "a3",
+          "text": "Football jersey",
+          "points": 20,
+          "acceptedAlternatives": ["Jersey", "Team shirt"]
+        },
+        {
+          "id": "a4",
+          "text": "Phone",
+          "points": 14,
+          "acceptedAlternatives": ["Mobile phone"]
+        },
+        {
+          "id": "a5",
+          "text": "Speaker",
+          "points": 8,
+          "acceptedAlternatives": ["Bluetooth speaker"]
+        },
+        {
+          "id": "a6",
+          "text": "Team flag",
+          "points": 5,
+          "acceptedAlternatives": ["Flag"]
+        }
+      ]
+    },
+    {
+      "id": "ng-013",
+      "category": "drinks",
+      "prompt": "Name a drink someone might offer a visitor in Nigeria.",
+      "hostNotes": "Malt and zobo are separate from the general soft-drink category on this board.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Water",
+          "points": 32,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Soft drink",
+          "points": 25,
+          "acceptedAlternatives": ["Soda", "Fizzy drink"]
+        },
+        {
+          "id": "a3",
+          "text": "Juice",
+          "points": 18,
+          "acceptedAlternatives": ["Fruit juice"]
+        },
+        {
+          "id": "a4",
+          "text": "Malt",
+          "points": 12,
+          "acceptedAlternatives": ["Malt drink"]
+        },
+        {
+          "id": "a5",
+          "text": "Tea",
+          "points": 8,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Zobo",
+          "points": 5,
+          "acceptedAlternatives": ["Hibiscus drink"]
+        }
+      ]
+    },
+    {
+      "id": "ng-014",
+      "category": "travel",
+      "prompt": "Name something people pack for a beach outing.",
+      "hostNotes": "One guess maps to one board answer. Food and drinks are separate.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Food",
+          "points": 30,
+          "acceptedAlternatives": ["Snacks"]
+        },
+        {
+          "id": "a2",
+          "text": "Drinks",
+          "points": 24,
+          "acceptedAlternatives": ["Water"]
+        },
+        {
+          "id": "a3",
+          "text": "Swimwear",
+          "points": 19,
+          "acceptedAlternatives": ["Swimsuit", "Swimming trunks"]
+        },
+        {
+          "id": "a4",
+          "text": "Towel",
+          "points": 13,
+          "acceptedAlternatives": ["Beach towel"]
+        },
+        {
+          "id": "a5",
+          "text": "Sunglasses",
+          "points": 9,
+          "acceptedAlternatives": ["Shades"]
+        },
+        {
+          "id": "a6",
+          "text": "Speaker",
+          "points": 5,
+          "acceptedAlternatives": ["Bluetooth speaker"]
+        }
+      ]
+    },
+    {
+      "id": "ng-015",
+      "category": "travel",
+      "prompt": "Name a Nigerian city someone might visit for a holiday.",
+      "hostNotes": "These are sample choices, not a tourism ranking. Ask for a city if someone names a state.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Lagos",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Abuja",
+          "points": 23,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Calabar",
+          "points": 16,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Uyo",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Jos",
+          "points": 8,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Enugu",
+          "points": 6,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ng-016",
+      "category": "home",
+      "prompt": "Name something people look for when the electricity goes out at night.",
+      "hostNotes": "A phone torch maps to phone; a standalone torch maps to torch. Ask which device the player means.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Torch",
+          "points": 28,
+          "acceptedAlternatives": ["Flashlight"]
+        },
+        {
+          "id": "a2",
+          "text": "Phone",
+          "points": 25,
+          "acceptedAlternatives": ["Phone torch", "Phone flashlight"]
+        },
+        {
+          "id": "a3",
+          "text": "Candle",
+          "points": 20,
+          "acceptedAlternatives": ["Candles"]
+        },
+        {
+          "id": "a4",
+          "text": "Rechargeable lamp",
+          "points": 14,
+          "acceptedAlternatives": ["Emergency light", "Lantern"]
+        },
+        {
+          "id": "a5",
+          "text": "Matches",
+          "points": 8,
+          "acceptedAlternatives": ["Lighter"]
+        },
+        {
+          "id": "a6",
+          "text": "Generator key",
+          "points": 5,
+          "acceptedAlternatives": ["Generator keys"]
+        }
+      ]
+    },
+    {
+      "id": "ng-017",
+      "category": "music",
+      "prompt": "Name a Nigerian musician whose music you might hear at a wedding reception.",
+      "hostNotes": "Accept stage names and unambiguous aliases. These are imagined game answers, not measured popularity.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Davido",
+          "points": 32,
+          "acceptedAlternatives": ["OBO"]
+        },
+        {
+          "id": "a2",
+          "text": "Wizkid",
+          "points": 25,
+          "acceptedAlternatives": ["Starboy", "Big Wiz"]
+        },
+        {
+          "id": "a3",
+          "text": "Burna Boy",
+          "points": 18,
+          "acceptedAlternatives": ["Burna"]
+        },
+        {
+          "id": "a4",
+          "text": "Kizz Daniel",
+          "points": 12,
+          "acceptedAlternatives": ["Kiss Daniel"]
+        },
+        {
+          "id": "a5",
+          "text": "King Sunny Ade",
+          "points": 8,
+          "acceptedAlternatives": ["Sunny Ade", "KSA"]
+        },
+        {
+          "id": "a6",
+          "text": "Flavour",
+          "points": 5,
+          "acceptedAlternatives": ["Flavour N'abania"]
+        }
+      ]
+    },
+    {
+      "id": "ng-018",
+      "category": "music",
+      "prompt": "Name a Nigerian female musician.",
+      "hostNotes": "This board contains only six sample answers. Other valid Nigerian musicians can be off-board without being factually wrong.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Tiwa Savage",
+          "points": 30,
+          "acceptedAlternatives": ["Tiwa"]
+        },
+        {
+          "id": "a2",
+          "text": "Yemi Alade",
+          "points": 24,
+          "acceptedAlternatives": ["Yemi"]
+        },
+        {
+          "id": "a3",
+          "text": "Tems",
+          "points": 19,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Ayra Starr",
+          "points": 13,
+          "acceptedAlternatives": ["Ayra"]
+        },
+        {
+          "id": "a5",
+          "text": "Simi",
+          "points": 9,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Teni",
+          "points": 5,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ng-019",
+      "category": "music",
+      "prompt": "Name a Nigerian musician known for Afrobeats.",
+      "hostNotes": "Use the artist's name. Off-board artists may still be valid answers to the general question.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Burna Boy",
+          "points": 35,
+          "acceptedAlternatives": ["Burna"]
+        },
+        {
+          "id": "a2",
+          "text": "Wizkid",
+          "points": 23,
+          "acceptedAlternatives": ["Starboy", "Big Wiz"]
+        },
+        {
+          "id": "a3",
+          "text": "Davido",
+          "points": 16,
+          "acceptedAlternatives": ["OBO"]
+        },
+        {
+          "id": "a4",
+          "text": "Rema",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Asake",
+          "points": 8,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Fireboy DML",
+          "points": 6,
+          "acceptedAlternatives": ["Fireboy"]
+        }
+      ]
+    },
+    {
+      "id": "ng-020",
+      "category": "music",
+      "prompt": "Name a Nigerian musician associated with an earlier generation of popular music.",
+      "hostNotes": "This is a subjective sample board. Accept these named artists; do not claim this list ranks their influence or popularity.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Fela Kuti",
+          "points": 28,
+          "acceptedAlternatives": ["Fela"]
+        },
+        {
+          "id": "a2",
+          "text": "King Sunny Ade",
+          "points": 25,
+          "acceptedAlternatives": ["Sunny Ade", "KSA"]
+        },
+        {
+          "id": "a3",
+          "text": "Ebenezer Obey",
+          "points": 20,
+          "acceptedAlternatives": ["Chief Commander"]
+        },
+        {
+          "id": "a4",
+          "text": "Onyeka Onwenu",
+          "points": 14,
+          "acceptedAlternatives": ["Onyeka"]
+        },
+        {
+          "id": "a5",
+          "text": "Sir Shina Peters",
+          "points": 8,
+          "acceptedAlternatives": ["Shina Peters"]
+        },
+        {
+          "id": "a6",
+          "text": "Oliver De Coque",
+          "points": 5,
+          "acceptedAlternatives": ["Oliver de Coque"]
+        }
+      ]
+    },
+    {
+      "id": "ng-021",
+      "category": "music",
+      "prompt": "Name something a musician holds or wears on stage.",
+      "hostNotes": "A headset microphone maps to microphone; monitoring earpieces map to earpiece. Ask which function is intended.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Microphone",
+          "points": 32,
+          "acceptedAlternatives": ["Mic", "Mike"]
+        },
+        {
+          "id": "a2",
+          "text": "Sunglasses",
+          "points": 25,
+          "acceptedAlternatives": ["Shades"]
+        },
+        {
+          "id": "a3",
+          "text": "Jewellery",
+          "points": 18,
+          "acceptedAlternatives": ["Jewelry", "Chain", "Necklace"]
+        },
+        {
+          "id": "a4",
+          "text": "Cap",
+          "points": 12,
+          "acceptedAlternatives": ["Hat"]
+        },
+        {
+          "id": "a5",
+          "text": "Guitar",
+          "points": 8,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Earpiece",
+          "points": 5,
+          "acceptedAlternatives": ["In-ear monitor", "In ear monitors"]
+        }
+      ]
+    },
+    {
+      "id": "ng-022",
+      "category": "music",
+      "prompt": "Name something fans do at a concert.",
+      "hostNotes": "If someone says use their phone, ask what they are doing with it.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Sing along",
+          "points": 30,
+          "acceptedAlternatives": ["Sing"]
+        },
+        {
+          "id": "a2",
+          "text": "Dance",
+          "points": 24,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Record videos",
+          "points": 19,
+          "acceptedAlternatives": ["Film", "Record on their phone"]
+        },
+        {
+          "id": "a4",
+          "text": "Scream",
+          "points": 13,
+          "acceptedAlternatives": ["Shout"]
+        },
+        {
+          "id": "a5",
+          "text": "Wave their hands",
+          "points": 9,
+          "acceptedAlternatives": ["Raise their hands"]
+        },
+        {
+          "id": "a6",
+          "text": "Clap",
+          "points": 5,
+          "acceptedAlternatives": ["Applaud"]
+        }
+      ]
+    },
+    {
+      "id": "ng-023",
+      "category": "shopping",
+      "prompt": "Name something people buy at a market to cook a pot of stew.",
+      "hostNotes": "Meat is deliberately grouped for this board. Accept a specific meat as that single answer.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Tomatoes",
+          "points": 35,
+          "acceptedAlternatives": ["Tomato"]
+        },
+        {
+          "id": "a2",
+          "text": "Pepper",
+          "points": 23,
+          "acceptedAlternatives": ["Peppers"]
+        },
+        {
+          "id": "a3",
+          "text": "Onions",
+          "points": 16,
+          "acceptedAlternatives": ["Onion"]
+        },
+        {
+          "id": "a4",
+          "text": "Oil",
+          "points": 12,
+          "acceptedAlternatives": ["Vegetable oil", "Palm oil"]
+        },
+        {
+          "id": "a5",
+          "text": "Meat",
+          "points": 8,
+          "acceptedAlternatives": ["Beef", "Chicken", "Goat meat"]
+        },
+        {
+          "id": "a6",
+          "text": "Seasoning",
+          "points": 6,
+          "acceptedAlternatives": ["Stock cubes", "Seasoning cubes", "Salt"]
+        }
+      ]
+    },
+    {
+      "id": "ng-024",
+      "category": "home",
+      "prompt": "Name a spread or filling people put in bread.",
+      "hostNotes": "Accept equivalent spreads or fillings. Different kinds of egg preparation count as one answer.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Butter",
+          "points": 28,
+          "acceptedAlternatives": ["Margarine"]
+        },
+        {
+          "id": "a2",
+          "text": "Egg",
+          "points": 25,
+          "acceptedAlternatives": ["Eggs", "Omelette"]
+        },
+        {
+          "id": "a3",
+          "text": "Sardines",
+          "points": 20,
+          "acceptedAlternatives": ["Tinned fish", "Canned fish"]
+        },
+        {
+          "id": "a4",
+          "text": "Jam",
+          "points": 14,
+          "acceptedAlternatives": ["Fruit jam"]
+        },
+        {
+          "id": "a5",
+          "text": "Peanut butter",
+          "points": 8,
+          "acceptedAlternatives": ["Groundnut butter"]
+        },
+        {
+          "id": "a6",
+          "text": "Mayonnaise",
+          "points": 5,
+          "acceptedAlternatives": ["Mayo"]
+        }
+      ]
+    }
+  ]
+}
