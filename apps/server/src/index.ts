@@ -8,10 +8,11 @@ const server = createApplication({
   production: process.env.NODE_ENV === "production",
   origin: process.env.APP_ORIGIN,
 });
-const port = Number(process.env.PORT ?? 3000);
-server.http.listen(port, "0.0.0.0", () =>
-  console.log("Naija Family Showdown is ready at http://localhost:" + port),
-);
+const endpoint = process.env.PORT ?? "3000";
+const onListening = () => console.log("Naija Family Showdown is ready.");
+// IISNode supplies a named pipe; local and Linux hosting supply a numeric port.
+if (/^\d+$/.test(endpoint)) server.http.listen(Number(endpoint), "0.0.0.0", onListening);
+else server.http.listen(endpoint, onListening);
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => {
     void server.close().then(() => process.exit(0));

@@ -1,10 +1,10 @@
-# Azure deployment — unconfigured
+# Azure deployment
 
-The repository, Azure names, and subdomain are intentionally blank in `deployment-settings.example.json`. Nothing has been published.
+Source is published to `Caryourday96/adeticket-ff`. The `adeticket-ff` Windows Web App exists in `Kayode_IGO`, Canada Central, on the existing `adeticket` S1 plan. The requested hostname is `naijafeud.kayodeadetunji.com`. Deployment identity, application settings, persistent storage verification, DNS, and TLS still need configuration before the game is live.
 
 ## Prerequisites
 
-Select an existing GitHub repository and Azure Linux Web App with a supported Node runtime (Node 24 preferred, minimum 22.13). Confirm available runtimes in the target subscription instead of assuming a particular plan supports them.
+The selected Web App uses Node 24 on Windows. The release includes `server.js` and `web.config` for IISNode, with one Node process and support for Azure's named-pipe `PORT`. Linux or local hosting can continue using a numeric port.
 
 Use one application instance. Before enabling deployment, choose and verify durable storage suitable for SQLite, including file locking and backup/restore. Do not put the database under the release directory or an ephemeral temporary directory. If the available storage is unsuitable, implement a managed database adapter first.
 
@@ -32,7 +32,7 @@ Set application settings securely in Azure:
 - `APP_ORIGIN`: the exact HTTPS subdomain origin, without a trailing slash.
 - `DATA_DIR`: the verified absolute persistent data path.
 
-The app reads Azure's `PORT`. Use startup command `node server.cjs` for the deployed `dist/` package. Ensure the frontend `web/` directory sits beside that file. No runtime package installation is required; server dependencies are bundled.
+The app reads Azure's `PORT`. Deploy the contents of `dist/`, including `web.config`, `server.js`, `server.cjs`, and the frontend `web/` directory. Windows IISNode starts `server.js`; Linux or local hosting can run `node server.cjs`. No runtime package installation is required; server dependencies are bundled. The IIS WebSocket module is disabled in `web.config` so Node handles the protocol; enable WebSockets in the App Service configuration.
 
 Enable required WebSocket support and appropriate health checking at `/api/health`. Configure HTTPS and the custom domain using the exact verification and CNAME records shown by Azure. Check plan costs and domain/certificate support before changing resources.
 

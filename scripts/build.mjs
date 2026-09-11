@@ -53,6 +53,8 @@ await build({
   plugins: [nodeResolver],
 });
 await mkdir("dist", { recursive: true });
+await writeFile("dist/server.js", 'require("./server.cjs");\n');
+await writeFile("dist/web.config", await readFile("deployment/web.config", "utf8"));
 await writeFile(
   "dist/package.json",
   JSON.stringify(
