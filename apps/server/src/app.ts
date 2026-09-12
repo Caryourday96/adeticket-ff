@@ -295,6 +295,18 @@ export function createApplication(options: {
   });
   const web = options.webDir ?? resolve(existsSync(resolve("web")) ? "web" : "dist/web");
   if (existsSync(web)) {
+    // Static assets and SPA navigation share a separate budget from API polling.
+    app.use(
+      rateLimit({
+        windowMs: 60000,
+        limit: 6000,
+        standardHeaders: true,
+        legacyHeaders: false,
+        validate: { xForwardedForHeader: false },
+        skip: (req) => req.path === "/api" || req.path.startsWith("/api/"),
+        message: "Too many page requests. Please wait a minute.",
+      }),
+    );
     app.use(
       express.static(web, {
         setHeaders: (res, path) => {

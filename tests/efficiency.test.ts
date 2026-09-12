@@ -108,9 +108,11 @@ it("caches fingerprinted assets while revalidating HTML and never caching API re
     }
     const asset = await fetch(base + "/assets/index-AbCd1234.js");
     expect(asset.headers.get("cache-control")).toBe("public, max-age=31536000, immutable");
+    expect(asset.headers.get("ratelimit-remaining")).toBe("5996");
     await asset.text();
     const health = await fetch(base + "/api/health");
     expect(health.headers.get("cache-control")).toBe("no-store");
+    expect(health.headers.get("ratelimit-remaining")).toBe("5999");
     await health.text();
   } finally {
     await server.close();

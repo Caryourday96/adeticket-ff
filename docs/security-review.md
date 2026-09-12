@@ -9,6 +9,8 @@ longer used to verify human passwords. The Azure host password does not need cha
 to use this verification implementation.
 
 API traffic has a 6,000-request/minute shared-IP limit and login has 10 attempts/minute.
+Static assets and page navigation share a separate 6,000-request/minute budget;
+API polling does not consume that budget.
 These budgets are process-local, matching the one-instance deployment. Forwarding
 headers supplied by callers are not trusted. Behind Azure/IIS, a proxy address may
 be shared across users: verify its networking before configuring trusted proxies or
