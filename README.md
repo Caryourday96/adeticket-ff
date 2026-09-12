@@ -97,6 +97,8 @@ Use `pnpm format` after edits. Keep business rules in `packages/game` and add a 
 
 ## Deployment status
 
-**No repository, Azure resource, or subdomain has been configured or deployed.** Deployment settings remain empty at the user's request. The Azure workflow is manual and skips deployment unless `AZURE_DEPLOY_ENABLED=true` is configured.
+The game is deployed at **https://naijafeud.kayodeadetunji.com** on the `adeticket-ff` Windows Azure Web App in Canada Central. Source is in `Caryourday96/adeticket-ff`.
+
+Pushes run validation; production deployment remains manual: GitHub Actions → Deploy to Azure → Run workflow → `main`. The workflow repeats formatting, type, test, and build checks before deploying through OIDC. No Azure password or publish profile is stored in Git.
 
 See [Azure setup](docs/azure-deployment.md), [architecture](docs/architecture.md), [question editing](docs/questions.md), and [host guide](docs/host-guide.md).

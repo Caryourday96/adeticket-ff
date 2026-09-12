@@ -31,11 +31,11 @@ A completed rehearsal game and an edited question pack remain in local ignored r
 
 ## Deployment status and limits
 
-No GitHub repository has been selected or pushed. GitHub account connection was verified separately. Azure resources and subdomain are unconfigured; the deployment workflow is opt-in and has not run.
+Source is pushed to `Caryourday96/adeticket-ff`. GitHub Actions deployment run `34656556703`, attempt 2, succeeded for `08d00a2`. The Windows Web App runs in Canada Central and serves https://naijafeud.kayodeadetunji.com with a managed TLS certificate.
 
 The exact Nigerian television design and ruleset have not been verified. The current interface uses an original blue-and-gold TV-style board. The bundled questions use illustrative points. One Fast Money set is included.
 
-Cloud storage compatibility, real phone QR scanning, and real Azure deployment still require testing against the eventual hosting environment.
+Public HTTPS startup and health checks pass. Unauthenticated games and packs APIs correctly return 401. Socket.IO connects successfully using both polling and WebSocket transports with the custom-domain origin. Authenticated cloud rehearsal, saved-game restart recovery, backup/restore, and real phone QR/latency testing remain outstanding.
 
 ## Phone buzzer verification
 
