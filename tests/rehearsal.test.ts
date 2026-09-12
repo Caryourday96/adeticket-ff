@@ -5,6 +5,19 @@ import { createRehearsal } from "../apps/server/src/rehearsal";
 import { transition } from "@naija/game";
 import { passwordVerifier } from "../apps/server/src/password";
 
+it("changes a ready Fast Money timer without allowing changes during a running turn", () => {
+  const ready = createRehearsal("ABC123", "fast");
+  const changed = transition(ready, { type: "fastDuration", seconds: 45 }, 1000);
+  expect(changed.fast?.remaining).toBe(45000);
+  const running = transition(changed, { type: "fastClock" }, 2000);
+  expect(running.fast?.deadline).toBe(47000);
+  expect(() => transition(running, { type: "fastDuration", seconds: 60 })).toThrow(
+    "before starting",
+  );
+  expect(() => transition(ready, { type: "fastDuration", seconds: 0 })).toThrow("10–120");
+  expect(ready.fast?.remaining).toBe(20000);
+});
+
 it("simulates through the real buzzer lock and winner checks, only in rehearsals", async () => {
   const server = createApplication({ database: ":memory:" });
   try {

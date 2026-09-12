@@ -269,6 +269,18 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
       s.message = "Fast Money: keep player two out of hearing.";
       break;
     }
+    case "fastDuration":
+      requireThat(
+        s.phase === "fast" && s.fast?.stage === "ready",
+        "Set the duration before starting this player's timer.",
+      );
+      requireThat(
+        Number.isInteger(cmd.seconds) && cmd.seconds >= 10 && cmd.seconds <= 120,
+        "Choose 10–120 seconds.",
+      );
+      s.fast!.remaining = cmd.seconds * 1000;
+      s.message = `Player ${s.fast!.player + 1} timer set to ${cmd.seconds} seconds.`;
+      break;
     case "fastClock":
       requireThat(
         s.fast && s.phase === "fast" && s.fast.stage === "ready",

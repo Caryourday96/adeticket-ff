@@ -41,7 +41,8 @@ test("Fast Money rehearsal starts the real timer and enables question navigation
 }) => {
   await signIn(page);
   await page.getByRole("button", { name: "Practice Fast Money", exact: true }).click();
-  await page.getByRole("button", { name: "Start 20-second timer" }).click();
+  await page.getByLabel("Timer duration", { exact: true }).selectOption("45");
+  await page.getByRole("button", { name: "Start 45-second timer" }).click();
   await expect(page.getByRole("navigation", { name: "Fast Money questions" })).toBeVisible();
   await page.getByRole("button", { name: "Question 2", exact: true }).click();
   await expect(page.getByRole("button", { name: "Question 2", exact: true })).toHaveAttribute(

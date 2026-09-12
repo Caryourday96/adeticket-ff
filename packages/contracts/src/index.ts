@@ -80,6 +80,7 @@ export const commandSchema = z.discriminatedUnion("type", [
     players: z.tuple([z.number().int().min(0), z.number().int().min(0)]),
   }),
   z.object({ type: z.literal("fastClock") }),
+  z.object({ type: z.literal("fastDuration"), seconds: z.number().int().min(10).max(120) }),
   z.object({
     type: z.literal("fastAnswer"),
     question: z.number().int().min(0).max(4),

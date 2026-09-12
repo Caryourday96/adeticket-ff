@@ -342,6 +342,18 @@ export function Host({ id }: { id: string }) {
                 )}
                 {judging && !(s.phase === "faceoff" && s.face.first === null) && (
                   <>
+                    {s.phase === "steal" && (
+                      <div className="host-note" role="status">
+                        <strong>
+                          {s.teams[active].name} can steal {s.bank} points
+                          {s.rules.includeStealAnswer ? " plus the matching answer’s points" : ""}.
+                        </strong>
+                        <p>
+                          A miss awards {s.bank} points to {s.teams[s.control].name}. Select the
+                          captain’s answer to settle the round.
+                        </p>
+                      </div>
+                    )}
                     <p>
                       {s.phase === "steal"
                         ? "One final guess. Select a hidden answer, or mark the steal unsuccessful."
@@ -364,6 +376,11 @@ export function Host({ id }: { id: string }) {
                 )}
                 {s.phase === "settled" && (
                   <>
+                    <h3>
+                      {s.roundWinner !== null
+                        ? s.teams[s.roundWinner].name + " won the round"
+                        : "Round complete"}
+                    </h3>
                     <p>{s.message}</p>
                     <button
                       className="button wide"

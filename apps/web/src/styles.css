@@ -1544,7 +1544,7 @@ small {
 }
 .timer {
   font-family: "Barlow Condensed", sans-serif;
-  font-size: 64px;
+  font-size: clamp(80px, 10vw, 120px);
   text-align: center;
   color: var(--gold);
   line-height: 1.2;

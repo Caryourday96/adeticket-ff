@@ -69,12 +69,34 @@ export function FastControls({
           <p className="muted">
             Read the first question, then start. Keep the other player out of hearing.
           </p>
+          <label>
+            Timer duration
+            <select
+              value={f.remaining / 1000}
+              disabled={busy}
+              onChange={(event) =>
+                void send({ type: "fastDuration", seconds: Number(event.target.value) })
+              }
+            >
+              {[...new Set([10, 15, 20, 25, 30, 45, 60, 90, 120, f.remaining / 1000])]
+                .sort((a, b) => a - b)
+                .map((duration) => (
+                  <option key={duration} value={duration}>
+                    {duration} seconds
+                  </option>
+                ))}
+            </select>
+          </label>
+          <p className="muted">
+            Standard timing is 20 seconds for player one and 25 for player two. Changes apply to
+            this turn only.
+          </p>
           <button
             className="button primary"
             disabled={busy}
             onClick={() => send({ type: "fastClock" })}
           >
-            Start {f.player === 0 ? 20 : 25}-second timer
+            Start {f.remaining / 1000}-second timer
           </button>
         </>
       )}
@@ -120,10 +142,17 @@ export function FastControls({
               <button
                 className="button wide"
                 key={a.id}
-                disabled={busy || seconds === 0}
+                disabled={
+                  busy || seconds === 0 || (f.player === 1 && f.entries[0][q]?.answerId === a.id)
+                }
                 onClick={() => record(a.id, a.text)}
               >
-                <span>{a.text}</span>
+                <span>
+                  {a.text}
+                  {f.player === 1 && f.entries[0][q]?.answerId === a.id
+                    ? " · Already given by player one — ask for another answer"
+                    : ""}
+                </span>
                 <b>{a.points}</b>
               </button>
             ))}
@@ -172,6 +201,10 @@ export function FastControls({
             Select a match to record and advance. All five recorded or time up ends the turn
             automatically.
           </p>
+          <p className="host-note">
+            Pass leaves the question unanswered. Use the numbered tabs to return, or keep passing to
+            cycle through unanswered questions.
+          </p>
           <details>
             <summary>{entries.filter(Boolean).length} / 5 answers recorded</summary>
             {entries.map((entry, i) => (
@@ -202,6 +235,20 @@ export function FastControls({
       )}
       {f.stage === "done" && (
         <>
+          <h2>Fast Money results</h2>
+          {f.entries.map((row, player) => (
+            <div key={player} className="host-note">
+              <h3>
+                {state.teams[state.winner!].members[f.players[player]]} ·{" "}
+                {row.reduce((total, entry) => total + (entry?.points ?? 0), 0)} points
+              </h3>
+              {row.map((entry, index) => (
+                <p key={index}>
+                  {index + 1}. {entry?.text ?? "No answer"} — {entry?.points ?? 0} points
+                </p>
+              ))}
+            </div>
+          ))}
           <h3>{f.entries.flat().reduce((sum, a) => sum + (a?.points ?? 0), 0)} / 200 points</h3>
           <p>
             {f.entries.flat().reduce((sum, a) => sum + (a?.points ?? 0), 0) >= 200
