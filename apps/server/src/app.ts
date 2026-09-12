@@ -130,7 +130,7 @@ export function createApplication(options: {
       return q;
     });
     let id = randomBytes(3).toString("hex").toUpperCase();
-    while (store.list().some((g) => g.id === id)) id = randomBytes(3).toString("hex").toUpperCase();
+    while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
     store.add(createGame(id, setup, questions, fastQuestions, bank.notice));
     res.status(201).json({ id });
   });
@@ -139,15 +139,20 @@ export function createApplication(options: {
     res.json(audience(store.saved(req.params.id).state)),
   );
   const broadcast = (id: string) => {
-    io.to(id + ":audience").emit("state", audience(store.saved(id).state));
+    const state = store.host(id);
+    const { canUndo: _canUndo, history: _history, ...game } = state;
+    io.to(id + ":audience").emit("state", audience(game));
     io.to(id + ":audience").emit("buzzer", buzzers.public(id));
-    for (const socket of io.sockets.sockets.values())
-      if (socket.data.hostGame === id) {
+    let hostBuzzers: ReturnType<typeof buzzers.host> | undefined;
+    for (const socketId of io.sockets.adapter.rooms.get(id + ":host") ?? []) {
+      const socket = io.sockets.sockets.get(socketId);
+      if (socket) {
         if (store.authorized(cookie(socket.request.headers.cookie))) {
-          socket.emit("state", store.host(id));
-          socket.emit("buzzers", buzzers.host(id));
+          socket.emit("state", state);
+          socket.emit("buzzers", (hostBuzzers ??= buzzers.host(id)));
         } else socket.disconnect(true);
       }
+    }
   };
   const playerToken = (req: express.Request) =>
     req.headers.cookie
@@ -231,11 +236,10 @@ export function createApplication(options: {
           throw new Error("Invalid room.");
         const state = store.saved(input.id).state;
         for (const room of socket.rooms) if (room !== socket.id) socket.leave(room);
-        socket.data.hostGame = null;
         if (input.role === "host") {
           if (!store.authorized(cookie(socket.request.headers.cookie)))
             throw new Error("Host access required.");
-          socket.data.hostGame = input.id;
+          socket.join(input.id + ":host");
           socket.emit("state", store.host(input.id));
           socket.emit("buzzers", buzzers.host(input.id));
         } else {
@@ -251,12 +255,26 @@ export function createApplication(options: {
   });
   const web = options.webDir ?? resolve(existsSync(resolve("web")) ? "web" : "dist/web");
   if (existsSync(web)) {
-    app.use(express.static(web));
+    app.use(
+      express.static(web, {
+        setHeaders: (res, path) => {
+          // Vite fingerprints built assets; HTML must revalidate after each deployment.
+          const fingerprinted = /[\\/]assets[\\/][^\\/]+-[\w-]{8,}\.[\w]+$/.test(path);
+          res.setHeader(
+            "Cache-Control",
+            fingerprinted
+              ? "public, max-age=31536000, immutable"
+              : "public, max-age=0, must-revalidate",
+          );
+        },
+      }),
+    );
     app.get("/{*path}", (req, res) => {
       if (req.path.startsWith("/api/")) {
         res.status(404).json({ error: "Not found." });
         return;
       }
+      res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
       res.sendFile(resolve(web, "index.html"));
     });
   }

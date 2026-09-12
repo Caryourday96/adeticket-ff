@@ -23,6 +23,15 @@ export class Store {
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS players(id TEXT PRIMARY KEY, game TEXT NOT NULL, hash TEXT NOT NULL, body TEXT NOT NULL)",
     );
+    // Partial index keeps the frequent timer check independent of archived game size.
+    this.db.exec(`
+      CREATE INDEX IF NOT EXISTS games_running_deadline
+      ON games(json_extract(body,'$.state.fast.deadline'))
+      WHERE json_extract(body,'$.state.phase')='fast'
+        AND json_extract(body,'$.state.fast.stage')='running'
+        AND json_extract(body,'$.state.paused')=0;
+      CREATE INDEX IF NOT EXISTS players_game_hash ON players(game,hash);
+    `);
   }
   players(game: string): BuzzerPlayer[] {
     return (
@@ -63,20 +72,32 @@ export class Store {
     if (!row) throw new Error("Game not found.");
     return JSON.parse(row.body);
   }
+  has(id: string) {
+    return !!this.db.prepare("SELECT 1 FROM games WHERE id=?").get(id);
+  }
   host(id: string): HostState {
     const r = this.saved(id);
     return { ...r.state, canUndo: r.undo.length > 0, history: r.history.slice(-12).reverse() };
   }
   list() {
-    return (this.db.prepare("SELECT body FROM games").all() as { body: string }[])
-      .map((r) => JSON.parse(r.body).state as GameState)
-      .map((s) => ({
-        id: s.id,
-        teams: s.teams.map((t) => t.name),
-        phase: s.phase,
-        round: s.round + 1,
-      }))
-      .reverse();
+    return this.db
+      .prepare(
+        `
+      SELECT id,
+        json_extract(body,'$.state.teams[0].name') AS firstTeam,
+        json_extract(body,'$.state.teams[1].name') AS secondTeam,
+        json_extract(body,'$.state.phase') AS phase,
+        json_extract(body,'$.state.round') + 1 AS round
+      FROM games ORDER BY rowid DESC
+    `,
+      )
+      .all()
+      .map((r) => ({
+        id: r.id as string,
+        teams: [r.firstTeam as string, r.secondTeam as string],
+        phase: r.phase as GameState["phase"],
+        round: r.round as number,
+      }));
   }
   expiredFastGames(now = Date.now()) {
     return (
@@ -156,7 +177,9 @@ export class Store {
     ).map((r) => ({ id: r.id, bank: bankSchema.parse(JSON.parse(r.body)) }));
   }
   pack(id: string) {
-    return this.packs().find((p) => p.id === id)?.bank;
+    const row = this.db.prepare("SELECT body FROM packs WHERE id=?").get(id) as
+      { body: string } | undefined;
+    return row ? bankSchema.parse(JSON.parse(row.body)) : undefined;
   }
   addPack(bank: Bank) {
     const id = randomBytes(8).toString("hex");

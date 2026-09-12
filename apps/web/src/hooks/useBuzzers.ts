@@ -31,7 +31,17 @@ export function useBuzzers<T extends HostBuzzers | PlayerView>(id: string, host 
         void refresh();
       }),
     );
-    socket.on(host ? "buzzers" : "buzzer", () => void refresh());
+    if (host) {
+      socket.on("buzzers", (next: HostBuzzers) => {
+        // The host stream already contains the full view. Supersede any older HTTP read.
+        sequence.current++;
+        setData(next as T);
+        setError("");
+      });
+    } else {
+      // Public buzzer events cannot include this phone's private registration status.
+      socket.on("buzzer", () => void refresh());
+    }
     const disconnect = () => {
       sequence.current++;
       setConnected(false);
