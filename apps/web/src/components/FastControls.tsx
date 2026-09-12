@@ -72,6 +72,7 @@ export function FastControls({
           <label>
             Timer duration
             <select
+              aria-label="Timer duration"
               value={f.remaining / 1000}
               disabled={busy}
               onChange={(event) =>
