@@ -15,6 +15,7 @@ jobs:
           node-version: "24"
       - uses: pnpm/action-setup@v4
       - run: pnpm install --frozen-lockfile
+      - run: pnpm audit --audit-level=moderate
       - run: pnpm format:check
       - run: pnpm typecheck
       - run: pnpm test

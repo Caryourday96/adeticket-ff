@@ -12,6 +12,29 @@ export class Buzzers {
   }
   private gates = new Map<string, BuzzerState & { revision: number }>();
   constructor(private store: Store) {}
+  forget(id: string, playerIds: string[]) {
+    this.gates.delete(id);
+    for (const playerId of playerIds) this.presence.delete(playerId);
+  }
+  simulate(id: string, team: Side, epoch: string) {
+    const state = this.store.host(id);
+    if (!state.rehearsal)
+      throw new Error("Simulated contestants are only available in rehearsal games.");
+    const token = randomBytes(32).toString("hex");
+    const player = {
+      id: randomUUID(),
+      team,
+      member: state.turns[team],
+      name: state.teams[team].members[state.turns[team]],
+      approved: true,
+    };
+    this.store.addPlayer(id, player, token);
+    try {
+      this.buzz(id, token, epoch);
+    } finally {
+      this.store.removePlayer(id, player.id);
+    }
+  }
   lock(id: string) {
     this.gates.set(id, {
       epoch: randomUUID(),

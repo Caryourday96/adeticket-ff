@@ -71,6 +71,7 @@ export const commandSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("next") }),
   z.object({ type: z.literal("showAll") }),
   z.object({ type: z.literal("undo") }),
+  z.object({ type: z.literal("endGame") }),
   z.object({ type: z.literal("pause") }),
   z.object({ type: z.literal("turn"), member: z.number().int().min(0).max(11) }),
   z.object({ type: z.literal("roster"), teams: z.tuple([teamSchema, teamSchema]) }),
@@ -113,6 +114,7 @@ export type FastState = {
 };
 export type GameState = {
   id: string;
+  rehearsal?: boolean;
   revision: number;
   teams: [Team, Team];
   scores: [number, number];

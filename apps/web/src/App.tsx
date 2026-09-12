@@ -8,7 +8,6 @@ import { Library } from "./pages/Library";
 import { Layout } from "./components/Layout";
 import { Brand } from "./components/Brand";
 import { Player } from "./pages/Player";
-import { CastReceiver } from "./pages/CastReceiver";
 function HostGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<{
       authenticated: boolean;
@@ -188,7 +187,6 @@ function Rules() {
 }
 export function App() {
   const path = location.pathname.split("/").filter(Boolean);
-  if (path[0] === "cast" && path[1] === "receiver") return <CastReceiver />;
   if (path[0] === "audience" && path[1]) return <Audience id={path[1].toUpperCase()} />;
   if (path[0] === "play" && path[1]) return <Player id={path[1].toUpperCase()} />;
   if (path[0] === "join") return <Join />;

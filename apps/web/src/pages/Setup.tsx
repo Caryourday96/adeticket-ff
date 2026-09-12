@@ -4,6 +4,7 @@ import { ArrowRight, Monitor, Users, Layers, Play, Shuffle } from "lucide-react"
 import { api } from "../lib/api";
 import { Layout } from "../components/Layout";
 import { TeamEditor } from "../components/TeamEditor";
+import { commandId } from "../lib/commandId";
 export function Setup() {
   const [teams, setTeams] = useState<[Team, Team]>([
     { name: "The Jollof Squad", members: ["Ada", "Chidi", "Tobi"], captain: 0 },
@@ -11,14 +12,64 @@ export function Setup() {
   ]);
   const [packs, setPacks] = useState<{ id: string; bank: Bank }[]>([]),
     [packId, setPackId] = useState("starter"),
-    [games, setGames] = useState<{ id: string; teams: string[]; phase: string; round: number }[]>(
-      [],
-    );
+    [games, setGames] = useState<
+      {
+        id: string;
+        teams: string[];
+        phase: string;
+        round: number;
+        revision: number;
+        rehearsal: boolean;
+      }[]
+    >([]);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [shuffle, setShuffle] = useState(true),
     [steal, setSteal] = useState(true),
     [target, setTarget] = useState(300);
+  const [showAllGames, setShowAllGames] = useState(false);
+  async function rehearse(scenario: "round" | "fast") {
+    setBusy(true);
+    setError("");
+    try {
+      const game = await api<{ id: string }>("/rehearsals", { scenario });
+      location.href = "/host/" + game.id;
+    } catch (e) {
+      setError((e as Error).message);
+      setBusy(false);
+    }
+  }
+  async function manage(game: (typeof games)[number], action: "end" | "delete") {
+    const name = game.teams.join(" vs ") + " (" + game.id + ")";
+    if (
+      !window.confirm(
+        action === "delete"
+          ? `Permanently delete ${name}? Saved scores, history and phone registrations will be removed. This cannot be undone.`
+          : `End ${name}? Scores will be saved and any running timer stopped. Unfinished round points will not be awarded.`,
+      )
+    )
+      return;
+    setBusy(true);
+    setError("");
+    try {
+      if (action === "delete") await api(`/games/${game.id}/delete`, { revision: game.revision });
+      else
+        await api(`/games/${game.id}/commands`, {
+          id: commandId(),
+          revision: game.revision,
+          command: { type: "endGame" },
+        });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      try {
+        setGames(await api<typeof games>("/games"));
+      } catch (e) {
+        setError((e as Error).message);
+      }
+      setBusy(false);
+    }
+  }
   const [required, setRequired] = useState<Record<string, number>>({});
   const selectedPack = packs.find((p) => p.id === packId)?.bank;
   const categories = [...new Set(selectedPack?.questions.map((q) => q.category) ?? [])];
@@ -101,6 +152,22 @@ export function Setup() {
             <b>03</b> Open the big screen
           </span>
         </div>
+        <section className="rehearsal-panel" aria-label="Start a rehearsal">
+          <div className="eyebrow">FIRST TIME HOSTING?</div>
+          <h2>Try a rehearsal.</h2>
+          <p>
+            Practise with ready-made teams and simulated contestants. Use the real host controls
+            with a guided coach; no phones are needed.
+          </p>
+          <div className="button-row">
+            <button className="button" disabled={busy} onClick={() => void rehearse("round")}>
+              Practise a round
+            </button>
+            <button className="button" disabled={busy} onClick={() => void rehearse("fast")}>
+              Practise Fast Money
+            </button>
+          </div>
+        </section>
         <div className="section-title">
           <h2>Who's in the family?</h2>
           <span>Make it personal. Set your lineup.</span>
@@ -234,19 +301,47 @@ export function Setup() {
               <span>Saved automatically</span>
             </div>
             <div className="saved-grid">
-              {games.slice(0, 6).map((g) => (
-                <a className="saved-game" key={g.id} href={"/host/" + g.id}>
-                  <div>
-                    <small>
-                      {g.id} · ROUND {g.round}
-                    </small>
-                    <strong>{g.teams.join(" vs ")}</strong>
-                    <span>{g.phase}</span>
+              {(showAllGames ? games : games.slice(0, 6)).map((g) => (
+                <article className="saved-game-card" key={g.id}>
+                  <a className="saved-game" href={"/host/" + g.id}>
+                    <div>
+                      <small>
+                        {g.rehearsal ? "REHEARSAL · " : ""}
+                        {g.id} · ROUND {g.round}
+                      </small>
+                      <strong>{g.teams.join(" vs ")}</strong>
+                      <span>{g.phase}</span>
+                    </div>
+                    <Play size={18} />
+                  </a>
+                  <div className="button-row">
+                    {g.phase !== "finished" && (
+                      <button
+                        className="button small"
+                        disabled={busy}
+                        onClick={() => void manage(g, "end")}
+                        aria-label={`End game ${g.id}`}
+                      >
+                        End game
+                      </button>
+                    )}
+                    <button
+                      className="button small"
+                      disabled={busy}
+                      onClick={() => void manage(g, "delete")}
+                      aria-label={`Delete game ${g.id}`}
+                    >
+                      Delete
+                    </button>
                   </div>
-                  <Play size={18} />
-                </a>
+                </article>
               ))}
             </div>
+            {games.length > 6 && (
+              <button className="button" onClick={() => setShowAllGames(!showAllGames)}>
+                {showAllGames ? "Show recent games" : `Show all ${games.length} games`}
+              </button>
+            )}
           </section>
         )}
       </main>

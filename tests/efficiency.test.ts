@@ -63,8 +63,22 @@ it("indexes timer deadlines on existing databases and updates the index on pause
     expect(store.has("OLDER")).toBe(true);
     expect(store.has("MISSING")).toBe(false);
     expect(store.list()).toEqual([
-      { id: "TIMER", teams: ["Jollof", "Suya"], phase: "fast", round: 1 },
-      { id: "OLDER", teams: ["Jollof", "Suya"], phase: "faceoff", round: 1 },
+      {
+        id: "TIMER",
+        teams: ["Jollof", "Suya"],
+        phase: "fast",
+        round: 1,
+        revision: 2,
+        rehearsal: false,
+      },
+      {
+        id: "OLDER",
+        teams: ["Jollof", "Suya"],
+        phase: "faceoff",
+        round: 1,
+        revision: 0,
+        rehearsal: false,
+      },
     ]);
     const pack = store.addPack(starterBank);
     expect(store.pack(pack)).toEqual(starterBank);

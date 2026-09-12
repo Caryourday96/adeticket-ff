@@ -29,7 +29,15 @@ Use the network/public address in the host browser before sharing a QR code. A l
 
 The default home-game preset uses a target of 300, multipliers of 1/1/2/3, and triple-point sudden death if needed. Successful steals include the stealing answer’s points, with the round multiplier applied. You can turn this off during setup. Previously saved games retain their chosen scoring rules. This is not advertised as a verified Nigerian official ruleset.
 
-## Phone buzzers
+## Rehearsal and saved games
+
+On the host desk, choose **Practise a round** or **Practise Fast Money**. Each creates a separate saved game with practice teams and a visible REHEARSAL label. The coach explains each phase. Open the normal phone buzzers, then use a simulated contestant button; suggestions let you practise judging correct answers and misses using the real scoring controls. Fast Money includes sample contestant responses, the real 20/25-second timers, passing, duplicates and reveals. Simulated buzzes exercise server rules, not real phone network latency.
+
+The new-round and Fast Money rehearsal shortcuts create new practice games. They do not reset another game. Real phones can still join a rehearsal for a device test.
+
+Saved games have **End game** and **Delete** controls. End keeps the score and history, stops the timer and awards no unfinished bank; Undo in the host dashboard can restore it. Delete permanently removes the selected game, its history and phone registrations after confirmation. Connected screens are notified. If the game has changed since the list loaded, refresh and retry. **Show all games** includes older sessions beyond the six recent games.
+
+## Phone buzzer setup
 
 Players open `/play/ROOM` from the host's Invite phones QR. They select a roster name and request approval. The host approves each registration and opens buzzers after reading the face-off question. Only the current face-off contestant from each team can buzz. Manual team buttons remain available as a fallback. Undo a mistaken buzz, then explicitly open buzzers again.
 

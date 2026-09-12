@@ -32,6 +32,13 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
       .then((s) => alive && setState((old) => (!old || s.revision >= old.revision ? s : old)))
       .catch((e) => alive && setError(e.message));
     const socket = io({ autoConnect: false });
+    socket.on("gameDeleted", () => {
+      alive = false;
+      setState(null);
+      setError("This game was deleted by the host.");
+      setConnected(false);
+      socket.disconnect();
+    });
     socket.on("connect", () =>
       socket.emit("join", { id, role }, (result: { error?: string }) => {
         setConnected(!result.error);

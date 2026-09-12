@@ -99,6 +99,17 @@ export function FastControls({
             ))}
           </nav>
           <p className="fast-prompt">{question.prompt}</p>
+          {state.rehearsal && (
+            <p className="host-note">
+              Simulated contestant says:{" "}
+              <strong>
+                {question.answers.find((a) => f.player === 0 || a.id !== f.entries[0][q]?.answerId)
+                  ?.text ?? "Pass"}
+              </strong>
+              . Judge it below, or use Pass / next to practise returning. For duplicate practice,
+              try player one’s answer during player two’s turn.
+            </p>
+          )}
           {entries[q] && (
             <p className="host-note">
               Recorded: {entries[q]!.text}. Choosing another answer replaces it.

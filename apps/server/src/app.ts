@@ -1,7 +1,9 @@
 import express from "express";
 import helmet from "helmet";
 import { createServer } from "node:http";
-import { randomBytes, randomUUID, timingSafeEqual, createHash } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
+import { rateLimit } from "express-rate-limit";
+import { passwordVerifier } from "./password";
 import { resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { Server } from "socket.io";
@@ -11,13 +13,13 @@ import { audience, createGame } from "@naija/game";
 import { Store } from "./store";
 import { Buzzers } from "./buzzers";
 import { z } from "zod";
+import { createRehearsal } from "./rehearsal";
 export function createApplication(options: {
   database: string;
   password?: string;
   production?: boolean;
   origin?: string;
   webDir?: string;
-  castAppId?: string;
 }) {
   if (options.production && !options.password)
     throw new Error("HOST_PASSWORD is required in production.");
@@ -43,19 +45,30 @@ export function createApplication(options: {
     helmet({
       contentSecurityPolicy: {
         directives: {
-          "connect-src": [
-            "'self'",
-            "ws:",
-            "wss:",
-            "https://www.gstatic.com",
-            "https://www.google.com",
-          ],
-          "script-src": ["'self'", "https://www.gstatic.com", "https://www.google.com"],
+          "connect-src": ["'self'", "ws:", "wss:"],
         },
       },
       strictTransportSecurity: options.production ? undefined : false,
     }),
   );
+  // Generous shared-IP budget allows phones on one venue Wi-Fi. Do not trust caller-supplied forwarding headers.
+  const apiLimiter = rateLimit({
+    windowMs: 60000,
+    limit: 6000,
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+    message: { error: "Too many requests. Please wait a minute." },
+  });
+  const loginLimiter = rateLimit({
+    windowMs: 60000,
+    limit: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+    message: { error: "Too many sign-in attempts. Please wait a minute." },
+  });
+  app.use("/api", apiLimiter);
   app.use(express.json({ limit: "2mb" }));
   app.use("/api", (_req, res, next) => {
     res.setHeader("Cache-Control", "no-store");
@@ -82,11 +95,6 @@ export function createApplication(options: {
     next();
   };
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
-  app.get("/api/config", (_req, res) =>
-    res.json({
-      castAppId: options.castAppId?.trim() || null,
-    }),
-  );
   app.get("/api/clock", (_req, res) => res.json({ now: Date.now() }));
   app.get("/api/session", (req, res) =>
     res.json({
@@ -94,22 +102,9 @@ export function createApplication(options: {
       passwordRequired: !!options.password,
     }),
   );
-  const attempts = new Map<string, { count: number; until: number }>();
-  app.post("/api/login", (req, res) => {
-    const ip = req.socket.remoteAddress ?? "unknown";
-    const old = attempts.get(ip);
-    const rate = old && old.until > Date.now() ? old : { count: 0, until: Date.now() + 60000 };
-    rate.count++;
-    attempts.set(ip, rate);
-    if (rate.count > 10) {
-      res.status(429).json({ error: "Too many attempts. Wait a minute." });
-      return;
-    }
-    const hash = (value: string) => createHash("sha256").update(value).digest();
-    if (
-      options.password &&
-      !timingSafeEqual(hash(String(req.body?.password ?? "")), hash(options.password))
-    ) {
+  const verifyPassword = passwordVerifier(options.password);
+  app.post("/api/login", loginLimiter, async (req, res) => {
+    if (!(await verifyPassword(req.body?.password))) {
       res.status(401).json({ error: "Incorrect host passphrase." });
       return;
     }
@@ -136,6 +131,13 @@ export function createApplication(options: {
     res.status(201).json({ id: store.addPack(bank) });
   });
   app.get("/api/games", auth, (_req, res) => res.json(store.list()));
+  app.post("/api/rehearsals", auth, (req, res) => {
+    const { scenario } = z.object({ scenario: z.enum(["round", "fast"]) }).parse(req.body);
+    let id = randomBytes(3).toString("hex").toUpperCase();
+    while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
+    store.add(createRehearsal(id, scenario));
+    res.status(201).json({ id });
+  });
   app.post("/api/games", auth, (req, res) => {
     const setup = setupSchema.parse(req.body);
     const bank =
@@ -177,6 +179,27 @@ export function createApplication(options: {
       .map((v) => v.trim())
       .find((v) => v.startsWith("nf_player_" + req.params.id + "="))
       ?.split("=")[1];
+  app.post("/api/games/:id/rehearsal/buzz", auth, (req, res) => {
+    const { team, epoch } = z
+      .object({ team: z.union([z.literal(0), z.literal(1)]), epoch: z.string().uuid() })
+      .parse(req.body);
+    buzzers.simulate(String(req.params.id), team, epoch);
+    broadcast(String(req.params.id));
+    res.json({ ok: true });
+  });
+  app.post("/api/games/:id/delete", auth, (req, res) => {
+    const { revision } = z.object({ revision: z.number().int().min(0) }).parse(req.body);
+    const id = String(req.params.id);
+    const players = store.players(id).map((p) => p.id);
+    store.remove(id, revision);
+    buzzers.forget(id, players);
+    io.to(id + ":audience")
+      .to(id + ":host")
+      .emit("gameDeleted");
+    io.in(id + ":audience").disconnectSockets(true);
+    io.in(id + ":host").disconnectSockets(true);
+    res.json({ ok: true });
+  });
   app.get("/api/games/:id/buzzers", auth, (req, res) =>
     res.json(buzzers.host(String(req.params.id))),
   );

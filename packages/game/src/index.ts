@@ -102,6 +102,17 @@ function settleFace(s: GameState) {
 export function transition(input: GameState, cmd: Command, now = Date.now()): GameState {
   const s = structuredClone(input);
   requireThat(cmd.type !== "undo", "Undo is handled by the game store.");
+  if (cmd.type === "endGame") {
+    requireThat(s.phase !== "finished", "This game has already ended.");
+    s.phase = "finished";
+    s.paused = false;
+    if (s.fast) {
+      s.fast.deadline = null;
+      s.fast.remaining = 0;
+    }
+    s.message = "Ended by the host. Final scores saved; unfinished round points were not awarded.";
+    return s;
+  }
   if (cmd.type === "pause") {
     s.paused = !s.paused;
     if (s.fast?.stage === "running") {

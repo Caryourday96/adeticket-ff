@@ -75,6 +75,20 @@ export class Store {
   has(id: string) {
     return !!this.db.prepare("SELECT 1 FROM games WHERE id=?").get(id);
   }
+  remove(id: string, revision: number) {
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      const saved = this.saved(id);
+      if (saved.state.revision !== revision)
+        throw new Error("The game changed. Refresh before deleting.");
+      this.db.prepare("DELETE FROM players WHERE game=?").run(id);
+      this.db.prepare("DELETE FROM games WHERE id=?").run(id);
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
+  }
   host(id: string): HostState {
     const r = this.saved(id);
     return { ...r.state, canUndo: r.undo.length > 0, history: r.history.slice(-12).reverse() };
@@ -87,7 +101,9 @@ export class Store {
         json_extract(body,'$.state.teams[0].name') AS firstTeam,
         json_extract(body,'$.state.teams[1].name') AS secondTeam,
         json_extract(body,'$.state.phase') AS phase,
-        json_extract(body,'$.state.round') + 1 AS round
+        json_extract(body,'$.state.round') + 1 AS round,
+        json_extract(body,'$.state.revision') AS revision,
+        json_extract(body,'$.state.rehearsal') AS rehearsal
       FROM games ORDER BY rowid DESC
     `,
       )
@@ -97,6 +113,8 @@ export class Store {
         teams: [r.firstTeam as string, r.secondTeam as string],
         phase: r.phase as GameState["phase"],
         round: r.round as number,
+        revision: r.revision as number,
+        rehearsal: r.rehearsal === 1,
       }));
   }
   expiredFastGames(now = Date.now()) {
