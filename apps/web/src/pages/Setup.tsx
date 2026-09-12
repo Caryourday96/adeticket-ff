@@ -17,7 +17,7 @@ export function Setup() {
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [shuffle, setShuffle] = useState(true),
-    [steal, setSteal] = useState(false),
+    [steal, setSteal] = useState(true),
     [target, setTarget] = useState(300);
   const [required, setRequired] = useState<Record<string, number>>({});
   const selectedPack = packs.find((p) => p.id === packId)?.bank;
@@ -156,7 +156,7 @@ export function Setup() {
             </label>
             <label>
               <input type="checkbox" checked={steal} onChange={(e) => setSteal(e.target.checked)} />
-              Include steal answer points
+              Add the stealing answer’s points to a successful steal
             </label>
           </div>
         </section>

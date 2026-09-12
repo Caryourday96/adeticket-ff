@@ -82,7 +82,7 @@ describe("main game", () => {
     expect(s.phase).toBe("steal");
     expect(s.bank).toBe(57);
   });
-  it("successful steal excludes steal-answer points by default", () => {
+  it("successful steal includes steal-answer points by default", () => {
     const s = run(
       playing(),
       { type: "miss" },
@@ -90,14 +90,14 @@ describe("main game", () => {
       { type: "miss" },
       { type: "answer", answerId: "a2" },
     );
-    expect(s.scores).toEqual([0, 32]);
+    expect(s.scores).toEqual([0, 57]);
     expect(s.phase).toBe("settled");
     expect(s.revealed).toContain("a2");
     expect(() => transition(s, { type: "answer", answerId: "a3" })).toThrow();
   });
   it("optional steal values and failed steals settle correctly", () => {
     const first = playing();
-    first.rules.includeStealAnswer = true;
+    first.rules.includeStealAnswer = false;
     expect(
       run(
         first,
@@ -106,10 +106,27 @@ describe("main game", () => {
         { type: "miss" },
         { type: "answer", answerId: "a2" },
       ).scores,
-    ).toEqual([0, 57]);
+    ).toEqual([0, 32]);
     expect(
       run(playing(), { type: "miss" }, { type: "miss" }, { type: "miss" }, { type: "miss" }).scores,
     ).toEqual([32, 0]);
+  });
+  it.each([2, 3])("multiplies the bank and stealing answer by %i exactly once", (factor) => {
+    const first = fresh();
+    first.rules.multipliers[0] = factor;
+    const stolen = run(
+      first,
+      { type: "buzz", team: 0 },
+      { type: "answer", answerId: "a1" },
+      { type: "choice", pass: false },
+      { type: "miss" },
+      { type: "miss" },
+      { type: "miss" },
+      { type: "answer", answerId: "a2" },
+    );
+    expect(stolen.bank).toBe((32 + 25) * factor);
+    expect(stolen.scores).toEqual([0, 57 * factor]);
+    expect(transition(stolen, { type: "showAll" }).scores).toEqual(stolen.scores);
   });
   it("board completion and show-all cannot add extra points", () => {
     const s = run(

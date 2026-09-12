@@ -27,7 +27,7 @@ Use the network/public address in the host browser before sharing a QR code. A l
 
 ## Rules preset
 
-The default home-game preset uses a target of 300, multipliers of 1/1/2/3, and triple-point sudden death if needed. Stealing-answer points are excluded unless selected during setup. This is not advertised as a verified Nigerian official ruleset.
+The default home-game preset uses a target of 300, multipliers of 1/1/2/3, and triple-point sudden death if needed. Successful steals include the stealing answer’s points, with the round multiplier applied. You can turn this off during setup. Previously saved games retain their chosen scoring rules. This is not advertised as a verified Nigerian official ruleset.
 
 ## Phone buzzers
 

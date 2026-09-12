@@ -43,7 +43,7 @@ export type Team = z.infer<typeof teamSchema>;
 export const rulesSchema = z.object({
   target: z.number().int().min(100).max(1000).default(300),
   multipliers: z.array(z.number().int().min(1).max(5)).length(4).default([1, 1, 2, 3]),
-  includeStealAnswer: z.boolean().default(false),
+  includeStealAnswer: z.boolean().default(true),
 });
 export type Rules = z.infer<typeof rulesSchema>;
 export const setupSchema = z
