@@ -12,7 +12,7 @@ Use one application instance. Before enabling deployment, choose and verify dura
 
 CI checks formatting, types, tests, and production build on pushes and pull requests, and uploads the `dist/` release artifact.
 
-The separate Azure workflow is manual and restricted to `main`, using the GitHub environment `production`. Its non-secret Azure identifiers are configured in the workflow's `env` section:
+The separate Azure workflow deploys automatically on every push to `main`, using the GitHub environment `production`. Manual runs remain available and are restricted to `main`. Formatting, type, test, and build checks must pass before deployment; deployments run one at a time without cancelling an active deployment. Its non-secret Azure identifiers are configured in the workflow's `env` section:
 
 - `AZURE_WEBAPP_NAME`
 - `AZURE_CLIENT_ID`
