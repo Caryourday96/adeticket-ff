@@ -17,6 +17,7 @@ export function createApplication(options: {
   production?: boolean;
   origin?: string;
   webDir?: string;
+  castAppId?: string;
 }) {
   if (options.production && !options.password)
     throw new Error("HOST_PASSWORD is required in production.");
@@ -40,7 +41,18 @@ export function createApplication(options: {
   app.disable("x-powered-by");
   app.use(
     helmet({
-      contentSecurityPolicy: { directives: { "connect-src": ["'self'", "ws:", "wss:"] } },
+      contentSecurityPolicy: {
+        directives: {
+          "connect-src": [
+            "'self'",
+            "ws:",
+            "wss:",
+            "https://www.gstatic.com",
+            "https://www.google.com",
+          ],
+          "script-src": ["'self'", "https://www.gstatic.com", "https://www.google.com"],
+        },
+      },
       strictTransportSecurity: options.production ? undefined : false,
     }),
   );
@@ -70,6 +82,11 @@ export function createApplication(options: {
     next();
   };
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
+  app.get("/api/config", (_req, res) =>
+    res.json({
+      castAppId: options.castAppId?.trim() || null,
+    }),
+  );
   app.get("/api/clock", (_req, res) => res.json({ now: Date.now() }));
   app.get("/api/session", (req, res) =>
     res.json({

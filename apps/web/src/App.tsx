@@ -8,6 +8,7 @@ import { Library } from "./pages/Library";
 import { Layout } from "./components/Layout";
 import { Brand } from "./components/Brand";
 import { Player } from "./pages/Player";
+import { CastReceiver } from "./pages/CastReceiver";
 function HostGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<{
       authenticated: boolean;
@@ -151,7 +152,7 @@ function Rules() {
           [
             "03",
             "One chance to steal",
-            "The opposing captain gives one final answer. A correct hidden answer wins the bank. A miss gives it to the original team. The steal answer itself is excluded unless enabled during setup.",
+            "The opposing captain gives one final answer. A correct hidden answer wins the bank plus the stealing answer’s points by default. A miss gives the bank to the original team. Stealing-answer points can be disabled during setup.",
           ],
           [
             "04",
@@ -187,6 +188,7 @@ function Rules() {
 }
 export function App() {
   const path = location.pathname.split("/").filter(Boolean);
+  if (path[0] === "cast" && path[1] === "receiver") return <CastReceiver />;
   if (path[0] === "audience" && path[1]) return <Audience id={path[1].toUpperCase()} />;
   if (path[0] === "play" && path[1]) return <Player id={path[1].toUpperCase()} />;
   if (path[0] === "join") return <Join />;

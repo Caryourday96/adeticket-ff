@@ -7,6 +7,7 @@ const server = createApplication({
   password: process.env.HOST_PASSWORD,
   production: process.env.NODE_ENV === "production",
   origin: process.env.APP_ORIGIN,
+  castAppId: process.env.CAST_APP_ID,
 });
 const endpoint = process.env.PORT ?? "3000";
 const onListening = () => console.log("Naija Family Showdown is ready.");

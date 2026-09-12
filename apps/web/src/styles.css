@@ -1633,6 +1633,22 @@ small {
   flex-direction: column;
   align-items: center;
 }
+.cast-controls {
+  margin: 0 0 20px;
+}
+.cast-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cast-controls p {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+.audience-page.tv-audience {
+  padding: 4vh 5vw;
+}
 .audience-page > header {
   width: min(1120px, 100%);
   display: flex;
