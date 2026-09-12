@@ -41,20 +41,20 @@ export function RehearsalControls({ state: s, busy }: { state: HostState; busy: 
         ? "Read the question. Open buzzers below, then choose a simulated contestant."
         : "Ask for an answer. Use a suggestion below and judge it with your normal answer controls.",
     choice: "Choose Play or Pass in the normal controls to decide which team plays.",
-    play: "Practise revealing answers, marking misses and Undo. Three misses open a steal; clearing the board wins the round.",
+    play: "Practice revealing answers, marking misses and Undo. Three misses open a steal; clearing the board wins the round.",
     steal:
       "The opposing captain gets one answer. Judge a correct hidden answer for a successful steal, or mark a miss to return the bank to the playing team.",
     settled:
       "Check the awarded score, reveal remaining answers, then advance to the next round. Try Undo to correct an award.",
-    champion: "Choose two players in the normal controls to practise Fast Money.",
-    fast: "Use the Fast Money controls below. Start the timer after reading question one; practise passing, returning, recording answers and revealing points. Player two must give different answers.",
+    champion: "Choose two players in the normal controls to Practice Fast Money.",
+    fast: "Use the Fast Money controls below. Start the timer after reading question one; Practice passing, returning, recording answers and revealing points. Player two must give different answers.",
     finished:
       "Practice complete. Start another rehearsal or return to the host desk to create a real game.",
   };
   return (
     <section className="rehearsal-panel" aria-label="Rehearsal coach">
       <div className="eyebrow">REHEARSAL · SIMULATED CONTESTANTS</div>
-      <h2>Practise running the show.</h2>
+      <h2>Practice running the show.</h2>
       <p>
         {s.paused
           ? "The game is paused. Resume with the normal host controls when ready."
@@ -122,7 +122,7 @@ export function RehearsalControls({ state: s, busy }: { state: HostState; busy: 
         </a>
       </div>
       <p className="muted">
-        Shortcuts create a separate saved practice game. Use the host desk to end or delete old
+        Shortcuts create a separate saved Practice game. Use the host desk to end or delete old
         rehearsals. Simulated buzzes do not test real phone latency.
       </p>
       {error && (

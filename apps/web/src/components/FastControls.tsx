@@ -106,7 +106,7 @@ export function FastControls({
                 {question.answers.find((a) => f.player === 0 || a.id !== f.entries[0][q]?.answerId)
                   ?.text ?? "Pass"}
               </strong>
-              . Judge it below, or use Pass / next to practise returning. For duplicate practice,
+              . Judge it below, or use Pass / next to Practice returning. For duplicate Practice,
               try player one’s answer during player two’s turn.
             </p>
           )}

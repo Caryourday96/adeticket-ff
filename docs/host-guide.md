@@ -31,9 +31,9 @@ The default home-game preset uses a target of 300, multipliers of 1/1/2/3, and t
 
 ## Rehearsal and saved games
 
-On the host desk, choose **Practise a round** or **Practise Fast Money**. Each creates a separate saved game with practice teams and a visible REHEARSAL label. The coach explains each phase. Open the normal phone buzzers, then use a simulated contestant button; suggestions let you practise judging correct answers and misses using the real scoring controls. Fast Money includes sample contestant responses, the real 20/25-second timers, passing, duplicates and reveals. Simulated buzzes exercise server rules, not real phone network latency.
+On the host desk, choose **Practice a round** or **Practice Fast Money**. Each creates a separate saved game with Practice teams and a visible REHEARSAL label. The coach explains each phase. Open the normal phone buzzers, then use a simulated contestant button; suggestions let you Practice judging correct answers and misses using the real scoring controls. Fast Money includes sample contestant responses, the real 20/25-second timers, passing, duplicates and reveals. Simulated buzzes exercise server rules, not real phone network latency.
 
-The new-round and Fast Money rehearsal shortcuts create new practice games. They do not reset another game. Real phones can still join a rehearsal for a device test.
+The new-round and Fast Money rehearsal shortcuts create new Practice games. They do not reset another game. Real phones can still join a rehearsal for a device test.
 
 Saved games have **End game** and **Delete** controls. End keeps the score and history, stops the timer and awards no unfinished bank; Undo in the host dashboard can restore it. Delete permanently removes the selected game, its history and phone registrations after confirmation. Connected screens are notified. If the game has changed since the list loaded, refresh and retry. **Show all games** includes older sessions beyond the six recent games.
 

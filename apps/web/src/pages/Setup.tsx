@@ -156,15 +156,15 @@ export function Setup() {
           <div className="eyebrow">FIRST TIME HOSTING?</div>
           <h2>Try a rehearsal.</h2>
           <p>
-            Practise with ready-made teams and simulated contestants. Use the real host controls
+            Practice with ready-made teams and simulated contestants. Use the real host controls
             with a guided coach; no phones are needed.
           </p>
           <div className="button-row">
             <button className="button" disabled={busy} onClick={() => void rehearse("round")}>
-              Practise a round
+              Practice a round
             </button>
             <button className="button" disabled={busy} onClick={() => void rehearse("fast")}>
-              Practise Fast Money
+              Practice Fast Money
             </button>
           </div>
         </section>
