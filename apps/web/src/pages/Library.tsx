@@ -4,7 +4,10 @@ import { bankSchema, type Bank, type Question } from "@naija/contracts";
 import { api, download } from "../lib/api";
 import { fromCsv, toCsv } from "../lib/csv";
 import { Layout } from "../components/Layout";
+import { normalized, reviewQuestion } from "../lib/review";
 export function Library() {
+  const [usage, setUsage] = useState<{ prompt: string; game: string }[]>([]);
+  const [needsReview, setNeedsReview] = useState(false);
   const [packs, setPacks] = useState<{ id: string; bank: Bank }[]>([]),
     [packId, setPackId] = useState("starter"),
     [search, setSearch] = useState(""),
@@ -16,6 +19,9 @@ export function Library() {
     [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    api<typeof usage>("/question-usage")
+      .then(setUsage)
+      .catch((e) => setError(e.message));
     api<typeof packs>("/packs")
       .then(setPacks)
       .catch((e) => setError(e.message));
@@ -140,11 +146,25 @@ export function Library() {
                 </button>
               ))}
             </div>
+            <label>
+              <input
+                type="checkbox"
+                checked={needsReview}
+                onChange={(event) => setNeedsReview(event.target.checked)}
+              />{" "}
+              Show questions needing review
+            </label>
+            <p className="host-note">
+              Review flags repeated prompts and overlapping accepted answers. Seen counts include
+              boards opened in saved games, excluding rehearsals. Deleting a game removes its
+              contribution. Similar wording is not automatically treated as the same question.
+            </p>
             <div className="question-cards">
               {bank.questions
                 .filter(
                   (q) =>
                     (category === "all" || q.category === category) &&
+                    (!needsReview || reviewQuestion(q, bank.questions).length > 0) &&
                     q.prompt.toLowerCase().includes(search.toLowerCase()),
                 )
                 .map((q) => (
@@ -158,6 +178,21 @@ export function Library() {
                   >
                     <span className="section-eyebrow">{q.category}</span>
                     <h3>{q.prompt}</h3>
+                    <p>
+                      {
+                        new Set(
+                          usage
+                            .filter((row) => normalized(row.prompt) === normalized(q.prompt))
+                            .map((row) => row.game),
+                        ).size
+                      }{" "}
+                      saved games have shown this question
+                    </p>
+                    {reviewQuestion(q, bank.questions).map((warning) => (
+                      <p key={warning} className="host-note">
+                        Review: {warning}
+                      </p>
+                    ))}
                     <div>
                       <span>
                         {q.answers.length} answers ·{" "}
@@ -208,6 +243,13 @@ export function Library() {
                 {draft.questions.length} questions · {draft.scoringSource}
               </p>
               <p>{draft.notice}</p>
+              {draft.questions.flatMap((q) =>
+                reviewQuestion(q, draft.questions).map((warning) => (
+                  <p key={q.id + warning} className="host-note">
+                    {q.prompt}: {warning}
+                  </p>
+                )),
+              )}
               <div className="import-preview">
                 {draft.questions.map((q) => (
                   <p key={q.id}>
@@ -244,6 +286,11 @@ export function Library() {
               </button>
               <div className="section-eyebrow">QUESTION EDITOR</div>
               <h2>Make the board your own.</h2>
+              {reviewQuestion(edit, bank.questions).map((warning) => (
+                <p key={warning} role="status" className="host-note">
+                  {warning}
+                </p>
+              ))}
               <label>
                 Question
                 <input

@@ -1,5 +1,25 @@
 import { test, expect, type Page } from "@playwright/test";
 
+test("library review filter and completed game scorecard are available", async ({ page }) => {
+  await signIn(page);
+  await page.getByRole("link", { name: "Question library", exact: true }).click();
+  await page.getByLabel("Show questions needing review").check();
+  await expect(page.getByLabel("Show questions needing review")).toBeChecked();
+  await page.goto("/");
+  await page.getByRole("button", { name: "Practice a round", exact: true }).click();
+  await expect(page).toHaveURL(/\/host\/[A-F0-9]{6}$/);
+  const gameUrl = page.url();
+  const id = gameUrl.split("/").pop();
+  await page.goto("/");
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: `End game ${id}`, exact: true }).click();
+  await expect(page.getByRole("button", { name: `End game ${id}`, exact: true })).toHaveCount(0);
+  await page.goto(gameUrl);
+  const downloadEvent = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download scorecard", exact: true }).click();
+  expect((await downloadEvent).suggestedFilename()).toBe(`naija-feud-${id}-scorecard.csv`);
+});
+
 async function signIn(page: Page) {
   await page.goto("/");
   await page.getByLabel("Host passphrase").fill("local-e2e-fixture-only");

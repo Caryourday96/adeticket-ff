@@ -23,6 +23,7 @@ import { TeamEditor } from "../components/TeamEditor";
 import { FastControls } from "../components/FastControls";
 import { BuzzerControls } from "../components/BuzzerControls";
 import { RehearsalControls } from "../components/RehearsalControls";
+import { GameResults } from "../components/GameResults";
 export function Host({ id }: { id: string }) {
   const { state: s, connected, error, busy, send, clockOffset } = useGame<HostState>(id, "host");
   const [search, setSearch] = useState(""),
@@ -184,6 +185,7 @@ export function Host({ id }: { id: string }) {
         )}
         <div className="host-grid">
           <div className="board-column">
+            {["champion", "finished"].includes(s.phase) && <GameResults state={s} />}
             <div className="live-message" aria-live="polite">
               <span className="status-dot" />
               {s.message}

@@ -131,6 +131,7 @@ export function createApplication(options: {
     res.status(201).json({ id: store.addPack(bank) });
   });
   app.get("/api/games", auth, (_req, res) => res.json(store.list()));
+  app.get("/api/question-usage", auth, (_req, res) => res.json(store.questionUsage()));
   app.post("/api/rehearsals", auth, (req, res) => {
     const { scenario } = z.object({ scenario: z.enum(["round", "fast"]) }).parse(req.body);
     let id = randomBytes(3).toString("hex").toUpperCase();

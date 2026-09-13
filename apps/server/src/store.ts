@@ -126,6 +126,18 @@ export class Store {
         .all(now) as { id: string }[]
     ).map((r) => r.id);
   }
+  questionUsage() {
+    return this.db
+      .prepare(
+        `
+      SELECT DISTINCT json_extract(question.value, '$.prompt') AS prompt, games.id AS game
+      FROM games, json_each(games.body, '$.state.questions') AS question
+      WHERE COALESCE(json_extract(games.body, '$.state.rehearsal'), 0) = 0
+        AND CAST(question.key AS INTEGER) <= json_extract(games.body, '$.state.round')
+    `,
+      )
+      .all() as { prompt: string; game: string }[];
+  }
   apply(id: string, envelope: Envelope) {
     this.db.exec("BEGIN IMMEDIATE");
     try {

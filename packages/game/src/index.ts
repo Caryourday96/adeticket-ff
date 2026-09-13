@@ -70,6 +70,10 @@ export function createGame(
   };
 }
 function award(s: GameState, side: Side) {
+  s.roundResults = [
+    ...(s.roundResults ?? []),
+    { round: s.round + 1, prompt: currentQuestion(s).prompt, winner: side, points: s.bank },
+  ];
   s.scores[side] += s.bank;
   s.roundWinner = side;
   s.phase = "settled";

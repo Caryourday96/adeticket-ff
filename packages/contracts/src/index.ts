@@ -114,6 +114,7 @@ export type FastState = {
   revealed: [number, number];
 };
 export type GameState = {
+  roundResults?: { round: number; prompt: string; winner: Side; points: number }[];
   id: string;
   rehearsal?: boolean;
   revision: number;
