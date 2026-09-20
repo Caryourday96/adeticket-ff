@@ -30,7 +30,10 @@ export function createApplication(options: {
     http = createServer(app);
   const buzzers = new Buzzers(store);
   const origins = new Set([
-    options.origin ?? "http://localhost:3000",
+    ...(options.origin ?? "http://localhost:3000")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean),
     ...(!options.production
       ? ["http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:3000"]
       : []),
