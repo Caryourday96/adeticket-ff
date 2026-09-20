@@ -582,9 +582,9 @@ export function Host({ id }: { id: string }) {
                 </button>
                 <button
                   className="button primary"
-                  onClick={() => {
-                    void send({ type: "roster", teams: rosters });
-                    setRosters(null);
+                  disabled={busy}
+                  onClick={async () => {
+                    if (await send({ type: "roster", teams: rosters })) setRosters(null);
                   }}
                 >
                   Save lineup

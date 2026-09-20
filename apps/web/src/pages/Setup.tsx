@@ -6,6 +6,9 @@ import { Layout } from "../components/Layout";
 import { TeamEditor } from "../components/TeamEditor";
 import { commandId } from "../lib/commandId";
 export function Setup() {
+  const [selfJoin, setSelfJoin] = useState(true);
+  const [fastPackId, setFastPackId] = useState("fast-starter");
+  const [fastIds, setFastIds] = useState<string[] | null>(null);
   const [teams, setTeams] = useState<[Team, Team]>([
     { name: "The Jollof Squad", members: ["Ada", "Chidi", "Tobi"], captain: 0 },
     { name: "The Suya Crew", members: ["Zainab", "Emeka", "Femi"], captain: 0 },
@@ -72,6 +75,8 @@ export function Setup() {
   }
   const [required, setRequired] = useState<Record<string, number>>({});
   const selectedPack = packs.find((p) => p.id === packId)?.bank;
+  const selectedFastPack = packs.find((p) => p.id === fastPackId)?.bank;
+  const chosenFastIds = fastIds ?? selectedFastPack?.questions.slice(0, 5).map((q) => q.id) ?? [];
   const categories = [...new Set(selectedPack?.questions.map((q) => q.category) ?? [])];
   const requiredTotal = Object.values(required).reduce((n, v) => n + v, 0);
   useEffect(() => {
@@ -93,8 +98,17 @@ export function Setup() {
           [ids[i], ids[j]] = [ids[j], ids[i]];
         }
       const result = await api<{ id: string }>("/games", {
-        teams,
+        teams: selfJoin
+          ? teams.map((t) => ({
+              ...t,
+              members: ["Waiting for players"],
+              captain: 0,
+              awaitingPlayers: true,
+            }))
+          : teams,
         packId,
+        fastPackId,
+        fastQuestionIds: chosenFastIds,
         requiredGroups: Object.entries(required)
           .filter(([, count]) => count > 0)
           .map(([category, count]) => ({ category, count })),
@@ -172,11 +186,24 @@ export function Setup() {
           <h2>Who's in the family?</h2>
           <span>Make it personal. Set your lineup.</span>
         </div>
+        <label>
+          <input
+            type="checkbox"
+            checked={selfJoin}
+            onChange={(e) => setSelfJoin(e.target.checked)}
+          />
+          Players enter their own names
+        </label>
+        <p>
+          Set the team names, create the game, then share {location.origin}/play and the game code.
+          Approve players in Phone buzzers.
+        </p>
         <div className="team-editors">
           {teams.map((t, i) => (
             <TeamEditor
               key={i}
               index={i}
+              namesOnly={selfJoin}
               team={t}
               onChange={(value) => setTeams((old) => (i === 0 ? [value, old[1]] : [old[0], value]))}
             />
@@ -197,11 +224,13 @@ export function Setup() {
                 setRequired({});
               }}
             >
-              {packs.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.bank.title} · {p.bank.questions.length} questions
-                </option>
-              ))}
+              {packs
+                .filter((p) => (p.bank.roundType ?? "regular") === "regular")
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.bank.title} · {p.bank.questions.length} questions
+                  </option>
+                ))}
             </select>
           </label>
           <label>
@@ -226,6 +255,50 @@ export function Setup() {
               Add the stealing answer’s points to a successful steal
             </label>
           </div>
+        </section>
+        <section className="settings-card">
+          <label>
+            Fast Money pack
+            <select
+              aria-label="Fast Money pack"
+              value={fastPackId}
+              onChange={(e) => {
+                setFastPackId(e.target.value);
+                setFastIds(null);
+              }}
+            >
+              {packs
+                .filter((p) => p.bank.roundType === "fast-money")
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.bank.title}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <label>
+            Five Fast Money questions
+            <select
+              multiple
+              aria-label="Five Fast Money questions"
+              size={5}
+              value={chosenFastIds}
+              onChange={(e) =>
+                setFastIds(Array.from(e.target.selectedOptions, (option) => option.value))
+              }
+            >
+              {selectedFastPack?.questions.map((q) => (
+                <option key={q.id} value={q.id}>
+                  {q.prompt}
+                </option>
+              ))}
+            </select>
+          </label>
+          <p className="host-note">
+            Choose exactly five. This library is separate from your regular rounds. Hold Ctrl
+            (Windows) or Command (Mac) to change multiple selections. The selected set must be able
+            to reach 200 points with distinct answers.
+          </p>
         </section>
         <section className="required-groups settings-card">
           <div>
@@ -287,7 +360,7 @@ export function Setup() {
           </span>
           <button
             className="button primary"
-            disabled={busy || !packs.length || requiredTotal > 4}
+            disabled={busy || !packs.length || requiredTotal > 4 || chosenFastIds.length !== 5}
             onClick={start}
           >
             {busy ? "Preparing your board…" : "Create game"}

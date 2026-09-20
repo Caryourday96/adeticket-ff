@@ -26,6 +26,7 @@ export const bankSchema = z
   .object({
     schemaVersion: z.literal(1),
     title: label,
+    roundType: z.enum(["regular", "fast-money"]).optional(),
     scoringSource: z.enum(["illustrative", "collected-survey", "episode-derived"]),
     notice: z.string().min(1).max(2000),
     questions: z.array(questionSchema).min(5).max(500),
@@ -37,7 +38,12 @@ export const bankSchema = z
 export type Question = z.infer<typeof questionSchema>;
 export type Bank = z.infer<typeof bankSchema>;
 export const teamSchema = z
-  .object({ name: label, members: z.array(label).min(1).max(12), captain: z.number().int().min(0) })
+  .object({
+    name: label,
+    members: z.array(label).min(1).max(12),
+    captain: z.number().int().min(0),
+    awaitingPlayers: z.boolean().optional(),
+  })
   .refine((t) => t.captain < t.members.length, "Captain must be a team member.");
 export type Team = z.infer<typeof teamSchema>;
 export const rulesSchema = z.object({
@@ -52,6 +58,12 @@ export const setupSchema = z
     questionIds: z.array(label).min(5).max(100),
     rules: rulesSchema.default({}),
     packId: z.string().optional(),
+    fastPackId: z.string().optional(),
+    fastQuestionIds: z
+      .array(label)
+      .length(5)
+      .refine((ids) => new Set(ids).size === 5, "Choose five distinct Fast Money questions.")
+      .optional(),
     requiredGroups: z
       .array(z.object({ category: label, count: z.number().int().min(1).max(4) }))
       .max(4)
@@ -74,6 +86,11 @@ export const commandSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("endGame") }),
   z.object({ type: z.literal("pause") }),
   z.object({ type: z.literal("turn"), member: z.number().int().min(0).max(11) }),
+  z.object({
+    type: z.literal("faceoffPlayer"),
+    team: teamIndex,
+    member: z.number().int().min(0).max(11),
+  }),
   z.object({ type: z.literal("roster"), teams: z.tuple([teamSchema, teamSchema]) }),
   z.object({
     type: z.literal("fastStart"),
@@ -164,6 +181,7 @@ export type BuzzerPlayer = {
   member: number;
   name: string;
   approved: boolean;
+  onStage?: boolean;
 };
 export type BuzzerState = {
   epoch: string;

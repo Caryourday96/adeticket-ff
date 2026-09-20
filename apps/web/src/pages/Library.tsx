@@ -6,6 +6,7 @@ import { fromCsv, toCsv } from "../lib/csv";
 import { Layout } from "../components/Layout";
 import { normalized, reviewQuestion } from "../lib/review";
 export function Library() {
+  const [roundType, setRoundType] = useState<"regular" | "fast-money">("regular");
   const [usage, setUsage] = useState<{ prompt: string; game: string }[]>([]);
   const [needsReview, setNeedsReview] = useState(false);
   const [packs, setPacks] = useState<{ id: string; bank: Bank }[]>([]),
@@ -35,6 +36,7 @@ export function Library() {
       const { id } = await api<{ id: string }>("/packs", valid);
       setPacks((p) => [...p, { id, bank: valid }]);
       setPackId(id);
+      setRoundType(valid.roundType ?? "regular");
       setDraft(null);
       setEdit(null);
       setMessage("Saved as a new pack. Existing games keep their original questions.");
@@ -88,6 +90,24 @@ export function Library() {
             {message}
           </div>
         )}
+        <div className="category-tabs" aria-label="Question library type">
+          {(["regular", "fast-money"] as const).map((type) => (
+            <button
+              key={type}
+              disabled={!packs.length}
+              aria-pressed={roundType === type}
+              className={roundType === type ? "active" : ""}
+              onClick={() => {
+                setRoundType(type);
+                setPackId(packs.find((p) => (p.bank.roundType ?? "regular") === type)?.id ?? "");
+                setCategory("all");
+                setSearch("");
+              }}
+            >
+              {type === "regular" ? "Regular rounds" : "Fast Money"}
+            </button>
+          ))}
+        </div>
         {bank && (
           <>
             <div className="library-banner">
@@ -105,11 +125,13 @@ export function Library() {
                 value={packId}
                 onChange={(e) => setPackId(e.target.value)}
               >
-                {packs.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.bank.title}
-                  </option>
-                ))}
+                {packs
+                  .filter((p) => (p.bank.roundType ?? "regular") === roundType)
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.bank.title}
+                    </option>
+                  ))}
               </select>
               <div className="search-box">
                 <Search size={16} />
@@ -232,6 +254,18 @@ export function Library() {
               aria-label="Review imported pack"
             >
               <h2>Review your import</h2>
+              <label>
+                Library
+                <select
+                  value={draft.roundType ?? "regular"}
+                  onChange={(e) =>
+                    setDraft({ ...draft, roundType: e.target.value as "regular" | "fast-money" })
+                  }
+                >
+                  <option value="regular">Regular rounds</option>
+                  <option value="fast-money">Fast Money</option>
+                </select>
+              </label>
               <label>
                 Pack title
                 <input

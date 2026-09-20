@@ -8,6 +8,7 @@ const columns = [
   "answer",
   "points",
   "aliases",
+  "round_type",
 ];
 export function toCsv(bank: Bank) {
   const cell = (s: string) => '"' + s.replaceAll('"', '""') + '"';
@@ -23,6 +24,7 @@ export function toCsv(bank: Bank) {
         a.text,
         String(a.points),
         a.acceptedAlternatives.join("|"),
+        bank.roundType ?? "regular",
       ]),
     ),
   ]
@@ -55,8 +57,11 @@ export function fromCsv(text: string): Bank {
   if (quoted) throw new Error("CSV contains an unclosed quote.");
   row.push(cell);
   if (row.some(Boolean)) rows.push(row);
-  if (rows.shift()?.join(",") !== columns.join(","))
+  const header = rows.shift()?.join(",");
+  if (header !== columns.join(",") && header !== columns.slice(0, -1).join(","))
     throw new Error("Use the CSV export's column names and order.");
+  const types = new Set(rows.map((row) => row[8] || "regular"));
+  if (types.size !== 1) throw new Error("Keep regular rounds and Fast Money in separate packs.");
   const questions: Bank["questions"] = [];
   for (const [id, category, prompt, hostNotes, answerId, answer, points, aliases = ""] of rows) {
     let q = questions.find((q) => q.id === id);
@@ -74,6 +79,7 @@ export function fromCsv(text: string): Bank {
   return bankSchema.parse({
     schemaVersion: 1,
     title: "Imported CSV pack",
+    roundType: [...types][0],
     scoringSource: "illustrative",
     notice: "Imported values: sample points. Review provenance before using.",
     questions,

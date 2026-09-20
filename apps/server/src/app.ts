@@ -8,7 +8,7 @@ import { resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { Server } from "socket.io";
 import { bankSchema, envelopeSchema, setupSchema } from "@naija/contracts";
-import { starterBank, fastQuestions } from "@naija/content";
+import { starterBank, fastBank, validateFastSet } from "@naija/content";
 import { audience, createGame } from "@naija/game";
 import { Store } from "./store";
 import { Buzzers } from "./buzzers";
@@ -124,7 +124,11 @@ export function createApplication(options: {
     res.json({ ok: true });
   });
   app.get("/api/packs", auth, (_req, res) =>
-    res.json([{ id: "starter", bank: starterBank }, ...store.packs()]),
+    res.json([
+      { id: "starter", bank: starterBank },
+      { id: "fast-starter", bank: fastBank },
+      ...store.packs(),
+    ]),
   );
   app.post("/api/packs", auth, (req, res) => {
     const bank = bankSchema.parse(req.body);
@@ -144,6 +148,21 @@ export function createApplication(options: {
     const bank =
       setup.packId && setup.packId !== "starter" ? store.pack(setup.packId) : starterBank;
     if (!bank) throw new Error("Question pack not found.");
+    if ((bank.roundType ?? "regular") !== "regular")
+      throw new Error("Choose a regular-round pack for regular rounds.");
+    const fastPack =
+      !setup.fastPackId || setup.fastPackId === "fast-starter"
+        ? fastBank
+        : store.pack(setup.fastPackId);
+    if (!fastPack || fastPack.roundType !== "fast-money")
+      throw new Error("Choose a Fast Money pack for Fast Money.");
+    const fastIds = setup.fastQuestionIds ?? fastPack.questions.slice(0, 5).map((q) => q.id);
+    const selectedFast = fastIds.map((id) => {
+      const question = fastPack.questions.find((q) => q.id === id);
+      if (!question) throw new Error("Unknown Fast Money question: " + id);
+      return question;
+    });
+    validateFastSet(selectedFast);
     const questions = setup.questionIds.map((id) => {
       const q = bank.questions.find((q) => q.id === id);
       if (!q) throw new Error("Unknown question: " + id);
@@ -151,7 +170,7 @@ export function createApplication(options: {
     });
     let id = randomBytes(3).toString("hex").toUpperCase();
     while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
-    store.add(createGame(id, setup, questions, fastQuestions, bank.notice));
+    store.add(createGame(id, setup, questions, selectedFast, bank.notice));
     res.status(201).json({ id });
   });
   app.get("/api/games/:id/host", auth, (req, res) => res.json(store.host(String(req.params.id))));
@@ -207,7 +226,7 @@ export function createApplication(options: {
   app.post("/api/games/:id/buzzers", auth, (req, res) => {
     const body = z
       .object({
-        action: z.enum(["arm", "lock", "approve", "remove"]),
+        action: z.enum(["arm", "lock", "approve", "remove", "stage", "bench"]),
         playerId: z.string().uuid().optional(),
       })
       .parse(req.body);
@@ -225,11 +244,15 @@ export function createApplication(options: {
     const body = z
       .object({
         team: z.union([z.literal(0), z.literal(1)]),
-        member: z.number().int().min(0).max(11),
+        member: z.number().int().min(0).max(11).optional(),
+        name: z.string().trim().min(1).max(100).optional(),
       })
       .parse(req.body);
     const id = String(req.params.id),
-      token = buzzers.join(id, body.team, body.member, playerToken(req));
+      token =
+        body.name !== undefined
+          ? buzzers.register(id, body.team, body.name, playerToken(req))
+          : buzzers.join(id, body.team, body.member ?? -1, playerToken(req));
     res.setHeader(
       "Set-Cookie",
       `nf_player_${id}=${token}; HttpOnly; SameSite=Strict; Path=/api/games/${id}; Max-Age=604800${options.production ? "; Secure" : ""}`,

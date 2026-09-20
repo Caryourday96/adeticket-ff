@@ -41,6 +41,9 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
           <span>
             <Radio size={14} /> THE HOST'S CORNER
           </span>
+          <a href="/play">
+            Join as a player <ArrowUpRight size={15} />
+          </a>
           <a href="/join">
             Join an audience screen <ArrowUpRight size={15} />
           </a>

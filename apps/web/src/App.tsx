@@ -76,6 +76,9 @@ function HostGate({ children }: { children: ReactNode }) {
             <ArrowRight size={16} />
           </button>
         </form>
+        <a className="entry-link" href="/play">
+          Playing? Join with your game code →
+        </a>
         <a className="entry-link" href="/join">
           Here to watch? Join the audience →
         </a>
@@ -83,13 +86,13 @@ function HostGate({ children }: { children: ReactNode }) {
     </div>
   );
 }
-function Join() {
+function Join({ player = false }: { player?: boolean }) {
   const [code, setCode] = useState("");
   return (
     <div className="entry-page">
       <Brand large />
       <section className="entry-card">
-        <div className="eyebrow">TAKE YOUR SEAT</div>
+        <div className="eyebrow">{player ? "PLAYER JOIN" : "TAKE YOUR SEAT"}</div>
         <h1>
           The family's
           <br />
@@ -99,7 +102,7 @@ function Join() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            location.href = "/audience/" + code.trim().toUpperCase();
+            location.href = (player ? "/play/" : "/audience/") + code.trim().toUpperCase();
           }}
         >
           <label>
@@ -115,7 +118,7 @@ function Join() {
             />
           </label>
           <button className="button primary wide">
-            Join audience
+            {player ? "Join as a player" : "Join audience"}
             <ArrowRight size={17} />
           </button>
         </form>
@@ -189,6 +192,7 @@ export function App() {
   const path = location.pathname.split("/").filter(Boolean);
   if (path[0] === "audience" && path[1]) return <Audience id={path[1].toUpperCase()} />;
   if (path[0] === "play" && path[1]) return <Player id={path[1].toUpperCase()} />;
+  if (path[0] === "play") return <Join player />;
   if (path[0] === "join") return <Join />;
   if (path[0] === "rules") return <Rules />;
   return (

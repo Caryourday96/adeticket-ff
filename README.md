@@ -2,6 +2,43 @@
 
 A host-led Nigerian-themed game with a private control desk and a synchronized audience board. Built with React, TypeScript, Express, Socket.IO, and SQLite.
 
+## Player registration and stage controls
+
+In setup, leave **Players enter their own names** selected and enter the two team
+names. Create the game and share `/play` plus the six-character game code, or use
+the direct player QR link in **Phone buzzers → Invite phones**. `/join` remains the
+audience-only entry page.
+
+Players enter the code, select a team and type their name. They need no host
+password. The host approves each registration in **Phone buzzers**, then clicks
+**Put [name] on stage** for one player per team. Approval alone does not enable
+self-registered phones. Read the question and click **Open buzzers**. Only the
+selected face-off players can buzz; the server enforces eligibility and accepts
+the first valid request. Changing the stage or roster locks buzzers again.
+
+**Take [name] off stage** keeps the phone registered. **Remove [name]** revokes its
+registration; the player can join again. Team names come from the saved game,
+including after phone refreshes and host renames. Existing games with host-entered
+rosters still work; players can type an existing roster name to request that place.
+Duplicate phone registrations for a name are rejected. Teams support up to 12
+members. Stage changes are available before a face-off starts.
+
+## Question libraries
+
+The library has separate **Regular rounds** and **Fast Money** tabs. Packs carry
+`roundType: "regular"` or `roundType: "fast-money"`; older packs without that field
+remain regular-round packs. JSON and CSV imports let the host review the library
+classification before saving. CSV exports include a `round_type` column.
+
+Game setup selects the regular pack and Fast Money pack independently. Select
+exactly five distinct Fast Money questions; the server checks that the selection
+can reach 200 points. The built-in Fast Money pack is the default. Games retain
+their own question snapshots when a library is later edited.
+
+The Python scraper can export `naija_game_pack.json` for libraries containing at
+least five verified, compatible questions. Import this file through the library;
+the scraper's detailed research JSON is a separate evidence format.
+
 ## Run locally
 
 Use Node.js 24 (minimum 22.13) and pnpm 11.19.0.

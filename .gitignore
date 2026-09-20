@@ -5,5 +5,6 @@ dist/
 .data/
 coverage/
 playwright-report/
+.playwright-browsers/
 test-results/
 *.log

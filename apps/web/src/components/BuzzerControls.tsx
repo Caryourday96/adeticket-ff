@@ -23,6 +23,14 @@ export function BuzzerControls({ state: s }: { state: HostState }) {
       <p>
         Only the current face-off player on each team can buzz. Open after reading the question.
       </p>
+      <p>
+        Players join at{" "}
+        <a href="/play" target="_blank" rel="noreferrer">
+          {location.origin}/play
+        </a>{" "}
+        · Game code <strong>{s.id}</strong>. Approve their names, then put one player from each team
+        on stage.
+      </p>
       <div className="button-row">
         <button
           className="button primary"
@@ -75,7 +83,9 @@ export function BuzzerControls({ state: s }: { state: HostState }) {
                   : p.connection === "away"
                     ? "App in background"
                     : "Offline / not responding")}
-              {s.turns[p.team] === p.member ? " · Face-off player" : ""}
+              {p.approved && p.onStage !== false && s.turns[p.team] === p.member
+                ? " · On stage"
+                : " · Off stage"}
             </small>
             <div className="button-row">
               {!p.approved && (
@@ -85,6 +95,23 @@ export function BuzzerControls({ state: s }: { state: HostState }) {
                   onClick={() => act({ action: "approve", playerId: p.id })}
                 >
                   Approve {p.name}
+                </button>
+              )}
+              {p.approved && (
+                <button
+                  className="button small"
+                  disabled={busy || !connected || s.phase !== "faceoff" || s.face.first !== null}
+                  onClick={() =>
+                    act({
+                      action:
+                        p.onStage !== false && s.turns[p.team] === p.member ? "bench" : "stage",
+                      playerId: p.id,
+                    })
+                  }
+                >
+                  {p.onStage !== false && s.turns[p.team] === p.member
+                    ? `Take ${p.name} off stage`
+                    : `Put ${p.name} on stage`}
                 </button>
               )}
               <button

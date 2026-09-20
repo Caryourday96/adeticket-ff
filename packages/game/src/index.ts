@@ -244,6 +244,18 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
       s.turns[s.control] = cmd.member;
       s.message = "Active player updated.";
       break;
+    case "faceoffPlayer":
+      requireThat(
+        s.phase === "faceoff" && s.face.first === null,
+        "Select the stage before the face-off begins.",
+      );
+      requireThat(
+        cmd.member < s.teams[cmd.team].members.length && !s.teams[cmd.team].awaitingPlayers,
+        "Approve a player first.",
+      );
+      s.turns[cmd.team] = cmd.member;
+      s.message = `${s.teams[cmd.team].members[cmd.member]} is on stage for ${s.teams[cmd.team].name}.`;
+      break;
     case "roster":
       requireThat(!["fast", "finished"].includes(s.phase), "Edit rosters before Fast Money.");
       s.teams = structuredClone(cmd.teams);
