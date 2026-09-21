@@ -31,6 +31,52 @@ export function Setup() {
     [steal, setSteal] = useState(true),
     [target, setTarget] = useState(300);
   const [showAllGames, setShowAllGames] = useState(false);
+  const [gameFilter, setGameFilter] = useState("all");
+  const [selectedGames, setSelectedGames] = useState<string[]>([]);
+  const [cleanupMessage, setCleanupMessage] = useState("");
+  const filteredGames = games.filter(
+    (g) =>
+      gameFilter === "all" ||
+      (gameFilter === "live"
+        ? !g.rehearsal && g.phase !== "finished"
+        : gameFilter === "ended"
+          ? g.phase === "finished"
+          : g.rehearsal),
+  );
+  const visibleGames = showAllGames ? filteredGames : filteredGames.slice(0, 6);
+  async function deleteSelectedGames() {
+    const chosen = games.filter((g) => selectedGames.includes(g.id) && g.phase === "finished");
+    if (
+      !chosen.length ||
+      !window.confirm(
+        `Permanently delete these ${chosen.length} ended games?\n${chosen.map((g) => `${g.id}: ${g.teams.join(" vs ")}`).join("\n")}\nScores, history and phone registrations will be removed. This cannot be undone.`,
+      )
+    )
+      return;
+    setBusy(true);
+    setError("");
+    setCleanupMessage("");
+    let deleted = 0;
+    const failures: string[] = [];
+    try {
+      for (const game of chosen) {
+        try {
+          await api(`/games/${game.id}/delete`, { revision: game.revision, endedOnly: true });
+          deleted++;
+        } catch (e) {
+          failures.push(`${game.id}: ${(e as Error).message}`);
+        }
+      }
+      setCleanupMessage(`${deleted} ended game${deleted === 1 ? "" : "s"} deleted.`);
+      setSelectedGames([]);
+      if (failures.length) setError(failures.join(" · "));
+      setGames(await api<typeof games>("/games"));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
   async function rehearse(scenario: "round" | "fast") {
     setBusy(true);
     setError("");
@@ -370,12 +416,84 @@ export function Setup() {
         {!!games.length && (
           <section className="saved-section">
             <div className="section-title">
-              <h2>Pick up where you left off</h2>
+              <h2>Your games</h2>
               <span>Saved automatically</span>
             </div>
+            <div className="game-list-tools">
+              <label>
+                Show games
+                <select
+                  aria-label="Show games"
+                  value={gameFilter}
+                  disabled={busy}
+                  onChange={(e) => {
+                    setGameFilter(e.target.value);
+                    setShowAllGames(false);
+                    setSelectedGames([]);
+                  }}
+                >
+                  <option value="all">All games ({games.length})</option>
+                  <option value="live">
+                    Live games ({games.filter((g) => !g.rehearsal && g.phase !== "finished").length}
+                    )
+                  </option>
+                  <option value="ended">
+                    Ended games ({games.filter((g) => g.phase === "finished").length})
+                  </option>
+                  <option value="rehearsal">
+                    Rehearsals ({games.filter((g) => g.rehearsal).length})
+                  </option>
+                </select>
+              </label>
+              <button
+                className="button small"
+                disabled={busy || !visibleGames.some((g) => g.phase === "finished")}
+                onClick={() =>
+                  setSelectedGames(
+                    visibleGames.filter((g) => g.phase === "finished").map((g) => g.id),
+                  )
+                }
+              >
+                Select visible ended games
+              </button>
+              <button
+                className="button small"
+                disabled={busy || !selectedGames.length}
+                onClick={() => void deleteSelectedGames()}
+              >
+                Delete selected ended games ({selectedGames.length})
+              </button>
+              {!!selectedGames.length && (
+                <button
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() => setSelectedGames([])}
+                >
+                  Clear selection
+                </button>
+              )}
+            </div>
+            {cleanupMessage && <p role="status">{cleanupMessage}</p>}
+            {!filteredGames.length && <p>No games in this view.</p>}
             <div className="saved-grid">
-              {(showAllGames ? games : games.slice(0, 6)).map((g) => (
+              {visibleGames.map((g) => (
                 <article className="saved-game-card" key={g.id}>
+                  {g.phase === "finished" && (
+                    <label className="game-cleanup-selection">
+                      <input
+                        type="checkbox"
+                        aria-label={`Select ended game ${g.id}`}
+                        disabled={busy}
+                        checked={selectedGames.includes(g.id)}
+                        onChange={(e) =>
+                          setSelectedGames((ids) =>
+                            e.target.checked ? [...ids, g.id] : ids.filter((id) => id !== g.id),
+                          )
+                        }
+                      />{" "}
+                      Select for cleanup
+                    </label>
+                  )}
                   <a className="saved-game" href={"/host/" + g.id}>
                     <div>
                       <small>
@@ -383,7 +501,11 @@ export function Setup() {
                         {g.id} · ROUND {g.round}
                       </small>
                       <strong>{g.teams.join(" vs ")}</strong>
-                      <span>{g.phase}</span>
+                      <span>
+                        {g.phase === "finished"
+                          ? "Ended · view results"
+                          : `${g.rehearsal ? "Practice" : "Live"} · ${g.phase}`}
+                      </span>
                     </div>
                     <Play size={18} />
                   </a>
@@ -410,9 +532,9 @@ export function Setup() {
                 </article>
               ))}
             </div>
-            {games.length > 6 && (
+            {filteredGames.length > 6 && (
               <button className="button" onClick={() => setShowAllGames(!showAllGames)}>
-                {showAllGames ? "Show recent games" : `Show all ${games.length} games`}
+                {showAllGames ? "Show recent games" : `Show all ${filteredGames.length} games`}
               </button>
             )}
           </section>

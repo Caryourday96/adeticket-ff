@@ -279,8 +279,12 @@ export function createApplication(options: {
     res.json({ ok: true });
   });
   app.post("/api/games/:id/delete", auth, (req, res) => {
-    const { revision } = z.object({ revision: z.number().int().min(0) }).parse(req.body);
+    const { revision, endedOnly } = z
+      .object({ revision: z.number().int().min(0), endedOnly: z.boolean().optional() })
+      .parse(req.body);
     const id = String(req.params.id);
+    if (endedOnly && store.host(id).phase !== "finished")
+      throw new Error("This game is active. End it before bulk cleanup.");
     const players = store.players(id).map((p) => p.id);
     store.remove(id, revision);
     buzzers.forget(id, players);

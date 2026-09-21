@@ -40,6 +40,47 @@ async function signIn(page: Page) {
   await expect(page.getByRole("button", { name: "Practice a round", exact: true })).toBeVisible();
 }
 
+test("ended-game cleanup filters rehearsals, confirms deletion and protects active games", async ({
+  page,
+}) => {
+  await signIn(page);
+  const create = async () =>
+    (await (await page.request.post("/api/rehearsals", { data: { scenario: "round" } })).json())
+      .id as string;
+  const ended = await create();
+  const active = await create();
+  const state = await (await page.request.get(`/api/games/${ended}/host`)).json();
+  expect(
+    (
+      await page.request.post(`/api/games/${ended}/commands`, {
+        data: { id: crypto.randomUUID(), revision: state.revision, command: { type: "endGame" } },
+      })
+    ).ok(),
+  ).toBeTruthy();
+  const activeState = await (await page.request.get(`/api/games/${active}/host`)).json();
+  expect(
+    (
+      await page.request.post(`/api/games/${active}/delete`, {
+        data: { revision: activeState.revision, endedOnly: true },
+      })
+    ).status(),
+  ).toBe(400);
+  await page.reload();
+  await page.getByLabel("Show games", { exact: true }).selectOption("ended");
+  await expect(page.getByLabel(`Select ended game ${ended}`)).toBeVisible();
+  await expect(page.getByLabel(`Delete game ${active}`, { exact: true })).toHaveCount(0);
+  await page.getByLabel(`Select ended game ${ended}`).check();
+  page.once("dialog", (d) => d.dismiss());
+  await page.getByRole("button", { name: "Delete selected ended games (1)", exact: true }).click();
+  await expect(page.getByLabel(`Select ended game ${ended}`)).toBeChecked();
+  page.once("dialog", (d) => d.accept());
+  await page.getByRole("button", { name: "Delete selected ended games (1)", exact: true }).click();
+  await expect(page.getByLabel(`Select ended game ${ended}`)).toHaveCount(0);
+  await page.getByLabel("Show games", { exact: true }).selectOption("rehearsal");
+  await expect(page.getByLabel(`End game ${active}`, { exact: true })).toBeVisible();
+  expect((await page.request.get(`/api/games/${active}/host`)).ok()).toBeTruthy();
+});
+
 test("survey collects phone answers and exports a reviewed question bank", async ({
   page,
   browser,
