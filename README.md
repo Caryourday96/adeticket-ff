@@ -23,6 +23,13 @@ rosters still work; players can type an existing roster name to request that pla
 Duplicate phone registrations for a name are rejected. Teams support up to 12
 members. Stage changes are available before a face-off starts.
 
+## Survey collection
+
+Use **Surveys** to share preset or custom questions, collect responses, review
+equivalent answers and export a collected-survey question bank. The public form
+needs no host login. See [the survey guide](docs/surveys.md) for scoring, sample
+sizes, grouping and duplicate-submission limits.
+
 ## Question libraries
 
 The library has separate **Regular rounds** and **Fast Money** tabs. Packs carry

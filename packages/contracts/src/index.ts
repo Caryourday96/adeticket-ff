@@ -1,4 +1,5 @@
 import { z } from "zod";
+export * from "./surveys";
 
 const label = z.string().trim().min(1).max(100);
 export const answerSchema = z.object({

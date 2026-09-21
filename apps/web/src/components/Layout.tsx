@@ -18,6 +18,10 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
             <Library size={18} />
             Question library
           </a>
+          <a className={active === "surveys" ? "selected" : ""} href="/surveys">
+            <BookOpen size={18} />
+            Surveys
+          </a>
           <a className={active === "rules" ? "selected" : ""} href="/rules">
             <BookOpen size={18} />
             How to play

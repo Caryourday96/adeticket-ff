@@ -3,6 +3,7 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { randomBytes, createHash } from "node:crypto";
 import { transition } from "@naija/game";
+import { Surveys } from "./surveys";
 import {
   bankSchema,
   type Bank,
@@ -14,9 +15,11 @@ import {
 type Saved = { state: GameState; undo: GameState[]; history: string[]; commands: string[] };
 export class Store {
   private db: DatabaseSync;
+  readonly surveys: Surveys;
   constructor(path: string) {
     if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
+    this.surveys = new Surveys(this.db);
     this.db.exec(
       "PRAGMA journal_mode=DELETE; PRAGMA busy_timeout=5000; CREATE TABLE IF NOT EXISTS games(id TEXT PRIMARY KEY, body TEXT NOT NULL); CREATE TABLE IF NOT EXISTS sessions(hash TEXT PRIMARY KEY, expires INTEGER NOT NULL); CREATE TABLE IF NOT EXISTS packs(id TEXT PRIMARY KEY, body TEXT NOT NULL);",
     );

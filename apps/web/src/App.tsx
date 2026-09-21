@@ -8,6 +8,7 @@ import { Library } from "./pages/Library";
 import { Layout } from "./components/Layout";
 import { Brand } from "./components/Brand";
 import { Player } from "./pages/Player";
+import { Surveys, SurveyForm } from "./pages/Surveys";
 function HostGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<{
       authenticated: boolean;
@@ -190,6 +191,7 @@ function Rules() {
 }
 export function App() {
   const path = location.pathname.split("/").filter(Boolean);
+  if (path[0] === "survey" && path[1]) return <SurveyForm id={path[1]} />;
   if (path[0] === "audience" && path[1]) return <Audience id={path[1].toUpperCase()} />;
   if (path[0] === "play" && path[1]) return <Player id={path[1].toUpperCase()} />;
   if (path[0] === "play") return <Join player />;
@@ -199,6 +201,8 @@ export function App() {
     <HostGate>
       {path[0] === "host" && path[1] ? (
         <Host id={path[1].toUpperCase()} />
+      ) : path[0] === "surveys" ? (
+        <Surveys />
       ) : path[0] === "library" ? (
         <Library />
       ) : (

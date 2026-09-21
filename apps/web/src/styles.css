@@ -2728,3 +2728,48 @@ small {
 .fast-reference p {
   font-size: 12px;
 }
+
+/* Survey collection and answer review use a focused single-column form. */
+.survey-public {
+  max-width: 850px;
+}
+.survey-public h1,
+.survey-host h1 {
+  margin: 24px 0 16px;
+}
+.survey-public form,
+.survey-host {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.survey-public .settings-card,
+.survey-host .settings-card {
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 0;
+}
+.survey-public label {
+  font-size: 16px;
+  line-height: 1.5;
+}
+.survey-public input {
+  font-size: 16px;
+}
+.survey-host details {
+  max-height: 360px;
+  overflow: auto;
+}
+.survey-host .survey-choice {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.survey-host .survey-choice:has(input[type="checkbox"]) {
+  flex-direction: row;
+  align-items: center;
+}
+.survey-host .survey-choice input[type="checkbox"] {
+  flex: 0 0 18px;
+}
+.survey-host svg {
+  flex-shrink: 0;
+}

@@ -98,6 +98,63 @@ export function createApplication(options: {
     next();
   };
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
+  app.get("/api/surveys", auth, (_req, res) => res.json(store.surveys.list()));
+  app.post("/api/surveys", auth, (req, res) =>
+    res.status(201).json(store.surveys.create(req.body)),
+  );
+  app.get("/api/surveys/:id/manage", auth, (req, res) =>
+    res.json(store.surveys.results(String(req.params.id))),
+  );
+  app.post("/api/surveys/:id/status", auth, (req, res) => {
+    const body = z.object({ open: z.boolean(), revision: z.number().int() }).parse(req.body);
+    res.json(store.surveys.setOpen(String(req.params.id), body.open, body.revision));
+  });
+  app.post("/api/surveys/:id/review", auth, (req, res) =>
+    res.json(store.surveys.review(String(req.params.id), req.body)),
+  );
+  app.get("/api/surveys/:id/export", auth, (req, res) =>
+    res.json(store.surveys.export(String(req.params.id))),
+  );
+  const respondentToken = (req: express.Request) =>
+    req.headers.cookie
+      ?.split(";")
+      .map((v) => v.trim())
+      .find((v) => v.startsWith(`nf_survey_${req.params.id}=`))
+      ?.split("=")[1];
+  app.get("/api/surveys/:id", (req, res) => {
+    const s = store.surveys.get(String(req.params.id));
+    let token = respondentToken(req);
+    if (!token || !/^[a-f0-9]{64}$/.test(token)) {
+      token = randomBytes(32).toString("hex");
+      res.setHeader(
+        "Set-Cookie",
+        `nf_survey_${s.id}=${token}; HttpOnly; SameSite=Strict; Path=/api/surveys/${s.id}; Max-Age=2592000${options.production ? "; Secure" : ""}`,
+      );
+    }
+    res.json({
+      id: s.id,
+      title: s.title,
+      roundType: s.roundType,
+      questions: s.questions,
+      open: s.open,
+      submitted: store.surveys.submitted(s.id, token),
+    });
+  });
+  const surveyLimiter = rateLimit({
+    windowMs: 60000,
+    limit: 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    validate: { xForwardedForHeader: false },
+    message: { error: "Please wait a minute before submitting again." },
+  });
+  app.post("/api/surveys/:id/responses", surveyLimiter, (req, res) => {
+    const token = respondentToken(req);
+    if (!token || !/^[a-f0-9]{64}$/.test(token))
+      throw new Error("Open the survey form before submitting.");
+    store.surveys.submit(String(req.params.id), token, req.body);
+    res.json({ ok: true });
+  });
   app.get("/api/clock", (_req, res) => res.json({ now: Date.now() }));
   app.get("/api/session", (req, res) =>
     res.json({

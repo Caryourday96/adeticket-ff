@@ -27,6 +27,44 @@ async function signIn(page: Page) {
   await expect(page.getByRole("button", { name: "Practice a round", exact: true })).toBeVisible();
 }
 
+test("survey collects phone answers and exports a reviewed question bank", async ({
+  page,
+  browser,
+}) => {
+  await signIn(page);
+  await page.getByRole("link", { name: "Surveys", exact: true }).click();
+  await page.getByLabel("Survey title").fill("Wedding survey browser test");
+  await page.getByRole("button", { name: "Create survey", exact: true }).click();
+  const link = await page.getByLabel("Survey share link").inputValue();
+  for (const answer of ["Rice", "Beans"]) {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    try {
+      const phone = await context.newPage();
+      await phone.goto(link);
+      for (const field of await phone.getByRole("textbox").all()) await field.fill(answer);
+      await phone.getByRole("button", { name: "Submit answers", exact: true }).click();
+      await expect(phone.getByRole("heading", { name: "Thank you!" })).toBeVisible();
+      await phone.reload();
+      await expect(phone.getByRole("heading", { name: "Thank you!" })).toBeVisible();
+    } finally {
+      await context.close();
+    }
+  }
+  await page.getByRole("button", { name: "Refresh results", exact: true }).click();
+  await expect(page.getByText("2 submissions · Open for responses", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Close survey for review", exact: true }).click();
+  for (const checkbox of await page
+    .getByRole("checkbox", { name: "I reviewed this question’s answer groups" })
+    .all())
+    await checkbox.check();
+  await page.getByRole("button", { name: "Save grouping and review", exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Download question bank JSON", exact: true }).click();
+  expect((await download).suggestedFilename()).toMatch(/survey-.*-regular\.json/);
+  await page.getByRole("button", { name: "Save bank to question library", exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText("Question bank saved in the question library.");
+});
+
 test("players enter their names and only buzz on stage with saved team names", async ({
   page,
   browser,
