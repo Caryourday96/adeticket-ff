@@ -40,6 +40,32 @@ async function signIn(page: Page) {
   await expect(page.getByRole("button", { name: "Practice a round", exact: true })).toBeVisible();
 }
 
+test("question history filters recorded boards and links back to their game", async ({ page }) => {
+  await signIn(page);
+  await page.getByRole("button", { name: "Create game", exact: true }).click();
+  await expect(page).toHaveURL(/\/host\/[A-F0-9]{6}$/);
+  const id = page.url().split("/").pop()!;
+  const state = await (await page.request.get(`/api/games/${id}/host`)).json();
+  const prompt = state.questions[0].prompt as string;
+  await page.goto("/library");
+  await page.getByPlaceholder("Search questions…").fill(prompt);
+  await page.getByLabel("Question history", { exact: true }).selectOption("played");
+  const card = page
+    .locator("button.question-card")
+    .filter({ has: page.getByRole("heading", { name: prompt, exact: true }) });
+  await expect(card).toHaveCount(1);
+  await card.click();
+  await page.getByText(/Saved game history \(/).click();
+  await expect(page.getByRole("link", { name: `Open game ${id}`, exact: true })).toHaveAttribute(
+    "href",
+    `/host/${id}`,
+  );
+  await page.goto("/library");
+  await page.getByPlaceholder("Search questions…").fill(prompt);
+  await page.getByLabel("Question history", { exact: true }).selectOption("unplayed");
+  await expect(page.getByRole("heading", { name: prompt, exact: true })).toHaveCount(0);
+});
+
 test("ended-game cleanup filters rehearsals, confirms deletion and protects active games", async ({
   page,
 }) => {
@@ -133,7 +159,8 @@ test("players enter their names and only buzz on stage with saved team names", a
   try {
     const phone = await context.newPage();
     await phone.goto(new URL("/play", page.url()).href);
-    await phone.getByLabel("Room code").fill(id);
+    await phone.getByLabel("Room code").fill(id.toLowerCase());
+    await expect(phone.getByLabel("Room code")).toHaveValue(id);
     await phone.getByRole("button", { name: "Join as a player" }).click();
     await expect(phone.getByLabel("Team", { exact: true })).toContainText("Lagos Stars");
     await phone.getByLabel("Your name").fill("Funke");

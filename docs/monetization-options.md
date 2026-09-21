@@ -12,6 +12,8 @@ Decision recorded: 21 September 2026. Prepare display advertising, disabled unti
 
 ## Suggested experiments
 
+See the [prioritised monetisation backlog](monetization-backlog.md) for the simplest launch sequence and hosting-access prerequisites. Start with a manually delivered hosted event or a one-event pass after account isolation; keep player access free.
+
 - Free demo: short game and starter pack.
 - Event pass: test CA$10–20 per event.
 - Regular host plan: test CA$25–40 per month.

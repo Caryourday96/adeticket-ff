@@ -40,8 +40,31 @@ it("counts opened saved boards only and removes deleted game usage", () => {
     store.add(state);
     expect(store.questionUsage()).toEqual([]);
     store.add({ ...state, id: "REAL12", rehearsal: false });
-    expect(store.questionUsage()).toEqual([{ prompt: state.questions[0].prompt, game: "REAL12" }]);
+    expect(store.questionUsage()).toEqual([
+      { prompt: state.questions[0].prompt, game: "REAL12", roundType: "regular" },
+    ]);
     store.remove("REAL12", 0);
+    expect(store.questionUsage()).toEqual([]);
+  } finally {
+    store.close();
+  }
+});
+
+it("keeps Fast Money history separate and counts only recorded questions once per game", () => {
+  const store = new Store(":memory:");
+  try {
+    const state = createRehearsal("FAST12", "fast");
+    state.rehearsal = false;
+    const prompt = state.fastQuestions[0].prompt;
+    state.fast!.entries[0][0] = { text: "Example", answerId: null, points: 0 };
+    state.fast!.entries[1][0] = { text: "Different", answerId: null, points: 0 };
+    store.add(state);
+    expect(store.questionUsage().filter((r) => r.roundType === "fast-money")).toEqual([
+      { prompt, game: state.id, roundType: "fast-money" },
+    ]);
+    store.remove(state.id, state.revision);
+    expect(store.questionUsage()).toEqual([]);
+    store.add({ ...state, id: "PRACT1", rehearsal: true });
     expect(store.questionUsage()).toEqual([]);
   } finally {
     store.close();

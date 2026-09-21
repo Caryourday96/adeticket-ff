@@ -1,5 +1,7 @@
 # Advertising setup
 
+For portal-by-portal instructions, use the [owner's AdSense activation guide](adsense-step-by-step.md). In particular, root-domain approval and root ads.txt must be handled at the hosting for `kayodeadetunji.com`; the game subdomain endpoints alone do not complete that setup.
+
 ## Current behaviour
 
 Advertising is off by default. Missing or malformed IDs also disable it. No empty placeholder, ad script or third-party advertising request is created while disabled. Only `/rules` has a manual responsive display placement, separated from the main content. It loads as the placement enters the viewport. Ad blocking or a script failure must not stop gameplay.

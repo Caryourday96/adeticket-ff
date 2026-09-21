@@ -133,13 +133,21 @@ export class Store {
     return this.db
       .prepare(
         `
-      SELECT DISTINCT json_extract(question.value, '$.prompt') AS prompt, games.id AS game
+      SELECT DISTINCT json_extract(question.value, '$.prompt') AS prompt, games.id AS game, 'regular' AS roundType
       FROM games, json_each(games.body, '$.state.questions') AS question
       WHERE COALESCE(json_extract(games.body, '$.state.rehearsal'), 0) = 0
         AND CAST(question.key AS INTEGER) <= json_extract(games.body, '$.state.round')
+      UNION
+      SELECT DISTINCT json_extract(question.value, '$.prompt') AS prompt, games.id AS game, 'fast-money' AS roundType
+      FROM games, json_each(games.body, '$.state.fastQuestions') AS question
+      WHERE COALESCE(json_extract(games.body, '$.state.rehearsal'), 0) = 0
+        AND (
+          json_extract(games.body, '$.state.fast.entries[0][' || question.key || ']') IS NOT NULL
+          OR json_extract(games.body, '$.state.fast.entries[1][' || question.key || ']') IS NOT NULL
+        )
     `,
       )
-      .all() as { prompt: string; game: string }[];
+      .all() as { prompt: string; game: string; roundType: "regular" | "fast-money" }[];
   }
   apply(id: string, envelope: Envelope) {
     this.db.exec("BEGIN IMMEDIATE");

@@ -7,7 +7,11 @@ import { Layout } from "../components/Layout";
 import { normalized, reviewQuestion } from "../lib/review";
 export function Library() {
   const [roundType, setRoundType] = useState<"regular" | "fast-money">("regular");
-  const [usage, setUsage] = useState<{ prompt: string; game: string }[]>([]);
+  const [usage, setUsage] = useState<
+    { prompt: string; game: string; roundType: "regular" | "fast-money" }[]
+  >([]);
+  const [usageReady, setUsageReady] = useState(false);
+  const [usageFilter, setUsageFilter] = useState("all");
   const [needsReview, setNeedsReview] = useState(false);
   const [packs, setPacks] = useState<{ id: string; bank: Bank }[]>([]),
     [packId, setPackId] = useState("starter"),
@@ -21,13 +25,24 @@ export function Library() {
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
     api<typeof usage>("/question-usage")
-      .then(setUsage)
+      .then((rows) => {
+        setUsage(rows);
+        setUsageReady(true);
+      })
       .catch((e) => setError(e.message));
     api<typeof packs>("/packs")
       .then(setPacks)
       .catch((e) => setError(e.message));
   }, []);
   const bank = packs.find((p) => p.id === packId)?.bank;
+  const history = new Map<string, Set<string>>();
+  for (const row of usage) {
+    if (row.roundType !== (bank?.roundType ?? "regular")) continue;
+    const key = normalized(row.prompt);
+    if (!history.has(key)) history.set(key, new Set());
+    history.get(key)!.add(row.game);
+  }
+  const gamesFor = (prompt: string) => [...(history.get(normalized(prompt)) ?? [])];
   async function save(pack: Bank) {
     setBusy(true);
     setError("");
@@ -177,16 +192,39 @@ export function Library() {
               Show questions needing review
             </label>
             <p className="host-note">
-              Review flags repeated prompts and overlapping accepted answers. Seen counts include
-              boards opened in saved games, excluding rehearsals. Deleting a game removes its
-              contribution. Similar wording is not automatically treated as the same question.
+              Regular history counts boards opened in saved games. Fast Money history counts
+              questions with a recorded response. Rehearsals are excluded. Deleting a game removes
+              its contribution. Unused questions in a pack are not counted.
             </p>
+            <label>
+              Question history
+              <select
+                aria-label="Question history"
+                value={usageFilter}
+                disabled={!usageReady}
+                onChange={(e) => setUsageFilter(e.target.value)}
+              >
+                <option value="all">All questions</option>
+                <option value="unplayed">Not recorded in saved games</option>
+                <option value="played">Recorded in saved games</option>
+              </select>
+            </label>
+            {usageReady && (
+              <p>
+                {bank.questions.filter((q) => gamesFor(q.prompt).length > 0).length} of{" "}
+                {bank.questions.length} questions recorded in saved games.
+              </p>
+            )}
             <div className="question-cards">
               {bank.questions
                 .filter(
                   (q) =>
                     (category === "all" || q.category === category) &&
                     (!needsReview || reviewQuestion(q, bank.questions).length > 0) &&
+                    (usageFilter === "all" ||
+                      (usageFilter === "played"
+                        ? gamesFor(q.prompt).length > 0
+                        : gamesFor(q.prompt).length === 0)) &&
                     q.prompt.toLowerCase().includes(search.toLowerCase()),
                 )
                 .map((q) => (
@@ -201,14 +239,9 @@ export function Library() {
                     <span className="section-eyebrow">{q.category}</span>
                     <h3>{q.prompt}</h3>
                     <p>
-                      {
-                        new Set(
-                          usage
-                            .filter((row) => normalized(row.prompt) === normalized(q.prompt))
-                            .map((row) => row.game),
-                        ).size
-                      }{" "}
-                      saved games have shown this question
+                      {usageReady
+                        ? `${gamesFor(q.prompt).length} saved games have recorded this question`
+                        : "Question history unavailable or loading"}
                     </p>
                     {reviewQuestion(q, bank.questions).map((warning) => (
                       <p key={warning} className="host-note">
@@ -320,6 +353,25 @@ export function Library() {
               </button>
               <div className="section-eyebrow">QUESTION EDITOR</div>
               <h2>Make the board your own.</h2>
+              <details>
+                <summary>Saved game history ({gamesFor(edit.prompt).length})</summary>
+                {!usageReady ? (
+                  <p>History is not available yet.</p>
+                ) : gamesFor(edit.prompt).length ? (
+                  gamesFor(edit.prompt).map((game) => (
+                    <p key={game}>
+                      <a href={`/host/${game}`} target="_blank" rel="noopener noreferrer">
+                        Open game {game}
+                      </a>
+                    </p>
+                  ))
+                ) : (
+                  <p>
+                    No matching history in saved games. Deleted games and rehearsals are not
+                    included.
+                  </p>
+                )}
+              </details>
               {reviewQuestion(edit, bank.questions).map((warning) => (
                 <p key={warning} role="status" className="host-note">
                   {warning}
