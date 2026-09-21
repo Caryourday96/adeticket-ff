@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import { createApplication } from "./app";
+import { advertisingConfig } from "./advertising";
 if (process.env.NODE_ENV === "production" && !process.env.DATA_DIR)
   throw new Error("DATA_DIR must identify verified persistent storage in production.");
 const server = createApplication({
@@ -7,6 +8,7 @@ const server = createApplication({
   password: process.env.HOST_PASSWORD,
   production: process.env.NODE_ENV === "production",
   origin: process.env.APP_ORIGIN,
+  advertising: advertisingConfig(process.env),
 });
 const endpoint = process.env.PORT ?? "3000";
 const onListening = () => console.log("Naija Family Showdown is ready.");

@@ -54,6 +54,7 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
         </header>
         {children}
         <footer className="footer">
+          <a href="/privacy">Privacy and advertising</a>
           <span>NAIJA FAMILY SHOWDOWN</span>
           <span>Sample game points · Unofficial home game</span>
         </footer>

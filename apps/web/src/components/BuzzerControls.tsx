@@ -2,6 +2,7 @@ import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import type { HostBuzzers, HostState } from "@naija/contracts";
 import { useBuzzers } from "../hooks/useBuzzers";
+import { phoneStatus } from "../lib/phoneStatus";
 export function BuzzerControls({ state: s }: { state: HostState }) {
   const { data, error, connected, busy, act } = useBuzzers<HostBuzzers>(s.id, true);
   const [invite, setInvite] = useState(false);
@@ -9,6 +10,38 @@ export function BuzzerControls({ state: s }: { state: HostState }) {
   return (
     <section className="control-card buzzer-controls">
       <div className="section-eyebrow">PHONE BUZZERS</div>
+      <div className="phone-health" aria-label="Player connection panel">
+        <h3>Player connections</h3>
+        {!connected || error ? (
+          <p role="status">Connection status unavailable — reconnecting to the game.</p>
+        ) : !data ? (
+          <p>Checking phones…</p>
+        ) : (
+          <>
+            <p className="phone-health-counts">
+              <span>{data.players.filter((p) => p.connection === "ready").length} active</span>
+              <span>
+                {data.players.filter((p) => p.connection === "away").length} in background
+              </span>
+              <span>{data.players.filter((p) => p.connection === "offline").length} offline</span>
+              <span>{data.players.filter((p) => !p.approved).length} awaiting approval</span>
+            </p>
+          </>
+        )}
+        {data &&
+          phoneStatus(s, data, connected && !error).map((p) => (
+            <div key={p.team} className={"phone-stage-status " + (p.ready ? "can-buzz" : "")}>
+              <strong>
+                {s.teams[p.team].name} · {p.name}
+              </strong>
+              <span>{p.message}</span>
+            </div>
+          ))}
+        <small>
+          Status refreshes every 5 seconds. A phone is marked offline after 15 seconds without a
+          heartbeat.
+        </small>
+      </div>
       <p className="host-note">
         {data?.players.filter((p) => p.approved && p.connection === "ready").length ?? 0} approved
         phones active · status updates every 5 seconds

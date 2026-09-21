@@ -1,5 +1,18 @@
 import { test, expect, type Page } from "@playwright/test";
 
+test("unconfigured ads make no advertising requests on rules or player pages", async ({ page }) => {
+  const requests: string[] = [];
+  page.on("request", (request) => {
+    if (/googlesyndication|doubleclick/.test(request.url())) requests.push(request.url());
+  });
+  for (const path of ["/rules", "/play", "/join", "/privacy"]) {
+    await page.goto(path);
+    await expect(page.locator("h1")).toBeVisible();
+    await expect(page.locator("#adsense-loader, .advertisement")).toHaveCount(0);
+  }
+  expect(requests).toEqual([]);
+});
+
 test("library review filter and completed game scorecard are available", async ({ page }) => {
   await signIn(page);
   await page.getByRole("link", { name: "Question library", exact: true }).click();
@@ -92,6 +105,10 @@ test("players enter their names and only buzz on stage with saved team names", a
     await page.getByRole("button", { name: "Put Funke on stage", exact: true }).click();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeEnabled();
+    await expect(page.getByLabel("Player connection panel")).toContainText("Lagos Stars · Funke");
+    await expect(page.getByLabel("Player connection panel")).toContainText("Can buzz now", {
+      timeout: 10000,
+    });
     await phone.reload();
     await expect(phone.locator(".phone-identity")).toContainText("Lagos Stars");
     await expect(phone.locator(".phone-buzzer")).toBeEnabled();

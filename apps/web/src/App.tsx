@@ -9,6 +9,7 @@ import { Layout } from "./components/Layout";
 import { Brand } from "./components/Brand";
 import { Player } from "./pages/Player";
 import { Surveys, SurveyForm } from "./pages/Surveys";
+import { Advertisement } from "./components/Advertisement";
 function HostGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<{
       authenticated: boolean;
@@ -185,12 +186,44 @@ function Rules() {
           The supplied questions use illustrative points. This is a configurable TV-style home-game
           preset; the Nigerian show's exact rules and visual details have not been verified.
         </p>
+        <Advertisement />
       </main>
     </Layout>
   );
 }
 export function App() {
   const path = location.pathname.split("/").filter(Boolean);
+  if (path[0] === "privacy")
+    return (
+      <Layout>
+        <main className="page rules-page">
+          <h1>Privacy and advertising</h1>
+          <p>
+            The game stores team names, player names, game progress and submitted survey answers so
+            hosts can run their events. Host and survey cookies support sign-in and prevent
+            accidental repeat submissions.
+          </p>
+          <p>
+            When advertising is enabled, the How to play page can display Google ads. Google and its
+            partners may use cookies, device information and your IP address to deliver and measure
+            ads. Advertising is not loaded on player buzzers, live boards or host controls.
+          </p>
+          <p>
+            Where a consent message is provided, use its privacy settings to manage your choices.
+          </p>
+          <p>
+            <a
+              href="https://policies.google.com/technologies/partner-sites"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              How Google uses information from partner sites
+            </a>
+          </p>
+          <p>For questions about your event data, contact your event organiser.</p>
+        </main>
+      </Layout>
+    );
   if (path[0] === "survey" && path[1]) return <SurveyForm id={path[1]} />;
   if (path[0] === "audience" && path[1]) return <Audience id={path[1].toUpperCase()} />;
   if (path[0] === "play" && path[1]) return <Player id={path[1].toUpperCase()} />;

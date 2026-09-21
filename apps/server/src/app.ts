@@ -5,7 +5,8 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { rateLimit } from "express-rate-limit";
 import { passwordVerifier } from "./password";
 import { resolve } from "node:path";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import { advertisingConfig, advertisingDocument, type AdvertisingConfig } from "./advertising";
 import { Server } from "socket.io";
 import { bankSchema, envelopeSchema, setupSchema } from "@naija/contracts";
 import { starterBank, fastBank, validateFastSet } from "@naija/content";
@@ -20,6 +21,7 @@ export function createApplication(options: {
   production?: boolean;
   origin?: string;
   webDir?: string;
+  advertising?: AdvertisingConfig;
 }) {
   if (options.production && !options.password)
     throw new Error("HOST_PASSWORD is required in production.");
@@ -44,6 +46,7 @@ export function createApplication(options: {
     allowRequest: (req, cb) => cb(null, originAllowed(req.headers.origin)),
   });
   app.disable("x-powered-by");
+  const ads = options.advertising ?? advertisingConfig({});
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -98,6 +101,14 @@ export function createApplication(options: {
     next();
   };
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
+  app.get("/ads.txt", (_req, res) => {
+    res.type("text/plain").setHeader("Cache-Control", "public, max-age=300");
+    if (!ads.publisher) {
+      res.status(404).send("Advertising is not configured.\n");
+      return;
+    }
+    res.send(`google.com, ${ads.publisher.replace("ca-", "")}, DIRECT, f08c47fec0942fa0\n`);
+  });
   app.get("/api/surveys", auth, (_req, res) => res.json(store.surveys.list()));
   app.post("/api/surveys", auth, (req, res) =>
     res.status(201).json(store.surveys.create(req.body)),
@@ -379,6 +390,16 @@ export function createApplication(options: {
   });
   const web = options.webDir ?? resolve(existsSync(resolve("web")) ? "web" : "dist/web");
   if (existsSync(web)) {
+    app.get("/rules", (_req, res, next) => {
+      if (!ads.enabled) {
+        next();
+        return;
+      }
+      const document = advertisingDocument(readFileSync(resolve(web, "index.html"), "utf8"), ads);
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("Content-Security-Policy", document.csp);
+      res.type("html").send(document.html);
+    });
     // Static assets and SPA navigation share a separate budget from API polling.
     app.use(
       rateLimit({
