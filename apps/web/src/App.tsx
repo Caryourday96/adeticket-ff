@@ -262,27 +262,15 @@ export function App() {
             <div>
               <h2>Privacy and cookie choices</h2>
               <p>
-                Where regional regulations require consent (such as in the EEA, UK, and
-                Switzerland), a Google-certified Consent Management Platform (CMP) dialog is
-                presented. You may reopen and update your privacy choices at any time:
+                Before advertising is enabled, the operator must configure and test consent
+                messaging for applicable regions. When available, use the privacy settings beside
+                the ad on the How to play page. If no advertising or consent message is loaded,
+                those controls may be unavailable.
               </p>
               <p>
-                <button
-                  type="button"
-                  className="button small"
-                  onClick={() => {
-                    const fc = window.googlefc;
-                    if (fc?.callbackQueue && typeof fc.showRevocationMessage === "function") {
-                      fc.callbackQueue.push(fc.showRevocationMessage);
-                    } else if (typeof fc?.showRevocationMessage === "function") {
-                      fc.showRevocationMessage();
-                    } else {
-                      location.href = "/rules";
-                    }
-                  }}
-                >
-                  Manage privacy & cookie choices
-                </button>
+                <a className="button small" href="/rules#privacy-choices">
+                  Manage privacy &amp; cookie choices
+                </a>
               </p>
             </div>
           </section>

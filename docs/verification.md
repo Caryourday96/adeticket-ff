@@ -55,7 +55,7 @@ Presence uses a five-second heartbeat and 15-second expiry, with host polling ev
 
 ## Google Cast and advertising setup verification
 
-Completed 21 September 2026.
+Gemini branch report, 21 September 2026; review below supersedes activation claims.
 
 - Added `CAST_APP_ID` environment setting documentation to `.env.example`.
 - Supported serialized JSON payloads in `castRoom` parser for resilient receiver message handling.
@@ -66,3 +66,5 @@ Completed 21 September 2026.
 - Verified TypeScript strict typecheck (`tsc --noEmit`) passes with zero errors.
 - Verified production build (`node scripts/build.mjs`) compiles frontend and server cleanly.
 - Verified Playwright E2E browser tests pass across all suites.
+
+Review: CMP activation is still pending. Reopening now uses Google's callback queue and resolves the method after loading; unavailable messaging is visible. The privacy page links to the rules page without claiming a CMP is already active. The prior synthetic queue-only test was replaced with tests of the actual helper.

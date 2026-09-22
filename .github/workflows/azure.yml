@@ -38,6 +38,8 @@ jobs:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: Configure public Cast receiver ID
+        run: az webapp config appsettings set --resource-group Kayode_IGO --name "$AZURE_WEBAPP_NAME" --settings CAST_APP_ID=0AF8BA4D --output none
       - uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}

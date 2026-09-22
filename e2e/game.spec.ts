@@ -21,10 +21,10 @@ test("privacy page displays operator disclosure and consent management choices",
   await expect(page.getByRole("heading", { name: "Privacy and advertising" })).toBeVisible();
   await expect(page.locator("main")).toContainText("operated by Adeticket Inc.");
   await expect(page.locator("main")).toContainText("adeticket@gmail.com");
-  const consentBtn = page.getByRole("button", { name: "Manage privacy & cookie choices" });
+  const consentBtn = page.getByRole("link", { name: "Manage privacy & cookie choices" });
   await expect(consentBtn).toBeVisible();
   await consentBtn.click();
-  await expect(page).toHaveURL(/\/rules$/);
+  await expect(page).toHaveURL(/\/rules#privacy-choices$/);
 });
 
 test("library review filter and completed game scorecard are available", async ({ page }) => {

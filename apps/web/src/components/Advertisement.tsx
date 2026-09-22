@@ -1,12 +1,10 @@
+import { reopenPrivacy, type ConsentApi } from "../lib/privacy";
 import { useEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
     adsbygoogle?: Record<string, unknown>[];
-    googlefc?: {
-      callbackQueue?: Array<() => void>;
-      showRevocationMessage?: () => void;
-    };
+    googlefc?: ConsentApi;
   }
 }
 
@@ -18,6 +16,7 @@ export function Advertisement() {
   const unit = useRef<HTMLModElement>(null);
   const requested = useRef(false);
   const [failed, setFailed] = useState(false);
+  const [privacyMessage, setPrivacyMessage] = useState("");
   const configured = /^ca-pub-\d{16}$/.test(client ?? "") && /^\d{10}$/.test(slot ?? "");
   useEffect(() => {
     if (!configured || !unit.current || location.pathname.replace(/\/$/, "") !== "/rules") return;
@@ -58,23 +57,23 @@ export function Advertisement() {
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
-      <div className="advertisement-footer">
+      <div className="advertisement-footer" id="privacy-choices">
         <a href="/privacy">Privacy and advertising</a>
         <button
           type="button"
           className="privacy-reopen-button"
           onClick={() => {
-            const fc = window.googlefc;
-            if (fc?.callbackQueue && typeof fc.showRevocationMessage === "function") {
-              fc.callbackQueue.push(fc.showRevocationMessage);
-            } else if (typeof fc?.showRevocationMessage === "function") {
-              fc.showRevocationMessage();
-            }
+            setPrivacyMessage(
+              reopenPrivacy(window.googlefc)
+                ? "Privacy settings requested."
+                : "Privacy settings are unavailable. Advertising may be blocked or consent messaging is not configured.",
+            );
           }}
         >
           Privacy and cookie settings
         </button>
       </div>
+      {privacyMessage && <p role="status">{privacyMessage}</p>}
     </aside>
   );
 }

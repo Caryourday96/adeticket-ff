@@ -46,3 +46,5 @@ Do not describe device discovery or hardware casting as verified until this pass
 References: [registration](https://developers.google.com/cast/docs/registration),
 [web sender](https://developers.google.com/cast/docs/web_sender/integrate),
 [receiver options](https://developers.google.com/cast/docs/reference/web_receiver/cast.framework.CastReceiverOptions).
+
+Production receiver ID: `0AF8BA4D` (public). The Azure deployment workflow applies this setting. To change or disable it, update that workflow; a portal-only change will be overwritten by the next deployment. Hardware acceptance is still pending.
