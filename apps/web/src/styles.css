@@ -2788,10 +2788,31 @@ small {
   color: #94a3b8;
   margin-bottom: 12px;
 }
-.advertisement > a {
-  display: block;
+.advertisement-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-top: 20px;
   font-size: 12px;
+}
+.advertisement-footer a,
+.privacy-reopen-button {
+  color: #94a3b8;
+  font-size: 12px;
+  text-decoration: underline;
+}
+.privacy-reopen-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+}
+.advertisement-footer a:hover,
+.privacy-reopen-button:hover {
+  color: #e2e8f0;
 }
 
 .phone-health {

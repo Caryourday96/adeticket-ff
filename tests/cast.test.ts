@@ -1,4 +1,6 @@
 import { afterEach, expect, it, vi } from "vitest";
+import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
+import { resolve } from "node:path";
 import { castRoom } from "../apps/web/src/lib/cast";
 import { createApplication } from "../apps/server/src/app";
 
@@ -8,9 +10,11 @@ afterEach(() => {
 });
 it("accepts room selection and rejects URLs, commands and malformed room codes", () => {
   expect(castRoom({ type: "SHOW_ROOM", room: "ABC123" })).toBe("ABC123");
+  expect(castRoom(JSON.stringify({ type: "SHOW_ROOM", room: "ABC123" }))).toBe("ABC123");
   for (const value of [
     null,
     "ABC123",
+    "not valid json",
     {},
     { type: "command", room: "ABC123" },
     { type: "SHOW_ROOM", room: "https://example.com/host/ABC123" },
@@ -24,10 +28,16 @@ it("accepts room selection and rejects URLs, commands and malformed room codes",
 it.each([undefined, "A1B2C3D4"])(
   "exposes only the public Cast ID (%s), without granting host access",
   async (castAppId) => {
+    const web = mkdtempSync(resolve(".data-cast-test-"));
+    writeFileSync(
+      resolve(web, "index.html"),
+      '<html><head></head><body><script src="/app.js"></script></body></html>',
+    );
     const server = createApplication({
       database: ":memory:",
       password: "private-test-password",
       castAppId,
+      webDir: web,
     });
     try {
       await new Promise<void>((resolve) => server.http.listen(0, "127.0.0.1", resolve));
@@ -47,6 +57,7 @@ it.each([undefined, "A1B2C3D4"])(
       await games.text();
     } finally {
       await server.close();
+      rmSync(web, { recursive: true, force: true });
     }
   },
 );

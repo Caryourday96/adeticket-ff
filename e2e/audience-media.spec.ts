@@ -48,3 +48,17 @@ test("Cast receiver accepts only room messages and opens the public board", asyn
   await expect(page.locator(".audience-page header")).toContainText(id);
   await expect(page.getByRole("button", { name: "Fullscreen", exact: true })).toHaveCount(0);
 });
+
+test("host audience dialog displays Cast controls and explains unconfigured state", async ({
+  page,
+}) => {
+  await signIn(page);
+  await page.getByRole("button", { name: "Practice a round", exact: true }).click();
+  await expect(page).toHaveURL(/\/host\/[A-F0-9]{6}$/);
+  await page.getByRole("button", { name: "Audience screen", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Audience screen" })).toBeVisible();
+  const cast = page.getByLabel("Google Cast");
+  await expect(cast).toBeVisible();
+  await expect(cast.getByRole("button", { name: "Cast to TV" })).toBeDisabled();
+  await expect(cast).toContainText("TV casting is awaiting activation.");
+});

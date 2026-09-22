@@ -1,7 +1,16 @@
 export const CAST_NAMESPACE = "urn:x-cast:com.naijafeud.audience";
 export function castRoom(input: unknown): string | null {
-  if (!input || typeof input !== "object") return null;
-  const message = input as { type?: unknown; room?: unknown };
+  if (!input) return null;
+  let parsed = input;
+  if (typeof input === "string") {
+    try {
+      parsed = JSON.parse(input);
+    } catch {
+      return null;
+    }
+  }
+  if (!parsed || typeof parsed !== "object") return null;
+  const message = parsed as { type?: unknown; room?: unknown };
   return message.type === "SHOW_ROOM" &&
     typeof message.room === "string" &&
     /^[A-F0-9]{6}$/.test(message.room)

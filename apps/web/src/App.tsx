@@ -200,29 +200,104 @@ export function App() {
       <Layout>
         <main className="page rules-page">
           <h1>Privacy and advertising</h1>
-          <p>
-            The game stores team names, player names, game progress and submitted survey answers so
-            hosts can run their events. Host and survey cookies support sign-in and prevent
-            accidental repeat submissions.
+          <p className="lead">
+            Family Showdown is operated by Adeticket Inc. (
+            <a href="mailto:adeticket@gmail.com">adeticket@gmail.com</a>).
           </p>
-          <p>
-            When advertising is enabled, the How to play page can display Google ads. Google and its
-            partners may use cookies, device information and your IP address to deliver and measure
-            ads. Advertising is not loaded on player buzzers, live boards or host controls.
-          </p>
-          <p>
-            Where a consent message is provided, use its privacy settings to manage your choices.
-          </p>
-          <p>
-            <a
-              href="https://policies.google.com/technologies/partner-sites"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              How Google uses information from partner sites
-            </a>
-          </p>
-          <p>For questions about your event data, contact your event organiser.</p>
+
+          <section className="rule-card">
+            <span>01</span>
+            <div>
+              <h2>Data and event storage</h2>
+              <p>
+                The service stores game progress, team rosters, contestant names, and submitted
+                survey responses so hosts can run events. Game data is stored in persistent
+                application storage and can be deleted by the host through the dashboard cleanup
+                controls.
+              </p>
+            </div>
+          </section>
+
+          <section className="rule-card">
+            <span>02</span>
+            <div>
+              <h2>Cookies and sessions</h2>
+              <p>
+                We use strictly necessary first-party cookies: host authentication cookies (7-day
+                expiry), player room session cookies (7-day expiry) to allow reconnects on mobile
+                buzzers, and survey cookies (30-day expiry) to prevent accidental duplicate voting.
+                No third-party marketing cookies are used during gameplay.
+              </p>
+            </div>
+          </section>
+
+          <section className="rule-card">
+            <span>03</span>
+            <div>
+              <h2>Advertising boundaries</h2>
+              <p>
+                When advertising is activated by the operator, Google AdSense responsive display ads
+                are loaded solely below the instructions on the public How to play (
+                <a href="/rules">/rules</a>) page. Advertising scripts, third-party cookies, and ad
+                network trackers are never loaded on player buzzers, join forms, audience boards,
+                survey forms, or host desks.
+              </p>
+              <p>
+                Google and its advertising partners may use cookies, device identifiers, and IP
+                addresses to deliver and measure ads. Read{" "}
+                <a
+                  href="https://policies.google.com/technologies/partner-sites"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  how Google uses information from partner sites
+                </a>
+                .
+              </p>
+            </div>
+          </section>
+
+          <section className="rule-card">
+            <span>04</span>
+            <div>
+              <h2>Privacy and cookie choices</h2>
+              <p>
+                Where regional regulations require consent (such as in the EEA, UK, and
+                Switzerland), a Google-certified Consent Management Platform (CMP) dialog is
+                presented. You may reopen and update your privacy choices at any time:
+              </p>
+              <p>
+                <button
+                  type="button"
+                  className="button small"
+                  onClick={() => {
+                    const fc = window.googlefc;
+                    if (fc?.callbackQueue && typeof fc.showRevocationMessage === "function") {
+                      fc.callbackQueue.push(fc.showRevocationMessage);
+                    } else if (typeof fc?.showRevocationMessage === "function") {
+                      fc.showRevocationMessage();
+                    } else {
+                      location.href = "/rules";
+                    }
+                  }}
+                >
+                  Manage privacy & cookie choices
+                </button>
+              </p>
+            </div>
+          </section>
+
+          <section className="rule-card">
+            <span>05</span>
+            <div>
+              <h2>Contact and data requests</h2>
+              <p>
+                For questions regarding event data, privacy practices, or to request removal of
+                stored data, contact Adeticket Inc. at{" "}
+                <a href="mailto:adeticket@gmail.com">adeticket@gmail.com</a>.
+              </p>
+            </div>
+          </section>
         </main>
       </Layout>
     );

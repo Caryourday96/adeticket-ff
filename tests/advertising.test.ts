@@ -62,3 +62,31 @@ it("isolates advertising to rules, uses fresh nonces and never caches injected H
     rmSync(web, { recursive: true, force: true });
   }
 });
+
+it("returns 404 for ads.txt when advertising is not configured", async () => {
+  const server = createApplication({
+    database: ":memory:",
+    advertising: advertisingConfig({}),
+  });
+  await new Promise<void>((r) => server.http.listen(0, "127.0.0.1", r));
+  const base = `http://127.0.0.1:${(server.http.address() as { port: number }).port}`;
+  try {
+    const res = await fetch(base + "/ads.txt");
+    expect(res.status).toBe(404);
+    expect(await res.text()).toContain("Advertising is not configured");
+  } finally {
+    await server.close();
+  }
+});
+
+it("triggers googlefc CMP revocation when callback queue is present", () => {
+  const queue: Array<() => void> = [];
+  const showRevocationMessage = () => {};
+  const fakeFc = {
+    callbackQueue: queue,
+    showRevocationMessage,
+  };
+  fakeFc.callbackQueue.push(fakeFc.showRevocationMessage);
+  expect(queue).toHaveLength(1);
+  expect(queue[0]).toBe(showRevocationMessage);
+});

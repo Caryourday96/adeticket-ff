@@ -14,6 +14,19 @@ test("unconfigured ads make no advertising requests on rules or player pages", a
   expect(requests).toEqual([]);
 });
 
+test("privacy page displays operator disclosure and consent management choices", async ({
+  page,
+}) => {
+  await page.goto("/privacy");
+  await expect(page.getByRole("heading", { name: "Privacy and advertising" })).toBeVisible();
+  await expect(page.locator("main")).toContainText("operated by Adeticket Inc.");
+  await expect(page.locator("main")).toContainText("adeticket@gmail.com");
+  const consentBtn = page.getByRole("button", { name: "Manage privacy & cookie choices" });
+  await expect(consentBtn).toBeVisible();
+  await consentBtn.click();
+  await expect(page).toHaveURL(/\/rules$/);
+});
+
 test("library review filter and completed game scorecard are available", async ({ page }) => {
   await signIn(page);
   await page.getByRole("link", { name: "Question library", exact: true }).click();

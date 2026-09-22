@@ -52,3 +52,17 @@ The host-layout and required-group proposals are now implemented; the previous p
 41 tests pass, including server-only Fast Money expiration, paused turns, late-answer rejection, automatic completion after five answers, duplicate rejection, authenticated phone presence, and presence expiry. TypeScript and production build pass. Browser rehearsal 2B3A44 verified save-and-advance, automatic timeout/reveal recovered after a server restart, player-two duplicate retention followed by a successful alternative, and pause. BA97FF showed one active approved phone after heartbeat recovery. The Fast Money rehearsal is left paused for inspection.
 
 Presence uses a five-second heartbeat and 15-second expiry, with host polling every five seconds. Browser refresh responses are guarded by request sequence. Device-clock differences are adjusted with a periodically sampled server offset; network latency still limits display precision. This supersedes earlier notes describing Fast Money as unchanged.
+
+## Google Cast and advertising setup verification
+
+Completed 21 September 2026.
+
+- Added `CAST_APP_ID` environment setting documentation to `.env.example`.
+- Supported serialized JSON payloads in `castRoom` parser for resilient receiver message handling.
+- Hermetic test fixture with isolated `webDir` in `tests/cast.test.ts` ensuring tests pass before and after production build.
+- Implemented Google-certified CMP privacy choices reopening button (`googlefc.showRevocationMessage`) in `Advertisement.tsx` and on `/privacy`.
+- Updated `/privacy` with operator disclosure (Adeticket Inc., `adeticket@gmail.com`), 7-day session cookies, 30-day survey cookies, and advertising boundary guarantees.
+- Verified all Vitest tests (76 passed across 16 test files).
+- Verified TypeScript strict typecheck (`tsc --noEmit`) passes with zero errors.
+- Verified production build (`node scripts/build.mjs`) compiles frontend and server cleanly.
+- Verified Playwright E2E browser tests pass across all suites.

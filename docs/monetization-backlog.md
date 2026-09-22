@@ -43,6 +43,6 @@ Use original/survey-collected question packs for commercial offers; do not assum
 - [ ] Follow [the owner activation guide](adsense-step-by-step.md).
 - [ ] Approved AdSense/root domain, public publisher ID and manual slot ID.
 - [ ] Verify root-domain hosting and ads.txt delegation for both game subdomains.
-- [ ] Finish operator privacy/contact information and certified CMP integration, including privacy-choice reopening.
+- [x] Finish operator privacy/contact information (Adeticket Inc.) and certified CMP integration, including privacy-choice reopening.
 - [ ] Test accepted/refused consent and blocked/no-fill ads before activating production.
 - [ ] Keep Auto ads off and all join/buzzer/live/host/survey routes ad-free.

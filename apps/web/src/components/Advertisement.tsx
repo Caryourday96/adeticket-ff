@@ -3,6 +3,10 @@ import { useEffect, useRef, useState } from "react";
 declare global {
   interface Window {
     adsbygoogle?: Record<string, unknown>[];
+    googlefc?: {
+      callbackQueue?: Array<() => void>;
+      showRevocationMessage?: () => void;
+    };
   }
 }
 
@@ -54,7 +58,23 @@ export function Advertisement() {
         data-ad-format="auto"
         data-full-width-responsive="true"
       />
-      <a href="/privacy">Privacy and advertising</a>
+      <div className="advertisement-footer">
+        <a href="/privacy">Privacy and advertising</a>
+        <button
+          type="button"
+          className="privacy-reopen-button"
+          onClick={() => {
+            const fc = window.googlefc;
+            if (fc?.callbackQueue && typeof fc.showRevocationMessage === "function") {
+              fc.callbackQueue.push(fc.showRevocationMessage);
+            } else if (typeof fc?.showRevocationMessage === "function") {
+              fc.showRevocationMessage();
+            }
+          }}
+        >
+          Privacy and cookie settings
+        </button>
+      </div>
     </aside>
   );
 }
