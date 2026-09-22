@@ -97,6 +97,7 @@ export const audienceThemes: Record<AudienceTheme["preset"], AudienceTheme> = {
 };
 export const commandSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("audienceTheme"), theme: audienceThemeSchema }),
+  z.object({ type: z.literal("audienceSound"), enabled: z.boolean() }),
   z.object({ type: z.literal("buzz"), team: teamIndex }),
   z.object({ type: z.literal("answer"), answerId: label }),
   z.object({ type: z.literal("miss") }),
@@ -154,6 +155,7 @@ export type FastState = {
 };
 export type GameState = {
   audienceTheme?: AudienceTheme;
+  audienceSoundEnabled?: boolean;
   lastCommand?: Command["type"];
   roundResults?: { round: number; prompt: string; winner: Side; points: number }[];
   id: string;

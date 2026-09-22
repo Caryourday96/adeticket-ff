@@ -82,6 +82,15 @@ export function BuzzerControls({
         >
           {s.joinsLocked ? "Allow new joins" : "Lock new joins"}
         </button>
+        <button
+          className="button small"
+          disabled={busy}
+          onClick={() =>
+            void send({ type: "audienceSound", enabled: s.audienceSoundEnabled === false })
+          }
+        >
+          {s.audienceSoundEnabled === false ? "Enable audience sound" : "Mute audience sound"}
+        </button>
       </div>
       <details className="host-diagnostics">
         <summary>Host diagnostics</summary>

@@ -190,6 +190,12 @@ describe("main game", () => {
     const open = transition(locked, { type: "setJoinLock", locked: false });
     expect(open.joinsLocked).toBe(false);
   });
+  it("lets the host mute audience sound without pausing the game", () => {
+    const muted = transition(fresh(), { type: "audienceSound", enabled: false });
+    expect(muted.audienceSoundEnabled).toBe(false);
+    expect(muted.phase).toBe("faceoff");
+    expect(audience(muted).audienceSoundEnabled).toBe(false);
+  });
   it("does not put hidden answer text, aliases, notes or future questions in audience payload", () => {
     const s = playing(),
       out = audience(s),

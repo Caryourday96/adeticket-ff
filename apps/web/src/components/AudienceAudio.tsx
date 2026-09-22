@@ -20,6 +20,7 @@ export function AudienceAudio({
   const [enabled, setEnabled] = useState(false),
     [volume, setVolume] = useState(0.6);
   const [error, setError] = useState("");
+  const hostAllowsSound = state?.audienceSoundEnabled !== false;
   useEffect(() => {
     const player = new GameAudio();
     audio.current = player;
@@ -44,21 +45,33 @@ export function AudienceAudio({
     previous.current = connected ? state : null;
     const duplicateLocalExpiry =
       cue === "time" && localExpiryAt.current !== null && Date.now() - localExpiryAt.current < 1500;
-    if (cue && !duplicateLocalExpiry && enabled && !audio.current?.play(cue, volume))
+    if (
+      cue &&
+      !duplicateLocalExpiry &&
+      enabled &&
+      hostAllowsSound &&
+      !audio.current?.play(cue, volume)
+    )
       setError("Sound paused by browser. Press Test sound to resume.");
-  }, [state, connected, enabled, volume]);
+  }, [state, connected, enabled, volume, hostAllowsSound]);
   useEffect(() => {
     const fast = state?.fast;
     const remaining =
       connected && !state?.paused && fast?.stage === "running" && fast.deadline
         ? Math.max(0, fast.deadline - now)
         : null;
-    if (remaining === 0 && previousTime.current !== null && previousTime.current > 0 && enabled) {
+    if (
+      remaining === 0 &&
+      previousTime.current !== null &&
+      previousTime.current > 0 &&
+      enabled &&
+      hostAllowsSound
+    ) {
       localExpiryAt.current = Date.now();
       audio.current?.play("time", volume);
     }
     previousTime.current = remaining;
-  }, [state, connected, now, enabled, volume]);
+  }, [state, connected, now, enabled, volume, hostAllowsSound]);
   return (
     <div className="audience-audio" aria-label="Audience sound controls">
       {!tv && (
@@ -110,6 +123,7 @@ export function AudienceAudio({
           </label>
         </>
       )}
+      {!hostAllowsSound && <span role="status">Audience sound is muted by the host.</span>}
       {error && <span role="status">{error}</span>}
     </div>
   );

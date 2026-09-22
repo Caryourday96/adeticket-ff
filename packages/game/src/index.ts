@@ -42,6 +42,7 @@ export function createGame(
   requireThat(questions.length >= 5, "Select at least five questions.");
   return {
     id,
+    audienceSoundEnabled: true,
     revision: 0,
     teams: structuredClone(setup.teams),
     scores: [0, 0],
@@ -109,6 +110,11 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
   requireThat(cmd.type !== "undo", "Undo is handled by the game store.");
   if (cmd.type === "audienceTheme") {
     s.audienceTheme = structuredClone(cmd.theme);
+    return s;
+  }
+  if (cmd.type === "audienceSound") {
+    s.audienceSoundEnabled = cmd.enabled;
+    s.message = cmd.enabled ? "Audience sound is enabled." : "Audience sound is muted by the host.";
     return s;
   }
   if (cmd.type === "endGame") {
