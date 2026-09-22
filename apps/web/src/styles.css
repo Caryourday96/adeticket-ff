@@ -2903,3 +2903,150 @@ small {
 .audience-audio input {
   width: 100px;
 }
+.catalogue-page {
+  min-height: 100vh;
+  background: #f4f3eb;
+  color: #17261f;
+}
+.catalogue-header,
+.catalogue-page main,
+.catalogue-footer {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 32px;
+}
+.catalogue-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #d1d6ca;
+}
+.catalogue-brand {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-decoration: none;
+}
+.catalogue-brand span {
+  color: #537344;
+  margin-left: 6px;
+}
+.catalogue-intro {
+  padding: 74px 0 80px;
+  max-width: 850px;
+}
+.catalogue-intro h1 {
+  font-size: clamp(48px, 7vw, 92px);
+  letter-spacing: -5px;
+  line-height: 1.02;
+  margin: 22px 0;
+}
+.catalogue-intro > p {
+  font-size: 22px;
+  line-height: 1.5;
+  color: #526257;
+  margin-bottom: 32px;
+}
+.catalogue-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.catalogue-section-heading span {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+.catalogue-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #d0d7c9;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #fff;
+}
+.catalogue-art {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 35px;
+  background: #d4e997;
+  color: #214b37;
+}
+.catalogue-art > span {
+  font-weight: 800;
+  font-size: 35px;
+  letter-spacing: 7px;
+}
+.catalogue-art strong {
+  font-size: 49px;
+  letter-spacing: -2px;
+}
+.catalogue-art div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  width: 75%;
+  margin-top: 25px;
+}
+.catalogue-art i {
+  background: #214b37;
+  color: #e1efb7;
+  padding: 12px;
+  text-align: center;
+  border-radius: 5px;
+  font-style: normal;
+  font-weight: 800;
+}
+.catalogue-details {
+  padding: 38px;
+}
+.catalogue-details h3 {
+  font-size: 36px;
+  letter-spacing: -1px;
+  margin: 15px 0;
+}
+.catalogue-details p {
+  line-height: 1.65;
+}
+.catalogue-actions {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin: 26px 0 20px;
+}
+.catalogue-footer {
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid #d1d6ca;
+  font-size: 14px;
+}
+.catalogue-footer span {
+  margin-right: auto;
+}
+@media (max-width: 720px) {
+  .catalogue-header,
+  .catalogue-page main,
+  .catalogue-footer {
+    padding: 22px;
+  }
+  .catalogue-intro {
+    padding: 46px 0;
+  }
+  .catalogue-intro h1 {
+    letter-spacing: -2px;
+  }
+  .catalogue-card {
+    grid-template-columns: 1fr;
+  }
+  .catalogue-art {
+    min-height: 290px;
+  }
+  .catalogue-details {
+    padding: 26px;
+  }
+}

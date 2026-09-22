@@ -1,0 +1,164 @@
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #17261f;
+  background: #f4f3eb;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-underline-offset: 5px;
+}
+header,
+main,
+footer {
+  max-width: 1180px;
+  margin: auto;
+  padding: 28px 32px;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #d1d6ca;
+}
+.brand {
+  font-size: 25px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  text-decoration: none;
+}
+.brand span {
+  color: #b26f35;
+}
+.hero {
+  padding: 90px 0 110px;
+  max-width: 900px;
+}
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #526257;
+}
+.hero h1 {
+  font-size: clamp(48px, 7vw, 92px);
+  letter-spacing: -5px;
+  line-height: 1.02;
+  margin: 22px 0;
+}
+.intro {
+  max-width: 650px;
+  font-size: 22px;
+  line-height: 1.5;
+  color: #526257;
+  margin-bottom: 32px;
+}
+.button {
+  display: inline-block;
+  padding: 16px 24px;
+  background: #214b37;
+  color: white;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 700;
+}
+.statement {
+  border-top: 1px solid #d1d6ca;
+  border-bottom: 1px solid #d1d6ca;
+  padding: 55px 0;
+}
+.statement h2,
+.credentials h2,
+.projects h2 {
+  font-size: clamp(30px, 4vw, 52px);
+  letter-spacing: -2px;
+  max-width: 680px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: #d1d6ca;
+  margin: 70px 0;
+}
+.grid article {
+  background: #f4f3eb;
+  padding: 32px;
+  min-height: 220px;
+}
+.grid span {
+  color: #b26f35;
+  font-weight: 700;
+}
+.grid h3 {
+  font-size: 25px;
+  margin: 24px 0 12px;
+}
+.grid p,
+.project p,
+.credentials p {
+  line-height: 1.7;
+  color: #526257;
+}
+.credentials {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  padding: 70px 0;
+  border-top: 1px solid #d1d6ca;
+}
+.credentials p {
+  margin: 0 0 15px;
+}
+.credentials b {
+  color: #214b37;
+}
+.projects {
+  padding: 70px 0;
+}
+.project {
+  border-top: 1px solid #d1d6ca;
+  padding: 25px 0;
+}
+.project h3 {
+  font-size: 25px;
+  margin: 0;
+}
+.project p {
+  max-width: 700px;
+}
+footer {
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid #d1d6ca;
+  font-size: 14px;
+}
+footer span:first-child {
+  margin-right: auto;
+}
+@media (max-width: 720px) {
+  header,
+  main,
+  footer {
+    padding: 22px;
+  }
+  .hero {
+    padding: 55px 0 70px;
+  }
+  .hero h1 {
+    letter-spacing: -2px;
+  }
+  .grid,
+  .credentials {
+    grid-template-columns: 1fr;
+  }
+  .credentials {
+    gap: 10px;
+  }
+}

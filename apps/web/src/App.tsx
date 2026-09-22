@@ -192,8 +192,72 @@ function Rules() {
     </Layout>
   );
 }
+function Catalogue() {
+  return (
+    <div className="catalogue-page">
+      <header className="catalogue-header">
+        <a className="catalogue-brand" href="/catalogue">
+          adeticket<span>play</span>
+        </a>
+        <a href="mailto:adeticket@gmail.com">Get in touch ↗</a>
+      </header>
+      <main>
+        <section className="catalogue-intro">
+          <div className="eyebrow">GOOD COMPANY. GREAT COMPETITION.</div>
+          <h1>
+            Bring everyone
+            <br />
+            into the game.
+          </h1>
+          <p>Pick your game, gather your people, and make a night of it.</p>
+          <a className="button primary" href="#games">
+            Explore games ↓
+          </a>
+        </section>
+        <section id="games" className="catalogue-games">
+          <div className="catalogue-section-heading">
+            <h2>Your next game night</h2>
+            <span>01 / AVAILABLE NOW</span>
+          </div>
+          <article className="catalogue-card">
+            <div className="catalogue-art" aria-hidden="true">
+              <span>FAMILY</span>
+              <strong>SHOWDOWN</strong>
+              <div>
+                <i>1</i>
+                <i>2</i>
+                <i>3</i>
+                <i>4</i>
+              </div>
+            </div>
+            <div className="catalogue-details">
+              <div className="eyebrow">TEAMS · TRIVIA · PHONE BUZZERS</div>
+              <h3>Family Showdown</h3>
+              <p>
+                Two teams. One survey board. Guess the popular answers, race to buzz in, and go for
+                the steal.
+              </p>
+              <div className="catalogue-actions">
+                <a className="button primary" href="https://ff.kayodeadetunji.com/">
+                  Open game ↗
+                </a>
+                <a href="https://ff.kayodeadetunji.com/play">Join with a game code →</a>
+              </div>
+              <a href="https://ff.kayodeadetunji.com/rules">Read the rules</a>
+            </div>
+          </article>
+        </section>
+      </main>
+      <footer className="catalogue-footer">
+        <span>Adeticket Inc.</span>
+        <a href="mailto:adeticket@gmail.com">adeticket@gmail.com</a>
+      </footer>
+    </div>
+  );
+}
 export function App() {
   const path = location.pathname.split("/").filter(Boolean);
+  if (path[0] === "catalogue" || location.hostname === "play.adeticket.com") return <Catalogue />;
   if (path[0] === "cast") return <CastReceiver />;
   if (path[0] === "privacy")
     return (

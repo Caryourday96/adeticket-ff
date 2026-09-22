@@ -421,6 +421,41 @@ export function createApplication(options: {
   });
   const web = options.webDir ?? resolve(existsSync(resolve("web")) ? "web" : "dist/web");
   if (existsSync(web)) {
+    const staticSites = resolve(web, "../sites");
+    app.use((req, res, next) => {
+      const hostname = (req.hostname || "").toLowerCase();
+      const site =
+        hostname === "play.adeticket.com"
+          ? "catalogue"
+          : hostname === "kayodeadetunji.com"
+            ? "portfolio"
+            : hostname === "adeticket.com"
+              ? "adeticket"
+              : undefined;
+      if (!site || req.path !== "/" || !existsSync(resolve(staticSites, site, "index.html"))) {
+        next();
+        return;
+      }
+      res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
+      res.sendFile(resolve(staticSites, site, "index.html"));
+    });
+    app.use((req, res, next) => {
+      const hostname = (req.hostname || "").toLowerCase();
+      const site =
+        hostname === "play.adeticket.com"
+          ? "catalogue"
+          : hostname === "kayodeadetunji.com"
+            ? "portfolio"
+            : hostname === "adeticket.com"
+              ? "adeticket"
+              : undefined;
+      if (!site || !req.path.startsWith("/site-assets/")) {
+        next();
+        return;
+      }
+      const asset = req.path.slice("/site-assets/".length);
+      res.sendFile(resolve(staticSites, site, asset), (error) => error && next());
+    });
     app.get("/rules", (_req, res, next) => {
       if (!ads.enabled) {
         next();

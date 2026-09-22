@@ -1,6 +1,6 @@
 import { build as buildWeb } from "vite";
 import { build } from "esbuild";
-import { mkdir, writeFile, readFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile, cp } from "node:fs/promises";
 import { createRequire, isBuiltin } from "node:module";
 import { resolve, dirname, extname } from "node:path";
 import { existsSync } from "node:fs";
@@ -53,6 +53,7 @@ await build({
   plugins: [nodeResolver],
 });
 await mkdir("dist", { recursive: true });
+await cp("sites", "dist/sites", { recursive: true });
 await writeFile("dist/server.js", 'require("./server.cjs");\n');
 await writeFile("dist/web.config", await readFile("deployment/web.config", "utf8"));
 await writeFile(
