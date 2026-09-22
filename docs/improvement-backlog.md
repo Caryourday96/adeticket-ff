@@ -16,13 +16,14 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Fast Money now labels expiry versus a manually completed turn, explains pass-and-return behavior and presents final totals in a dedicated live summary. Commit `691a24d`.
 - Hosts can mute or re-enable audience and Cast sound independently while board updates continue. Commit `5dfbb24`.
 - Host diagnostics provide a trusted handoff link and show the number of connected host desks so a second signed-in device can take over safely. Commit `9549cc7`.
+- Host diagnostics now show current Cast sender/device status and the latest server response time.
 - Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
 - Visible branding is now Friends Showdown. Commit `bfe380f`.
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
 
 ## P0 — verify before a major event
 
-- **Deployment verification:** confirm the GitHub Actions, Azure deployment and smoke checks for commits `946a5aa` and `bfe380f`; test survey creation, join locking and diagnostics on the live site.
+- **Deployment verification:** confirm GitHub Actions, Azure deployment and smoke checks for the latest releases; test survey creation, join locking and diagnostics on the live site. Current check was inconclusive: GitHub status connector returned no check records and direct production HTTPS requests failed TLS from this environment.
 - **Scraper calibration:** capture matching partial and complete Nigerian board screenshots, tune slot geometry and completion detection, then validate a full episode with preceding spoken questions and variable answer counts.
 - **Cast acceptance:** test the registered receiver on the actual Google Cast TV for discovery, handoff, reconnect, board updates and audio. Build and test the iPad sender wrapper on macOS.
 
@@ -32,7 +33,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - **Host handoff:** the trusted-link and connected-host-count flow is shipped. A live two-device rehearsal is still required before considering it fully verified.
 - **Fast Money polish:** expiry sound, timer-expiry messaging, pass-and-return wording and final-results presentation are shipped. Remaining work is optional visual refinement after a live game-night rehearsal.
 - **Moderation:** add join-code regeneration. Locking joins, player-facing status and independent audience-sound control are shipped.
-- **Diagnostics:** add a visible audience Cast status and last server-update timestamp to the host panel.
+- **Diagnostics:** current Cast sender/device status and latest server response time are now shown. Confirm accuracy during a live TV session.
 
 ## P2 — presentation and accessibility
 

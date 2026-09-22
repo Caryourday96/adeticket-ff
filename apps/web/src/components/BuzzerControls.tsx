@@ -4,6 +4,7 @@ import type { Command, HostBuzzers, HostState } from "@naija/contracts";
 import { useBuzzers } from "../hooks/useBuzzers";
 import { phoneStatus } from "../lib/phoneStatus";
 import { api } from "../lib/api";
+import { CAST_STATUS_EVENT, type CastStatusDetail } from "../lib/cast";
 export function BuzzerControls({
   state: s,
   send,
@@ -21,7 +22,12 @@ export function BuzzerControls({
     audienceConnections: number;
     registeredPlayers: number;
     approvedPlayers: number;
+    serverTime: number;
   } | null>(null);
+  const [castStatus, setCastStatus] = useState<CastStatusDetail>({
+    status: "Cast has not been opened on this host yet.",
+    device: "",
+  });
   const url = location.origin + "/play/" + s.id;
   useEffect(() => {
     let alive = true;
@@ -36,6 +42,12 @@ export function BuzzerControls({
       clearInterval(timer);
     };
   }, [s.id]);
+  useEffect(() => {
+    const receive = (event: Event) =>
+      setCastStatus((event as CustomEvent<CastStatusDetail>).detail);
+    window.addEventListener(CAST_STATUS_EVENT, receive);
+    return () => window.removeEventListener(CAST_STATUS_EVENT, receive);
+  }, []);
   return (
     <section className="control-card buzzer-controls">
       <div className="section-eyebrow">PHONE BUZZERS</div>
@@ -105,6 +117,16 @@ export function BuzzerControls({
             Host sockets: {diagnostics.hostConnections} · Audience screens:{" "}
             {diagnostics.audienceConnections} · Registered players: {diagnostics.registeredPlayers}{" "}
             ({diagnostics.approvedPlayers} approved)
+          </p>
+        )}
+        <p>
+          Cast: <strong>{castStatus.device || castStatus.status}</strong>
+          {castStatus.device ? ` · ${castStatus.status}` : ""}
+        </p>
+        {diagnostics && (
+          <p>
+            Server responded at {new Date(diagnostics.serverTime).toLocaleTimeString()} · checked
+            just now
           </p>
         )}
         <p className="muted">

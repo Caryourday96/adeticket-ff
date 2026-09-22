@@ -330,6 +330,7 @@ export function createApplication(options: {
     const host = store.host(id);
     const players = store.players(id);
     res.json({
+      serverTime: Date.now(),
       revision: host.revision,
       phase: host.phase,
       hostConnections: io.sockets.adapter.rooms.get(id + ":host")?.size ?? 0,

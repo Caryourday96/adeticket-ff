@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { Cast } from "lucide-react";
 import { api } from "../lib/api";
-import { CAST_NAMESPACE, isIOSBrowser, loadSender, type SenderContext } from "../lib/cast";
+import {
+  CAST_NAMESPACE,
+  isIOSBrowser,
+  loadSender,
+  publishCastStatus,
+  type SenderContext,
+} from "../lib/cast";
 
 export function CastControls({ id }: { id: string }) {
   const [context, setContext] = useState<SenderContext | null>(null);
@@ -12,6 +18,9 @@ export function CastControls({ id }: { id: string }) {
   );
   const [device, setDevice] = useState("");
   const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    publishCastStatus({ status, device });
+  }, [status, device]);
   useEffect(() => {
     let alive = true;
     let cleanup = () => {};

@@ -1,4 +1,9 @@
 export const CAST_NAMESPACE = "urn:x-cast:com.naijafeud.audience";
+export const CAST_STATUS_EVENT = "friends-showdown:cast-status";
+export type CastStatusDetail = { status: string; device: string };
+export function publishCastStatus(detail: CastStatusDetail) {
+  window.dispatchEvent(new CustomEvent<CastStatusDetail>(CAST_STATUS_EVENT, { detail }));
+}
 export function castRoom(input: unknown): string | null {
   if (!input) return null;
   let parsed = input;
