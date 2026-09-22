@@ -39,10 +39,11 @@ export function Player({ id }: { id: string }) {
         <p>Connecting to the game…</p>
       ) : !p ? (
         <section className="entry-card">
-          <h1>Take your place.</h1>
+          <h1>{s.joinsLocked ? "Joining is paused." : "Take your place."}</h1>
           <p>
-            Enter your name and select your team. Your host will approve you and choose who goes on
-            stage.
+            {s.joinsLocked
+              ? "The host has locked new joins for this game. Ask them to reopen joining when ready."
+              : "Enter your name and select your team. Your host will approve you and choose who goes on stage."}
           </p>
           <form
             onSubmit={(e) => {
@@ -79,7 +80,11 @@ export function Player({ id }: { id: string }) {
             <button
               className="button primary wide"
               disabled={
-                busy || !connected || !name.trim() || ["fast", "finished"].includes(s.phase)
+                busy ||
+                !connected ||
+                !name.trim() ||
+                s.joinsLocked ||
+                ["fast", "finished"].includes(s.phase)
               }
             >
               Join game

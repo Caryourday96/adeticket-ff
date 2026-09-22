@@ -4,6 +4,15 @@ import type { Command, HostState, PublicState } from "@naija/contracts";
 import { api } from "../lib/api";
 import { commandId } from "../lib/commandId";
 export function useGame<T extends HostState | PublicState>(id: string, role: "host" | "audience") {
+  const cacheKey = `friends-showdown:${role}:${id}`;
+  const cached = (): T | null => {
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      return raw ? (JSON.parse(raw) as T) : null;
+    } catch {
+      return null;
+    }
+  };
   const sending = useRef(false);
   const [clockOffset, setClockOffset] = useState(0);
   useEffect(() => {
@@ -22,7 +31,7 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
       clearInterval(timer);
     };
   }, []);
-  const [state, setState] = useState<T | null>(null),
+  const [state, setState] = useState<T | null>(cached),
     [connected, setConnected] = useState(false),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
@@ -38,6 +47,14 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
     }
   }, [id, role]);
   useEffect(() => {
+    if (!state) return;
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify(state));
+    } catch {
+      // Storage can be disabled or full; the live socket remains authoritative.
+    }
+  }, [cacheKey, state]);
+  useEffect(() => {
     let alive = true;
     void refresh().then(() => {
       if (!alive) setState(null);
@@ -46,6 +63,9 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
     socket.on("gameDeleted", () => {
       alive = false;
       setState(null);
+      try {
+        localStorage.removeItem(cacheKey);
+      } catch {}
       setError("This game was deleted by the host.");
       setConnected(false);
       socket.disconnect();
