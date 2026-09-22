@@ -150,7 +150,9 @@ test("survey collects phone answers and exports a reviewed question bank", async
   await page.getByRole("button", { name: "Download question bank JSON", exact: true }).click();
   expect((await download).suggestedFilename()).toMatch(/survey-.*-regular\.json/);
   await page.getByRole("button", { name: "Save bank to question library", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("Question bank saved in the question library.");
+  await expect(page.locator('[role="status"].success')).toHaveText(
+    "Question bank saved in the question library.",
+  );
 });
 
 test("players enter their names and only buzz on stage with saved team names", async ({
@@ -174,7 +176,7 @@ test("players enter their names and only buzz on stage with saved team names", a
     await phone.getByLabel("Your name").fill("Funke");
     await phone.getByRole("button", { name: "Join game", exact: true }).click();
     await expect(phone.getByText("Waiting for host approval", { exact: true })).toBeVisible();
-    await page.locator(".buzzer-controls summary").click();
+    await page.locator(".roster-summary > summary").click();
     await page.getByRole("button", { name: "Approve Funke", exact: true }).click();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeDisabled();
@@ -263,3 +265,4 @@ test("Fast Money rehearsal starts the real timer and enables question navigation
     "step",
   );
 });
+

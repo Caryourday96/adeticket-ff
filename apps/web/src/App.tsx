@@ -11,6 +11,7 @@ import { Brand } from "./components/Brand";
 import { Player } from "./pages/Player";
 import { Surveys, SurveyForm } from "./pages/Surveys";
 import { Advertisement } from "./components/Advertisement";
+import { AlphaNotice } from "./components/AlphaNotice";
 function HostGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<{
       authenticated: boolean;
@@ -28,6 +29,7 @@ function HostGate({ children }: { children: ReactNode }) {
   return (
     <div className="entry-page">
       <Brand large />
+      <AlphaNotice />
       <section className="entry-card">
         <LockKeyhole size={24} className="gold" />
         <div className="eyebrow">HOST ACCESS</div>
@@ -94,6 +96,7 @@ function Join({ player = false }: { player?: boolean }) {
   return (
     <div className="entry-page">
       <Brand large />
+      <AlphaNotice />
       <section className="entry-card">
         <div className="eyebrow">{player ? "PLAYER JOIN" : "TAKE YOUR SEAT"}</div>
         <h1>
@@ -376,3 +379,4 @@ export function App() {
     </HostGate>
   );
 }
+

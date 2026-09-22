@@ -17,13 +17,15 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Hosts can mute or re-enable audience and Cast sound independently while board updates continue. Commit `5dfbb24`.
 - Host diagnostics provide a trusted handoff link and show the number of connected host desks so a second signed-in device can take over safely. Commit `9549cc7`.
 - Host diagnostics now show current Cast sender/device status and the latest server response time.
+- Alpha release notice now appears on the player and audience room-code entry forms, as well as the in-game player screen.
+- Corrected three Playwright assertions exposed by the latest CI run: join-page alpha notice coverage, the survey success status selector, and the player roster summary selector.
 - Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
 - Visible branding is now Friends Showdown. Commit `bfe380f`.
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
 
 ## P0 — verify before a major event
 
-- **Deployment verification:** confirm GitHub Actions, Azure deployment and smoke checks for the latest releases; test survey creation, join locking and diagnostics on the live site. Current check was inconclusive: GitHub status connector returned no check records and direct production HTTPS requests failed TLS from this environment.
+- **Deployment verification:** latest commit `d9e3b63` has successful GitHub Validate and Azure deployment workflows, including the production smoke-check step. Its Playwright workflow reported 12 passed and 3 failed; the specific failures are being corrected locally now and still need a fresh CI run. Direct production HTTPS requests from this environment fail TLS, so the Azure smoke check is the current live-route evidence.
 - **Scraper calibration:** capture matching partial and complete Nigerian board screenshots, tune slot geometry and completion detection, then validate a full episode with preceding spoken questions and variable answer counts.
 - **Cast acceptance:** test the registered receiver on the actual Google Cast TV for discovery, handoff, reconnect, board updates and audio. Build and test the iPad sender wrapper on macOS.
 
@@ -32,7 +34,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - **Offline recovery:** short-outage state retention is shipped; longer-outage reconciliation and conflict messaging remain to be tested and hardened.
 - **Host handoff:** the trusted-link and connected-host-count flow is shipped. A live two-device rehearsal is still required before considering it fully verified.
 - **Fast Money polish:** expiry sound, timer-expiry messaging, pass-and-return wording and final-results presentation are shipped. Remaining work is optional visual refinement after a live game-night rehearsal.
-- **Moderation:** add join-code regeneration. Locking joins, player-facing status and independent audience-sound control are shipped.
+- **Moderation:** add join-code regeneration. Treat as a deliberate identity migration: the current code is the game’s primary key across persistence, routes and socket rooms. Locking joins, player-facing status and independent audience-sound control are shipped.
 - **Diagnostics:** current Cast sender/device status and latest server response time are now shown. Confirm accuracy during a live TV session.
 
 ## P2 — presentation and accessibility
@@ -57,3 +59,4 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Do not claim a feature is live until the corresponding GitHub Actions/Azure run and a production check succeed.
 - Do not enable advertising until AdSense approval, consent management and rollback testing are complete.
 - Keep the scraper’s uncertain boards in review status; never export a partial board as verified.
+
