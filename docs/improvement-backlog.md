@@ -1,44 +1,53 @@
-# Improvement backlog
+# Friends Showdown improvement backlog
 
-This list separates game-night reliability from optional product ideas. Items marked done already exist in the current release; the rest are candidates for later work.
+This is the current handoff list. “Shipped” means the code is in `main`; live deployment or physical-device verification is called out separately.
 
-## Next reliability work
+## Shipped recently
 
-- **Cast acceptance test** — test the registered receiver on the user’s Google Cast TV and verify launch, room handoff, reconnect, audience updates and sound. The web sender cannot run on iPad browsers; an iPad sender requires a native iOS wrapper using Google’s iOS Cast SDK.
-- **Fast Money expiry sound** — play the time-up cue when the server changes a turn to reveal, even when the state update arrives before the client’s countdown reaches zero.
-- **Live release smoke test** — after each deployment, check health, host sign-in, player join, audience board, `/cast`, `/ads.txt`, and the configured Cast application ID.
-- **Host recovery** — add a reconnect banner with the last confirmed revision, safe retry, and a clear “resume from server state” action.
-- **Game cleanup** — add host confirmation, bulk selection, and retention filters to the existing old-game deletion view.
-- **Offline game-night fallback** — preserve the last audience board and host state locally during a short network interruption, then reconcile from the server after reconnecting.
-- **Host handoff** — allow a second trusted host device to take over a room if the original host tablet or laptop fails.
-- **Room diagnostics** — add a host-only panel showing server connection, audience connections, buzzer connections, Cast state, and the last state update time.
+- Survey creation now has explicit preset/manual sources, duplicate removal, valid question-count checks and Fast Money’s exactly-five-question rule. Commit `d5d19fb`.
+- Fast Money expiry audio uses the authoritative server transition and avoids duplicate local/server cues. Commit `9aad7d8`.
+- Host reconnect recovery shows the last confirmed revision and offers a server-state refresh.
+- Host diagnostics show game revision, host sockets, audience screens, registered players and approved players.
+- Hosts can lock new player joins and remove all registered player phones with confirmation.
+- Player buzzers show a readiness checklist for connection, approval, stage assignment and open buzzers.
+- Azure deployment runs smoke checks for `/api/health`, `/api/config`, `/cast` and `/ads.txt`.
+- Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
+- Visible branding is now Friends Showdown. Commit `bfe380f`.
+- Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
 
-## Host and player experience
+## P0 — verify before a major event
 
-- **Theme packs** — extend the current Classic, Ihechi birthday and Midnight presets with custom logo upload, celebratory confetti toggle, sponsor line, and a saved event template.
-- **Audience display modes** — provide board-only, scoreboard-only, waiting-room, QR join and final-score layouts for projectors and TVs.
-- **Accessibility** — add high-contrast mode, reduced motion, larger answer text, keyboard focus treatment, screen-reader labels, and a visible buzzer result announcement.
-- **Player readiness** — show team assignment, stage status, connection quality, and a host-controlled “ready” state before the round begins.
-- **Game-night export** — provide a downloadable scorecard and event summary with round winners, steals, Fast Money totals and timestamps.
-- **Event templates** — save team names, theme, rules, question packs and sponsor text as a reusable event setup.
-- **Moderation controls** — let the host remove a player, lock new joins, regenerate the join code, and mute audience sound independently from board updates.
-- **Buzzer fairness view** — show the server-recorded buzzer timestamp and winning device to the host for disputes.
+- **Deployment verification:** confirm the GitHub Actions, Azure deployment and smoke checks for commits `946a5aa` and `bfe380f`; test survey creation, join locking and diagnostics on the live site.
+- **Scraper calibration:** capture matching partial and complete Nigerian board screenshots, tune slot geometry and completion detection, then validate a full episode with preceding spoken questions and variable answer counts.
+- **Cast acceptance:** test the registered receiver on the actual Google Cast TV for discovery, handoff, reconnect, board updates and audio. Build and test the iPad sender wrapper on macOS.
 
-## Question libraries and surveys
+## P1 — game-night reliability
 
-- **Answer review queue** — record accepted answer variations and let the host approve or reject them without editing the canonical answer.
-- **Question history** — warn when a question was recently used and filter by regular-round versus Fast Money usage.
-- **Survey collection** — add a shareable survey link with one response per participant, duplicate-response controls, export, and question-bank import validation.
-- **Scraper calibration** — collect Nigerian board screenshots, tune slot geometry and completion detection, then validate complete-board selection across several videos before batch mode.
-- **Question quality scoring** — flag duplicate prompts, suspicious point totals, missing questions, and incomplete scraped boards before import.
+- **Offline recovery:** preserve the last board and host state during a short outage, then reconcile safely from the server.
+- **Host handoff:** allow a second trusted host device to take over a room if the original device fails.
+- **Fast Money polish:** improve pass-and-return wording, timer visibility and the final results presentation; expiry sound is complete.
+- **Moderation:** add join-code regeneration, a clearer “lock joins” state on the player page and independent audience-sound mute control.
+- **Diagnostics:** add a visible audience Cast status and last server-update timestamp to the host panel.
 
-## Operations and growth
+## P2 — presentation and accessibility
 
-- **Monitoring** — add deployment health checks, error logging, and a small status page for game-night incidents.
-- **Privacy and ads** — finish consent configuration and AdSense review only after both root sites are reachable; keep game ads disabled until consent and approval are verified.
-- **Native iPad sender** — package the audience sender as an iOS app or wrapper with the Google Cast iOS SDK if iPad casting is a requirement.
-- **Event analytics** — track only aggregate games started, completed rounds, and player joins with an explicit privacy choice.
-- **Load testing** — simulate a host, audience screens, two teams and many player buzzers to find socket and timer limits before a large event.
-- **Accessibility audit** — run keyboard, screen-reader, contrast and reduced-motion checks in CI so visual improvements do not regress usability.
-- **Localization** — make game labels, instructions and Fast Money prompts translatable while preserving Nigerian wording in the question bank.
-- **Sponsor mode** — add a controlled sponsor logo/message slot to themed audience screens with a per-event enable switch.
+- Audience layouts: board-only, scoreboard-only, waiting room, QR join and final-score modes.
+- Downloadable scorecard with round winners, steals, Fast Money totals and timestamps.
+- Reusable event templates for team names, themes, question packs and sponsor text.
+- High-contrast mode, reduced motion, larger text, keyboard focus and screen-reader audit.
+- Automated accessibility checks in CI.
+
+## P3 — operations and growth
+
+- Load testing with a host, audience screens, two teams and many phone buzzers.
+- Deployment error logging and a small game-night status page.
+- AdSense site review, certified consent management and real ad-delivery testing; ads remain disabled.
+- Sponsor mode with an event-specific logo/message switch.
+- Paid custom question packs or hosted event packages.
+- Aggregate game analytics with an explicit privacy choice.
+
+## Working rules
+
+- Do not claim a feature is live until the corresponding GitHub Actions/Azure run and a production check succeed.
+- Do not enable advertising until AdSense approval, consent management and rollback testing are complete.
+- Keep the scraper’s uncertain boards in review status; never export a partial board as verified.
