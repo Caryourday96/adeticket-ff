@@ -15,6 +15,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Player pages now explain when the host has paused new joins and disable the join action.
 - Fast Money now labels expiry versus a manually completed turn, explains pass-and-return behavior and presents final totals in a dedicated live summary. Commit `691a24d`.
 - Hosts can mute or re-enable audience and Cast sound independently while board updates continue. Commit `5dfbb24`.
+- Host diagnostics provide a trusted handoff link and show the number of connected host desks so a second signed-in device can take over safely. Commit `9549cc7`.
 - Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
 - Visible branding is now Friends Showdown. Commit `bfe380f`.
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
@@ -28,7 +29,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 ## P1 — game-night reliability
 
 - **Offline recovery:** short-outage state retention is shipped; longer-outage reconciliation and conflict messaging remain to be tested and hardened.
-- **Host handoff:** allow a second trusted host device to take over a room if the original device fails.
+- **Host handoff:** the trusted-link and connected-host-count flow is shipped. A live two-device rehearsal is still required before considering it fully verified.
 - **Fast Money polish:** expiry sound, timer-expiry messaging, pass-and-return wording and final-results presentation are shipped. Remaining work is optional visual refinement after a live game-night rehearsal.
 - **Moderation:** add join-code regeneration. Locking joins, player-facing status and independent audience-sound control are shipped.
 - **Diagnostics:** add a visible audience Cast status and last server-update timestamp to the host panel.
