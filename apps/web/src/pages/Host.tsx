@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { CastControls } from "../components/CastControls";
 import { QRCodeSVG } from "qrcode.react";
 import {
   Copy,
@@ -511,6 +512,7 @@ export function Host({ id }: { id: string }) {
               </button>
               <div className="section-eyebrow">EVERYONE'S INVITED</div>
               <h2>Put the game on the big screen.</h2>
+              <CastControls id={id} />
               <p>Scan to join this game's audience. Viewing only.</p>
               <div className="qr">
                 <QRCodeSVG value={url} size={190} level="M" marginSize={3} />

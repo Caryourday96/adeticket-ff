@@ -2858,3 +2858,27 @@ small {
   border-radius: 2px;
   overflow: hidden;
 }
+
+.cast-actions,
+.audience-audio {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.cast-controls {
+  margin: 16px 0;
+}
+.audience-audio {
+  justify-content: flex-end;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+.audience-audio label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.audience-audio input {
+  width: 100px;
+}

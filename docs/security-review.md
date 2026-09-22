@@ -39,3 +39,7 @@ a successful build as evidence that alerts have closed. No existing alerts were
 manually dismissed. This review is not a penetration test or a guarantee against
 undiscovered vulnerabilities. Branch protection and required CodeQL checks were not
 changed; the deployment workflow runs its own validation and dependency audit.
+
+## Google Cast restoration
+
+Restored at the user's request. The public configuration contains only the receiver application ID. Google SDK CSP allowances are scoped to host and Cast receiver routes. The receiver accepts room codes only and subscribes to the public audience feed; no host credentials or hidden answers are sent through Cast. Hardware validation remains required.

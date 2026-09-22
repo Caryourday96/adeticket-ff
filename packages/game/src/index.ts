@@ -370,7 +370,7 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
         "Complete this game first.",
       );
       s.phase = "finished";
-      s.message = "Thanks for playing. Naija, bring the energy!";
+      s.message = "Thanks for playing Family Showdown!";
       break;
   }
   return s;

@@ -22,6 +22,7 @@ export function createApplication(options: {
   origin?: string;
   webDir?: string;
   advertising?: AdvertisingConfig;
+  castAppId?: string;
 }) {
   if (options.production && !options.password)
     throw new Error("HOST_PASSWORD is required in production.");
@@ -52,6 +53,25 @@ export function createApplication(options: {
       contentSecurityPolicy: {
         directives: {
           "connect-src": ["'self'", "ws:", "wss:"],
+        },
+      },
+      strictTransportSecurity: options.production ? undefined : false,
+    }),
+  );
+  // Only host and receiver documents need the Google Cast SDK.
+  app.use(
+    ["/host", "/cast"],
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          "script-src": ["'self'", "https://www.gstatic.com", "https://www.google.com"],
+          "connect-src": [
+            "'self'",
+            "ws:",
+            "wss:",
+            "https://www.gstatic.com",
+            "https://www.google.com",
+          ],
         },
       },
       strictTransportSecurity: options.production ? undefined : false,
@@ -100,6 +120,13 @@ export function createApplication(options: {
     }
     next();
   };
+  app.get("/api/config", (_req, res) =>
+    res.json({
+      castAppId: /^[A-Fa-f0-9]{8}$/.test(options.castAppId?.trim() ?? "")
+        ? options.castAppId?.trim().toUpperCase()
+        : null,
+    }),
+  );
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
   app.get("/ads.txt", (_req, res) => {
     res.type("text/plain").setHeader("Cache-Control", "public, max-age=300");

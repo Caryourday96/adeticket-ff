@@ -3,6 +3,7 @@ import { ArrowRight, LockKeyhole } from "lucide-react";
 import { api } from "./lib/api";
 import { Setup } from "./pages/Setup";
 import { Host } from "./pages/Host";
+import { CastReceiver } from "./pages/CastReceiver";
 import { Audience } from "./pages/Audience";
 import { Library } from "./pages/Library";
 import { Layout } from "./components/Layout";
@@ -193,6 +194,7 @@ function Rules() {
 }
 export function App() {
   const path = location.pathname.split("/").filter(Boolean);
+  if (path[0] === "cast") return <CastReceiver />;
   if (path[0] === "privacy")
     return (
       <Layout>

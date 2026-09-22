@@ -132,6 +132,7 @@ export type FastState = {
   revealed: [number, number];
 };
 export type GameState = {
+  lastCommand?: Command["type"];
   roundResults?: { round: number; prompt: string; winner: Side; points: number }[];
   id: string;
   rehearsal?: boolean;

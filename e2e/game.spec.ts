@@ -1,4 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
+import { signIn } from "./helpers/auth";
+import { test, expect } from "@playwright/test";
 
 test("unconfigured ads make no advertising requests on rules or player pages", async ({ page }) => {
   const requests: string[] = [];
@@ -32,13 +33,6 @@ test("library review filter and completed game scorecard are available", async (
   await page.getByRole("button", { name: "Download scorecard", exact: true }).click();
   expect((await downloadEvent).suggestedFilename()).toBe(`naija-feud-${id}-scorecard.csv`);
 });
-
-async function signIn(page: Page) {
-  await page.goto("/");
-  await page.getByLabel("Host passphrase").fill("local-e2e-fixture-only");
-  await page.getByRole("button", { name: "Enter the host desk" }).click();
-  await expect(page.getByRole("button", { name: "Practice a round", exact: true })).toBeVisible();
-}
 
 test("question history filters recorded boards and links back to their game", async ({ page }) => {
   await signIn(page);

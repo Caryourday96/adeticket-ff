@@ -178,6 +178,7 @@ export class Store {
         r.state = next;
       }
       r.state.revision = revision;
+      r.state.lastCommand = envelope.command.type;
       r.commands.push(envelope.id);
       r.history.push(
         envelope.command.type +

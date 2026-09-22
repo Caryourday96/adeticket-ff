@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { Maximize, Radio } from "lucide-react";
 import type { PublicState } from "@naija/contracts";
 import { useGame } from "../hooks/useGame";
+import { AudienceAudio } from "../components/AudienceAudio";
 import { Board } from "../components/Board";
-export function Audience({ id }: { id: string }) {
+export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
   const { state, connected, error, clockOffset } = useGame<PublicState>(id, "audience"),
     [now, setNow] = useState(Date.now());
   useEffect(() => {
@@ -12,22 +13,25 @@ export function Audience({ id }: { id: string }) {
   }, []);
   return (
     <main className="audience-page">
+      <AudienceAudio state={state} connected={connected} tv={tv} now={now + clockOffset} />
       <header>
         <span>
           <Radio size={14} />
           {state?.rehearsal ? "REHEARSAL · " : ""}
           {connected ? "LIVE" : "CONNECTING"} · {id}
         </span>
-        <button
-          className="button small"
-          onClick={() => {
-            if (!document.fullscreenElement) void document.documentElement.requestFullscreen();
-            else void document.exitFullscreen();
-          }}
-        >
-          <Maximize size={15} />
-          Fullscreen
-        </button>
+        {!tv && (
+          <button
+            className="button small"
+            onClick={() => {
+              if (!document.fullscreenElement) void document.documentElement.requestFullscreen();
+              else void document.exitFullscreen();
+            }}
+          >
+            <Maximize size={15} />
+            Fullscreen
+          </button>
+        )}
       </header>
       {state ? (
         <>
