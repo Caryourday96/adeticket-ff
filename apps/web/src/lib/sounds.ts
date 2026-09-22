@@ -13,6 +13,10 @@ export function soundCue(before: PublicState | null, next: PublicState): SoundCu
       return next.roundWinner !== null && before.roundWinner === null ? "win" : "reveal";
     case "fastClock":
       return "start";
+    case "fastEndTurn":
+      // The server is authoritative for expiry. This covers a fast turn ending
+      // between two client countdown ticks, when the local clock never observes 0.
+      return before.fast?.stage === "running" && next.fast?.stage === "reveal" ? "time" : null;
     case "fastReveal": {
       if (!next.fast) return null;
       const p = next.fast.player;

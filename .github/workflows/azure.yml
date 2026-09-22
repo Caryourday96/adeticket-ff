@@ -44,3 +44,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           package: dist/
+      - name: Smoke test production routes
+        env:
+          BASE_URL: https://ff.adeticket.com
+        run: node scripts/smoke.mjs

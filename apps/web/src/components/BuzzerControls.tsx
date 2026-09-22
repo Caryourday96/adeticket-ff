@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import type { HostBuzzers, HostState } from "@naija/contracts";
+import type { Command, HostBuzzers, HostState } from "@naija/contracts";
 import { useBuzzers } from "../hooks/useBuzzers";
 import { phoneStatus } from "../lib/phoneStatus";
-export function BuzzerControls({ state: s }: { state: HostState }) {
-  const { data, error, connected, busy, act } = useBuzzers<HostBuzzers>(s.id, true);
+export function BuzzerControls({
+  state: s,
+  send,
+}: {
+  state: HostState;
+  send: (c: Command) => Promise<boolean>;
+}) {
+  const { data, error, connected, busy, act, lastUpdated } = useBuzzers<HostBuzzers>(s.id, true);
   const [invite, setInvite] = useState(false);
   const url = location.origin + "/play/" + s.id;
   return (
@@ -46,6 +52,27 @@ export function BuzzerControls({ state: s }: { state: HostState }) {
         {data?.players.filter((p) => p.approved && p.connection === "ready").length ?? 0} approved
         phones active · status updates every 5 seconds
       </p>
+      <div className="button-row">
+        <button
+          className="button small"
+          disabled={busy || s.phase === "fast" || s.phase === "finished"}
+          onClick={() => void send({ type: "setJoinLock", locked: !s.joinsLocked })}
+        >
+          {s.joinsLocked ? "Allow new joins" : "Lock new joins"}
+        </button>
+      </div>
+      <details className="host-diagnostics">
+        <summary>Host diagnostics</summary>
+        <p>
+          Game revision: <strong>{s.revision}</strong> · Buzzer stream:{" "}
+          <strong>{connected ? "connected" : "reconnecting"}</strong>
+          {lastUpdated ? ` · Last phone update ${new Date(lastUpdated).toLocaleTimeString()}` : ""}
+        </p>
+        <p className="muted">
+          Keep one host desk open. If the connection drops, wait for the reconnect banner or refresh
+          server state before judging the next answer.
+        </p>
+      </details>
       <h3>
         {data?.winner
           ? `${data.winner.name} buzzed first`

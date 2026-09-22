@@ -27,7 +27,15 @@ import { RehearsalControls } from "../components/RehearsalControls";
 import { GameResults } from "../components/GameResults";
 import { AudienceThemeControls } from "../components/AudienceThemeControls";
 export function Host({ id }: { id: string }) {
-  const { state: s, connected, error, busy, send, clockOffset } = useGame<HostState>(id, "host");
+  const {
+    state: s,
+    connected,
+    error,
+    busy,
+    send,
+    refresh,
+    clockOffset,
+  } = useGame<HostState>(id, "host");
   const [search, setSearch] = useState(""),
     [share, setShare] = useState(false),
     [copied, setCopied] = useState(false),
@@ -184,6 +192,15 @@ export function Host({ id }: { id: string }) {
         {error && (
           <div role="alert" className="error">
             {error}
+          </div>
+        )}
+        {!connected && (
+          <div className="connection-recovery" role="status">
+            <strong>Host connection interrupted.</strong> The server keeps the game state; the last
+            confirmed revision is {s.revision}.
+            <button className="button small" disabled={busy} onClick={() => void refresh()}>
+              Refresh server state
+            </button>
           </div>
         )}
         <div className="host-grid">
@@ -452,7 +469,7 @@ export function Host({ id }: { id: string }) {
                 )}
               </section>
             )}
-            <BuzzerControls state={s} />
+            <BuzzerControls state={s} send={send} />
             <details className="control-card roster-summary">
               <summary>Team lineup & roster changes</summary>
               <div className="section-title">

@@ -16,6 +16,7 @@ export function AudienceAudio({
   const audio = useRef<GameAudio | null>(null);
   const previous = useRef<PublicState | null>(null);
   const previousTime = useRef<number | null>(null);
+  const localExpiryAt = useRef<number | null>(null);
   const [enabled, setEnabled] = useState(false),
     [volume, setVolume] = useState(0.6);
   const [error, setError] = useState("");
@@ -41,7 +42,9 @@ export function AudienceAudio({
   useEffect(() => {
     const cue = state && connected ? soundCue(previous.current, state) : null;
     previous.current = connected ? state : null;
-    if (cue && enabled && !audio.current?.play(cue, volume))
+    const duplicateLocalExpiry =
+      cue === "time" && localExpiryAt.current !== null && Date.now() - localExpiryAt.current < 1500;
+    if (cue && !duplicateLocalExpiry && enabled && !audio.current?.play(cue, volume))
       setError("Sound paused by browser. Press Test sound to resume.");
   }, [state, connected, enabled, volume]);
   useEffect(() => {
@@ -50,8 +53,10 @@ export function AudienceAudio({
       connected && !state?.paused && fast?.stage === "running" && fast.deadline
         ? Math.max(0, fast.deadline - now)
         : null;
-    if (remaining === 0 && previousTime.current !== null && previousTime.current > 0 && enabled)
+    if (remaining === 0 && previousTime.current !== null && previousTime.current > 0 && enabled) {
+      localExpiryAt.current = Date.now();
       audio.current?.play("time", volume);
+    }
     previousTime.current = remaining;
   }, [state, connected, now, enabled, volume]);
   return (

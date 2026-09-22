@@ -183,6 +183,13 @@ describe("main game", () => {
     expect(() => transition(transition(playing(), { type: "pause" }), { type: "miss" })).toThrow(
       "Resume",
     ));
+  it("lets the host lock and reopen player joining", () => {
+    const locked = transition(fresh(), { type: "setJoinLock", locked: true });
+    expect(locked.joinsLocked).toBe(true);
+    expect(locked.message).toContain("locked");
+    const open = transition(locked, { type: "setJoinLock", locked: false });
+    expect(open.joinsLocked).toBe(false);
+  });
   it("does not put hidden answer text, aliases, notes or future questions in audience payload", () => {
     const s = playing(),
       out = audience(s),

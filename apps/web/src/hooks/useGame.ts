@@ -26,11 +26,22 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
     [connected, setConnected] = useState(false),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  const refresh = useCallback(async () => {
+    try {
+      const latest = await api<T>("/games/" + id + "/" + role);
+      setState((old) => (!old || latest.revision >= old.revision ? latest : old));
+      setError("");
+      return true;
+    } catch (e) {
+      setError((e as Error).message);
+      return false;
+    }
+  }, [id, role]);
   useEffect(() => {
     let alive = true;
-    api<T>("/games/" + id + "/" + role)
-      .then((s) => alive && setState((old) => (!old || s.revision >= old.revision ? s : old)))
-      .catch((e) => alive && setError(e.message));
+    void refresh().then(() => {
+      if (!alive) setState(null);
+    });
     const socket = io({ autoConnect: false });
     socket.on("gameDeleted", () => {
       alive = false;
@@ -56,7 +67,7 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
       alive = false;
       socket.disconnect();
     };
-  }, [id, role]);
+  }, [id, role, refresh]);
   const send = useCallback(
     async (command: Command) => {
       if (!state || sending.current) return false;
@@ -85,5 +96,5 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
     },
     [id, role, state, busy],
   );
-  return { state, connected, error, setError, busy, send, clockOffset };
+  return { state, connected, error, setError, busy, send, refresh, clockOffset };
 }

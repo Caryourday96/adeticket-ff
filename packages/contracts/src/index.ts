@@ -106,6 +106,7 @@ export const commandSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("undo") }),
   z.object({ type: z.literal("endGame") }),
   z.object({ type: z.literal("pause") }),
+  z.object({ type: z.literal("setJoinLock"), locked: z.boolean() }),
   z.object({ type: z.literal("turn"), member: z.number().int().min(0).max(11) }),
   z.object({
     type: z.literal("faceoffPlayer"),
@@ -176,6 +177,7 @@ export type GameState = {
   roundWinner: Side | null;
   showAll: boolean;
   paused: boolean;
+  joinsLocked?: boolean;
   message: string;
   fast: FastState | null;
   fastQuestions: Question[];

@@ -6,7 +6,8 @@ export function useBuzzers<T extends HostBuzzers | PlayerView>(id: string, host 
   const [data, setData] = useState<T | null>(null),
     [error, setError] = useState(""),
     [connected, setConnected] = useState(false),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const sequence = useRef(0),
     alive = useRef(false),
     acting = useRef(false);
@@ -16,6 +17,7 @@ export function useBuzzers<T extends HostBuzzers | PlayerView>(id: string, host 
       const next = await api<T>(`/games/${id}/${host ? "buzzers" : "player"}`);
       if (alive.current && request === sequence.current) {
         setData(next);
+        setLastUpdated(Date.now());
         setError("");
       }
     } catch (e) {
@@ -36,6 +38,7 @@ export function useBuzzers<T extends HostBuzzers | PlayerView>(id: string, host 
         // The host stream already contains the full view. Supersede any older HTTP read.
         sequence.current++;
         setData(next as T);
+        setLastUpdated(Date.now());
         setError("");
       });
     } else {
@@ -89,5 +92,5 @@ export function useBuzzers<T extends HostBuzzers | PlayerView>(id: string, host 
       setBusy(false);
     }
   }
-  return { data, error, connected, busy, act };
+  return { data, error, connected, busy, act, lastUpdated };
 }

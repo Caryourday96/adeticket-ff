@@ -63,6 +63,7 @@ export class Buzzers {
   join(id: string, team: Side, member: number, oldToken?: string) {
     const s = this.store.host(id),
       name = s.teams[team].members[member];
+    if (s.joinsLocked) throw new Error("The host has locked new joins.");
     if (!name || s.teams[team].awaitingPlayers || ["fast", "finished"].includes(s.phase))
       throw new Error("That roster place is unavailable.");
     const old = this.store.player(id, oldToken);
@@ -77,6 +78,7 @@ export class Buzzers {
   }
   register(id: string, team: Side, rawName: string, oldToken?: string) {
     const s = this.store.host(id);
+    if (s.joinsLocked) throw new Error("The host has locked new joins.");
     const name = rawName.trim();
     if (!name || name.length > 100 || ["fast", "finished"].includes(s.phase))
       throw new Error("Player registration is unavailable.");

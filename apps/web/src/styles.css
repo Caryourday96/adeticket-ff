@@ -775,6 +775,24 @@ small {
   gap: 7px;
   font-size: 10px;
 }
+
+.connection-recovery {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line, #d8dce8);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, #f6b73c 14%, transparent);
+}
+
+.host-diagnostics {
+  margin: 0.75rem 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--line, #d8dce8);
+}
 .online {
   color: var(--green);
 }

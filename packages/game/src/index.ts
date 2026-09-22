@@ -64,6 +64,7 @@ export function createGame(
     roundWinner: null,
     showAll: false,
     paused: false,
+    joinsLocked: false,
     message: "Choose who buzzed first.",
     fast: null,
     fastQuestions: structuredClone(fastQuestions),
@@ -133,6 +134,12 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
     return s;
   }
   requireThat(!s.paused, "Resume the game first.");
+  if (cmd.type === "setJoinLock") {
+    requireThat(!["fast", "finished"].includes(s.phase), "Player joining is closed for this game.");
+    s.joinsLocked = cmd.locked;
+    s.message = cmd.locked ? "New player joins are locked." : "New player joins are open.";
+    return s;
+  }
   const q = currentQuestion(s);
   switch (cmd.type) {
     case "buzz":

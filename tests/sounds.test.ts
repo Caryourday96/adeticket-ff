@@ -39,6 +39,18 @@ it("plays distinct gameplay cues and keeps snapshots, repeats and undo silent", 
   expect(soundCue(before, { ...next, lastCommand: "answer" })).toBe("reveal");
   expect(soundCue(before, { ...next, lastCommand: "answer", roundWinner: 0 })).toBe("win");
 });
+it("plays the expiry cue from the authoritative server transition", () => {
+  const state = fresh();
+  const running = transition(
+    transition({ ...state, phase: "champion", winner: 0 }, { type: "fastStart", players: [0, 1] }),
+    { type: "fastClock" },
+    100,
+  );
+  const before = audience({ ...running, revision: 4, lastCommand: "fastClock" });
+  const ended = transition(running, { type: "fastEndTurn" }, running.fast!.deadline! + 1);
+  const next = audience({ ...ended, revision: 5, lastCommand: "fastEndTurn" });
+  expect(soundCue(before, next)).toBe("time");
+});
 it("persists safe action metadata on commands and replaces it on undo", () => {
   const store = new Store(":memory:");
   try {
