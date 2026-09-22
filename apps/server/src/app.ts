@@ -325,10 +325,23 @@ export function createApplication(options: {
   app.get("/api/games/:id/buzzers", auth, (req, res) =>
     res.json(buzzers.host(String(req.params.id))),
   );
+  app.get("/api/games/:id/diagnostics", auth, (req, res) => {
+    const id = String(req.params.id);
+    const host = store.host(id);
+    const players = store.players(id);
+    res.json({
+      revision: host.revision,
+      phase: host.phase,
+      hostConnections: io.sockets.adapter.rooms.get(id + ":host")?.size ?? 0,
+      audienceConnections: io.sockets.adapter.rooms.get(id + ":audience")?.size ?? 0,
+      registeredPlayers: players.length,
+      approvedPlayers: players.filter((p) => p.approved).length,
+    });
+  });
   app.post("/api/games/:id/buzzers", auth, (req, res) => {
     const body = z
       .object({
-        action: z.enum(["arm", "lock", "approve", "remove", "stage", "bench"]),
+        action: z.enum(["arm", "lock", "approve", "remove", "removeAll", "stage", "bench"]),
         playerId: z.string().uuid().optional(),
       })
       .parse(req.body);

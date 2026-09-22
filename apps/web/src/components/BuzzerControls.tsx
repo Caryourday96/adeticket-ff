@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import type { Command, HostBuzzers, HostState } from "@naija/contracts";
 import { useBuzzers } from "../hooks/useBuzzers";
 import { phoneStatus } from "../lib/phoneStatus";
+import { api } from "../lib/api";
 export function BuzzerControls({
   state: s,
   send,
@@ -12,7 +13,28 @@ export function BuzzerControls({
 }) {
   const { data, error, connected, busy, act, lastUpdated } = useBuzzers<HostBuzzers>(s.id, true);
   const [invite, setInvite] = useState(false);
+  const [diagnostics, setDiagnostics] = useState<{
+    revision: number;
+    phase: string;
+    hostConnections: number;
+    audienceConnections: number;
+    registeredPlayers: number;
+    approvedPlayers: number;
+  } | null>(null);
   const url = location.origin + "/play/" + s.id;
+  useEffect(() => {
+    let alive = true;
+    const refresh = () =>
+      void api<NonNullable<typeof diagnostics>>(`/games/${s.id}/diagnostics`)
+        .then((next) => alive && setDiagnostics(next))
+        .catch(() => alive && setDiagnostics(null));
+    refresh();
+    const timer = setInterval(refresh, 5000);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, [s.id]);
   return (
     <section className="control-card buzzer-controls">
       <div className="section-eyebrow">PHONE BUZZERS</div>
@@ -68,11 +90,30 @@ export function BuzzerControls({
           <strong>{connected ? "connected" : "reconnecting"}</strong>
           {lastUpdated ? ` · Last phone update ${new Date(lastUpdated).toLocaleTimeString()}` : ""}
         </p>
+        {diagnostics && (
+          <p>
+            Host sockets: {diagnostics.hostConnections} · Audience screens:{" "}
+            {diagnostics.audienceConnections} · Registered players: {diagnostics.registeredPlayers}{" "}
+            ({diagnostics.approvedPlayers} approved)
+          </p>
+        )}
         <p className="muted">
           Keep one host desk open. If the connection drops, wait for the reconnect banner or refresh
           server state before judging the next answer.
         </p>
       </details>
+      {data?.players.length ? (
+        <button
+          className="text-button"
+          disabled={busy}
+          onClick={() => {
+            if (window.confirm("Remove every registered player phone from this game?"))
+              void act({ action: "removeAll" });
+          }}
+        >
+          Remove all player phones
+        </button>
+      ) : null}
       <h3>
         {data?.winner
           ? `${data.winner.name} buzzed first`

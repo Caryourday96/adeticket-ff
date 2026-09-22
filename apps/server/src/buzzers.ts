@@ -126,7 +126,10 @@ export class Buzzers {
       this.lock(id);
       this.gates.get(id)!.armed = true;
     } else if (action === "lock") this.lock(id);
-    else {
+    else if (action === "removeAll") {
+      for (const p of this.store.players(id)) this.store.removePlayer(id, p.id);
+      this.lock(id);
+    } else {
       const p = this.store.players(id).find((p) => p.id === playerId);
       if (!p) throw new Error("Phone registration not found.");
       if (action === "remove") this.store.removePlayer(id, p.id);

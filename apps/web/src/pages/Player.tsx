@@ -105,6 +105,12 @@ export function Player({ id }: { id: string }) {
                         ? "You're live. Get ready!"
                         : "Wait for the host to open buzzers"}
           </div>
+          <ul className="phone-readiness" aria-label="Buzzer readiness checklist">
+            <li className={connected && gameConnected ? "done" : ""}>Phone connected</li>
+            <li className={p.approved ? "done" : ""}>Host approval</li>
+            <li className={eligible ? "done" : ""}>On-stage assignment</li>
+            <li className={b?.armed ? "done" : ""}>Host opened buzzers</li>
+          </ul>
           <button
             className={"phone-buzzer " + (ready ? "ready" : "")}
             disabled={!ready || busy}

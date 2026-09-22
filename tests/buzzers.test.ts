@@ -83,3 +83,14 @@ it("rejects teammates out of turn, paused games, and revoked phones", async () =
   ).json();
   expect(view.player).toBeNull();
 });
+it("reports host diagnostics and can clear all player phones", async () => {
+  const diagnostics = await (
+    await fetch(base + "/api" + path("diagnostics"), { headers: { Cookie: host } })
+  ).json();
+  expect(diagnostics).toMatchObject({
+    phase: expect.any(String),
+    registeredPlayers: expect.any(Number),
+  });
+  await post(path("buzzers"), { action: "removeAll" });
+  expect(server.store.players(id)).toHaveLength(0);
+});

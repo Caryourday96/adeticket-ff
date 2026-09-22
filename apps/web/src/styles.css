@@ -793,6 +793,31 @@ small {
   padding-top: 0.5rem;
   border-top: 1px solid var(--line, #d8dce8);
 }
+
+.phone-readiness {
+  display: grid;
+  gap: 0.25rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+  color: var(--muted, #6b7280);
+  font-size: 0.9rem;
+}
+
+.phone-readiness li::before {
+  content: "○";
+  display: inline-block;
+  width: 1.4rem;
+}
+
+.phone-readiness li.done {
+  color: var(--ink, #192033);
+}
+
+.phone-readiness li.done::before {
+  content: "✓";
+  color: #138a61;
+}
 .online {
   color: var(--green);
 }
