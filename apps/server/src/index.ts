@@ -12,7 +12,7 @@ const server = createApplication({
   castAppId: process.env.CAST_APP_ID,
 });
 const endpoint = process.env.PORT ?? "3000";
-const onListening = () => console.log("Naija Family Showdown is ready.");
+const onListening = () => console.log("Friends Showdown is ready.");
 // IISNode supplies a named pipe; local and Linux hosting supply a numeric port.
 if (/^\d+$/.test(endpoint)) server.http.listen(Number(endpoint), "0.0.0.0", onListening);
 else server.http.listen(endpoint, onListening);

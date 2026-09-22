@@ -22,7 +22,7 @@ struct ContentView: View {
                 }
                 Section { Text(cast.status).font(.footnote).foregroundStyle(.secondary) }
             }
-            .navigationTitle("Family Showdown")
+            .navigationTitle("Friends Showdown")
         }
     }
 }

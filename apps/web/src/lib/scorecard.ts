@@ -1,7 +1,7 @@
 import type { GameState } from "@naija/contracts";
 export function scorecard(state: GameState) {
   const rows: (string | number)[][] = [
-    ["Family Showdown", state.id],
+    ["Friends Showdown", state.id],
     ["Status", state.phase],
     ["Winner", state.winner === null ? "No champion declared" : state.teams[state.winner].name],
     ["Team", "Main game points"],

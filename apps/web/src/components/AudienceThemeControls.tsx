@@ -40,7 +40,7 @@ export function AudienceThemeControls({
               edit({ ...audienceThemes[event.target.value as AudienceTheme["preset"]] })
             }
           >
-            <option value="classic">Classic Family Showdown</option>
+            <option value="classic">Classic Friends Showdown</option>
             <option value="birthday">Ihechi’s birthday · plum & gold</option>
             <option value="midnight">Midnight · teal & navy</option>
           </select>
@@ -50,7 +50,7 @@ export function AudienceThemeControls({
           <input
             maxLength={80}
             value={theme.title}
-            placeholder="Family Showdown"
+            placeholder="Friends Showdown"
             onChange={(event) => edit({ ...theme, title: event.target.value })}
           />
         </label>
@@ -63,8 +63,8 @@ export function AudienceThemeControls({
           />
         </label>
         <p>
-          Leave the title empty to show the Family Showdown logo. Selecting a preset resets the text
-          to its defaults.
+          Leave the title empty to show the Friends Showdown logo. Selecting a preset resets the
+          text to its defaults.
         </p>
         <div className="theme-preview" aria-label="Theme preview">
           <Board compact state={{ ...audience(state), audienceTheme: theme }} />

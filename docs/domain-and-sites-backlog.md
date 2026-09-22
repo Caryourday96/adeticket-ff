@@ -3,7 +3,7 @@
 ## Approved current work
 
 - [ ] Publish a game catalogue at https://play.adeticket.com using Azure DNS and HTTPS.
-- [x] List Family Showdown at https://play.adeticket.com and link to https://ff.adeticket.com.
+- [x] List Friends Showdown at https://play.adeticket.com and link to https://ff.adeticket.com.
 - [ ] Create a static portfolio at kayodeadetunji.com from the owner's résumé, excluding all work history. Résumé requested; not yet available. Do not invent skills, credentials or projects.
 - [ ] Create an Adeticket Inc. static landing site at adeticket.com linking to the catalogue. Public contact: adeticket@gmail.com. Do not imply ticketing or payment services are available.
 - [ ] Inspect existing Azure DNS records and hosting before choosing deployment resources. Preserve email records and unrelated subdomains.
@@ -12,7 +12,7 @@
 
 ## Deferred by owner
 
-- [x] Bind ff.adeticket.com to Family Showdown.
+- [x] Bind ff.adeticket.com to Friends Showdown.
 - [ ] Redirect old game domains to ff.adeticket.com, preserving paths and query strings.
 - [ ] Update generated links and QR codes after the game-domain migration.
 - [ ] Update and test Google Cast receiver configuration after the migration.

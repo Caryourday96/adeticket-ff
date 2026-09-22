@@ -6,7 +6,7 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <a className="brand-link" href="/" aria-label="Family Showdown home">
+        <a className="brand-link" href="/" aria-label="Friends Showdown home">
           <Brand />
         </a>
         <div className="nav-label">YOUR GAME NIGHT</div>
@@ -70,7 +70,7 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
         {children}
         <footer className="footer">
           <a href="/privacy">Privacy and advertising</a>
-          <span>FAMILY SHOWDOWN</span>
+          <span>FRIENDS SHOWDOWN</span>
           <span>Sample game points · Unofficial home game</span>
         </footer>
       </div>

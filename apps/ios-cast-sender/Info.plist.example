@@ -1,5 +1,5 @@
 <key>NSLocalNetworkUsageDescription</key>
-<string>Family Showdown uses your local network to find your Google Cast TV.</string>
+<string>Friends Showdown uses your local network to find your Google Cast TV.</string>
 <key>NSBonjourServices</key>
 <array>
   <string>_googlecast._tcp</string>

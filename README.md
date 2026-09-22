@@ -1,4 +1,4 @@
-# Naija Family Showdown
+# Friends Showdown
 
 A host-led Nigerian-themed game with a private control desk and a synchronized audience board. Built with React, TypeScript, Express, Socket.IO, and SQLite.
 

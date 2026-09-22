@@ -2,7 +2,7 @@ export function Brand({ large = false }: { large?: boolean }) {
   return (
     <div className={"brand " + (large ? "brand-large" : "")}>
       <strong>
-        FAMILY
+        FRIENDS
         <br />
         SHOWDOWN
       </strong>

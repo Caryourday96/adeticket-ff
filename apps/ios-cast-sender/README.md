@@ -1,4 +1,4 @@
-# Family Showdown iPad Cast sender
+# Friends Showdown iPad Cast sender
 
 This is a small native iOS sender for the existing Google Cast receiver. It is intended for free Personal Team testing on one iPad. It does not replace the web host dashboard and it does not require a new receiver.
 

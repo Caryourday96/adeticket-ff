@@ -233,7 +233,7 @@ function Catalogue() {
             <div className="catalogue-details">
               <div className="eyebrow">TEAMS · TRIVIA · PHONE BUZZERS</div>
               <div className="catalogue-title-row">
-                <h3>Family Showdown</h3>
+                <h3>Friends Showdown</h3>
                 <span className="alpha-badge">ALPHA</span>
               </div>
               <p>
@@ -268,7 +268,7 @@ export function App() {
         <main className="page rules-page">
           <h1>Privacy and advertising</h1>
           <p className="lead">
-            Family Showdown is operated by Adeticket Inc. (
+            Friends Showdown is operated by Adeticket Inc. (
             <a href="mailto:adeticket@gmail.com">adeticket@gmail.com</a>).
           </p>
 
