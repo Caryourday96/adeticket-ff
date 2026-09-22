@@ -67,7 +67,7 @@ export function Library() {
         <div className="host-heading">
           <div>
             <div className="eyebrow">THE GOOD STUFF</div>
-            <h1>A little Naija knowledge.</h1>
+            <h1>A little family knowledge.</h1>
             <p>Food, music, family and everything in between.</p>
           </div>
           <button className="button primary" onClick={() => input.current?.click()}>
