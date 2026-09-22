@@ -59,4 +59,3 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Do not claim a feature is live until the corresponding GitHub Actions/Azure run and a production check succeed.
 - Do not enable advertising until AdSense approval, consent management and rollback testing are complete.
 - Keep the scraper’s uncertain boards in review status; never export a partial board as verified.
-

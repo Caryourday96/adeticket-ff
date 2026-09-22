@@ -379,4 +379,3 @@ export function App() {
     </HostGate>
   );
 }
-

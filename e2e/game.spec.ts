@@ -265,4 +265,3 @@ test("Fast Money rehearsal starts the real timer and enables question navigation
     "step",
   );
 });
-
