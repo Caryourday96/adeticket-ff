@@ -90,3 +90,4 @@ it("triggers googlefc CMP revocation when callback queue is present", () => {
   expect(queue).toHaveLength(1);
   expect(queue[0]).toBe(showRevocationMessage);
 });
+
