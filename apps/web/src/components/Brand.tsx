@@ -7,6 +7,7 @@ export function Brand({ large = false }: { large?: boolean }) {
         SHOWDOWN
       </strong>
       <small>THE HOME GAME</small>
+      <em className="alpha-badge">ALPHA</em>
     </div>
   );
 }

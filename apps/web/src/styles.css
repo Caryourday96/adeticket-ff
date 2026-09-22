@@ -323,6 +323,29 @@ small {
   letter-spacing: 2px;
   margin-top: 4px;
 }
+
+.alpha-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 205, 93, 0.55);
+  border-radius: 999px;
+  color: #ffcf66;
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.brand .alpha-badge { margin-top: 8px; }
+
+.catalogue-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 .brand-large {
   width: 176px;
   height: 113px;
