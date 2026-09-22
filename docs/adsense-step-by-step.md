@@ -8,7 +8,7 @@ Open https://adsense.google.com/start/ and sign in with the Google account that 
 
 ## 2. Add the root domain
 
-In **Sites → New site** (or Add site), enter `kayodeadetunji.com`. Ordinary subdomains such as `ff.kayodeadetunji.com` and `naijafeud.kayodeadetunji.com` are managed under this domain, rather than added as independent sites. Follow the site verification method Google offers, then request review.
+In **Sites → New site** (or Add site), enter the root site you want reviewed. The game now uses `ff.adeticket.com` and the catalogue uses `play.adeticket.com`; manage those under the Adeticket domain rather than the personal portfolio domain. Follow the site verification method Google offers, then request review.
 
 We must check where the root domain is hosted before placing its verification file/meta tag. The Azure game app controls the two game subdomains; we have not established that it serves the root domain. Do not change the root DNS or replace another site just for verification. If using a meta tag or another offered method, add it to the actual root site's hosting.
 
@@ -34,8 +34,8 @@ Publisher/slot IDs are public identifiers. They may be shared for setup; keep lo
 
 With the publisher ID configured, the app serves:
 
-- https://ff.kayodeadetunji.com/ads.txt
-- https://naijafeud.kayodeadetunji.com/ads.txt
+- https://ff.adeticket.com/ads.txt
+- https://play.adeticket.com/ads.txt
 
 Each should contain the real seller line:
 
@@ -46,8 +46,8 @@ google.com, pub-YOUR_16_DIGIT_ID, DIRECT, f08c47fec0942fa0
 The placeholder above must be replaced with your actual publisher ID. At the hosting service for **https://kayodeadetunji.com/ads.txt**, preserve existing authorised sellers and add your Google seller line. To explicitly delegate these subdomain files, also add:
 
 ```text
-subdomain=ff.kayodeadetunji.com
-subdomain=naijafeud.kayodeadetunji.com
+subdomain=ff.adeticket.com
+subdomain=play.adeticket.com
 ```
 
 Confirm all three URLs return plain text, not an HTML fallback or login page. Publishing subdomain files alone does not finish root-domain setup. Use AdSense's ads.txt check/status and allow its crawler to refresh. [Google ads.txt FAQ](https://support.google.com/adsense/answer/9785052).
@@ -67,7 +67,7 @@ Keep **Auto ads off** for the site. We use one manual unit and do not want Googl
 
 In AdSense open **Privacy & messaging → European regulations → Create message** (or manage the automatically created message). Select the applicable site, supply the site's name and actual privacy-policy URL, configure the message and publish it. Google's CMP is one certified option for EEA, UK and Swiss visitors. Review other regional messages applicable to your audience in the same area.
 
-Use `https://ff.kayodeadetunji.com/privacy` as the game privacy URL after completing its operator/contact, retention and actual advertising details. The page now includes the confirmed operator, Adeticket Inc., and contact adeticket@gmail.com. Privacy-choice reopening is prepared; a live CMP and its behaviour still need verification.
+Use `https://ff.adeticket.com/privacy` as the game privacy URL after completing its operator/contact, retention and actual advertising details. The page now includes the confirmed operator, Adeticket Inc., and contact adeticket@gmail.com. Privacy-choice reopening is prepared; a live CMP and its behaviour still need verification.
 
 **Remaining developer work before activation:** verify that the published CMP loads with this app's manual/lazy ad loader, provides a working way to reopen privacy choices, and respects consent acceptance/refusal/revocation. Run the checks in a controlled test deployment with the real account and Google's testing tools. Publishing a message alone is not proof this integration works. `ADS_CONSENT_READY` is only a configuration gate; it does not collect visitor consent.
 
@@ -88,7 +88,7 @@ Apply/Save. This restarts/reloads the app; schedule it outside an active game. N
 
 ## 8. Verify the result
 
-Visit https://ff.kayodeadetunji.com/rules and scroll below the instructions. The ad request loads as the placement enters view. Check the other domain too. Ads may not fill immediately, and ad blockers can prevent display. Use AdSense diagnostics; do not click your own ads to test.
+Visit https://ff.adeticket.com/rules and scroll below the instructions. The ad request loads as the placement enters view. Check the catalogue domain too. Ads may not fill immediately, and ad blockers can prevent display. Use AdSense diagnostics; do not click your own ads to test.
 
 Confirm no ads or AdSense loader on `/play`, player buzzers, host controls, audience boards or survey pages. Check phone layout, consent choices and browser console/CSP errors. Our disabled-state tests pass; live ad delivery has not yet been tested because no account IDs have been supplied.
 
@@ -102,6 +102,6 @@ Create the account, add the root domain, and obtain the publisher ID. Then estab
 
 ## Setup checkpoint — 22 September 2026
 
-AdSense sign-in has been opened for the owner. No publisher or slot ID has been obtained, and ads remain disabled. Public checks found `kayodeadetunji.com` and its `/ads.txt` could not resolve (ENOTFOUND), while `ff.kayodeadetunji.com` is healthy. Confirm the authoritative DNS provider and configure suitable root-domain hosting before verification. Do not overwrite existing DNS records or point the root at Azure until its current configuration and intended landing page are reviewed.
+AdSense sign-in has been opened for the owner. Ads remain disabled pending review. The game is now served from `ff.adeticket.com`; the personal portfolio remains at `kayodeadetunji.com` and the catalogue at `play.adeticket.com`.
 
 Account setup: publisher `ca-pub-2467796901387108`; responsive unit **Family Showdown - Game rules footer**, slot `8774068970`. The deployment workflow sets these public IDs and keeps both activation flags false. Change the workflow when activating; portal-only settings will be overwritten on deployment. Auto ads were confirmed OFF. Root hosting is reserved for the owner's personal/business site; await those hosting details, do not point the root to the game. Site status is Requires review; ownership not yet verified.

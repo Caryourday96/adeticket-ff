@@ -1,6 +1,6 @@
 # Azure deployment
 
-Source is published to `Caryourday96/adeticket-ff`. The game is live at https://naijafeud.kayodeadetunji.com on the `adeticket-ff` Windows Web App in `Kayode_IGO`, Canada Central, using the existing `adeticket` S1 plan. Azure reports the custom domain secured with an SNI managed certificate.
+Source is published to `Caryourday96/adeticket-ff`. The game is live at https://ff.adeticket.com on the `adeticket-ff` Windows Web App in `Kayode_IGO`, Canada Central, using the existing `adeticket` S1 plan. Azure reports the custom domain secured with an SNI managed certificate.
 
 ## Prerequisites
 
@@ -29,7 +29,7 @@ Set application settings securely in Azure:
 
 - `NODE_ENV=production`
 - `HOST_PASSWORD`: a private host passphrase.
-- `APP_ORIGIN=https://naijafeud.kayodeadetunji.com`
+- `APP_ORIGIN=https://ff.adeticket.com`
 - `DATA_DIR=D:\home\data\naija-feud`: outside the deployed release directory. Saved-game restart and backup/restore verification remains required; successful startup alone does not establish storage reliability.
 
 The app reads Azure's `PORT`. Deploy the contents of `dist/`, including `web.config`, `server.js`, `server.cjs`, and the frontend `web/` directory. Windows IISNode starts `server.js`; Linux or local hosting can run `node server.cjs`. No runtime package installation is required; server dependencies are bundled. The IIS WebSocket module is disabled in `web.config` so Node handles the protocol; enable WebSockets in the App Service configuration.

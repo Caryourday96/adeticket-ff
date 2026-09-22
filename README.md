@@ -141,7 +141,7 @@ Use `pnpm format` after edits. Keep business rules in `packages/game` and add a 
 
 ## Deployment status
 
-The game is deployed at **https://naijafeud.kayodeadetunji.com** on the `adeticket-ff` Windows Azure Web App in Canada Central. Source is in `Caryourday96/adeticket-ff`.
+The game is deployed at **https://ff.adeticket.com** on the `adeticket-ff` Windows Azure Web App in Canada Central. Source is in `Caryourday96/adeticket-ff`.
 
 Every push to `main` automatically deploys to Azure after formatting, type, test, and build checks pass. Other branches and pull requests run validation without deploying. Manual deployment is also available: GitHub Actions → Deploy to Azure → Run workflow → `main`. Deployments use OIDC; no Azure password or publish profile is stored in Git.
 

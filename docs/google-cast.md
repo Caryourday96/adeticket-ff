@@ -1,7 +1,7 @@
 # Google Cast setup
 
 The host's **Cast to TV** button launches a custom receiver at
-`https://ff.kayodeadetunji.com/cast`.
+`https://ff.adeticket.com/cast`.
 It sends only a six-character room code. The TV opens the public audience feed directly
 from Azure; host credentials, hidden answers and commands are never sent over Cast.
 The existing audience board, scores, Fast Money timer and reconnect behavior are reused.
@@ -11,7 +11,7 @@ The existing audience board, scores, Fast Money timer and reconnect behavior are
 1. Sign in at [Google Cast SDK Developer Console](https://cast.google.com/publish/).
    Google documents a $5 developer account registration fee; review the checkout before paying.
 2. Add a **Custom Receiver** application named **Family Showdown**.
-3. Set the receiver URL to `https://ff.kayodeadetunji.com/cast`.
+3. Set the receiver URL to `https://ff.adeticket.com/cast`.
    Leave audio-only device support off. Use the game website as the Web Sender URL.
 4. Copy the application ID into Azure App Service **adeticket-ff → Environment variables**
    as `CAST_APP_ID`, then Apply. This ID is public configuration, not a password.

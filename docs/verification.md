@@ -31,7 +31,7 @@ A completed rehearsal game and an edited question pack remain in local ignored r
 
 ## Deployment status and limits
 
-Source is pushed to `Caryourday96/adeticket-ff`. GitHub Actions deployment run `34656556703`, attempt 2, succeeded for `08d00a2`. The Windows Web App runs in Canada Central and serves https://naijafeud.kayodeadetunji.com with a managed TLS certificate.
+Source is pushed to `Caryourday96/adeticket-ff`. GitHub Actions deployment run `34656556703`, attempt 2, succeeded for `08d00a2`. The Windows Web App runs in Canada Central and serves https://ff.adeticket.com with a managed TLS certificate.
 
 The exact Nigerian television design and ruleset have not been verified. The current interface uses an original blue-and-gold TV-style board. The bundled questions use illustrative points. One Fast Money set is included.
 

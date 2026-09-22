@@ -241,12 +241,12 @@ function Catalogue() {
                 the steal.
               </p>
               <div className="catalogue-actions">
-                <a className="button primary" href="https://ff.kayodeadetunji.com/">
+                <a className="button primary" href="https://ff.adeticket.com/">
                   Open game ↗
                 </a>
-                <a href="https://ff.kayodeadetunji.com/play">Join with a game code →</a>
+                <a href="https://ff.adeticket.com/play">Join with a game code →</a>
               </div>
-              <a href="https://ff.kayodeadetunji.com/rules">Read the rules</a>
+              <a href="https://ff.adeticket.com/rules">Read the rules</a>
             </div>
           </article>
         </section>
