@@ -13,6 +13,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Azure deployment runs smoke checks for `/api/health`, `/api/config`, `/cast` and `/ads.txt`.
 - Brief-disconnect recovery now keeps the last confirmed host/audience state in the current browser and refreshes from the server after reconnecting. Commit `432b6ba`.
 - Player pages now explain when the host has paused new joins and disable the join action.
+- Fast Money now labels expiry versus a manually completed turn, explains pass-and-return behavior and presents final totals in a dedicated live summary. Commit `691a24d`.
 - Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
 - Visible branding is now Friends Showdown. Commit `bfe380f`.
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
@@ -27,7 +28,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 
 - **Offline recovery:** short-outage state retention is shipped; longer-outage reconciliation and conflict messaging remain to be tested and hardened.
 - **Host handoff:** allow a second trusted host device to take over a room if the original device fails.
-- **Fast Money polish:** improve pass-and-return wording, timer visibility and the final results presentation; expiry sound is complete.
+- **Fast Money polish:** expiry sound, timer-expiry messaging, pass-and-return wording and final-results presentation are shipped. Remaining work is optional visual refinement after a live game-night rehearsal.
 - **Moderation:** add join-code regeneration and independent audience-sound mute control. Locking joins and the player-facing status are shipped.
 - **Diagnostics:** add a visible audience Cast status and last server-update timestamp to the host panel.
 
