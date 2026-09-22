@@ -76,7 +76,27 @@ export const setupSchema = z
   );
 export type Setup = z.infer<typeof setupSchema>;
 const teamIndex = z.union([z.literal(0), z.literal(1)]);
+export const audienceThemeSchema = z.object({
+  preset: z.enum(["classic", "birthday", "midnight"]),
+  title: z.string().trim().max(80),
+  subtitle: z.string().trim().max(160),
+});
+export type AudienceTheme = z.infer<typeof audienceThemeSchema>;
+export const audienceThemes: Record<AudienceTheme["preset"], AudienceTheme> = {
+  classic: { preset: "classic", title: "", subtitle: "" },
+  birthday: {
+    preset: "birthday",
+    title: "Ihechi’s Birthday Showdown",
+    subtitle: "Let’s celebrate Ihechi with a little friendly competition!",
+  },
+  midnight: {
+    preset: "midnight",
+    title: "Game night",
+    subtitle: "Good company. Great competition.",
+  },
+};
 export const commandSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("audienceTheme"), theme: audienceThemeSchema }),
   z.object({ type: z.literal("buzz"), team: teamIndex }),
   z.object({ type: z.literal("answer"), answerId: label }),
   z.object({ type: z.literal("miss") }),
@@ -132,6 +152,7 @@ export type FastState = {
   revealed: [number, number];
 };
 export type GameState = {
+  audienceTheme?: AudienceTheme;
   lastCommand?: Command["type"];
   roundResults?: { round: number; prompt: string; winner: Side; points: number }[];
   id: string;

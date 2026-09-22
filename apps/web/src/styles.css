@@ -338,7 +338,9 @@ small {
   letter-spacing: 0.12em;
 }
 
-.brand .alpha-badge { margin-top: 8px; }
+.brand .alpha-badge {
+  margin-top: 8px;
+}
 
 .catalogue-title-row {
   display: flex;
@@ -3072,4 +3074,68 @@ small {
   .catalogue-details {
     padding: 26px;
   }
+}
+
+/* Event themes also apply to host previews and Cast. */
+.stage.theme-birthday {
+  background: radial-gradient(ellipse at top, #732557, #301333 55%, #160d20);
+  border-color: #d8ae64;
+}
+.theme-birthday .stage-lights {
+  background: linear-gradient(90deg, transparent, #ffe0a0, #f5a2d4, transparent);
+}
+.theme-birthday .question-plaque {
+  background: #421c3d;
+  border-color: #d8ae64;
+}
+.stage.theme-midnight {
+  background: radial-gradient(ellipse at top, #104b56, #092633 55%, #06131e);
+  border-color: #68d5ca;
+}
+.theme-midnight .question-plaque {
+  background: #0c3440;
+  border-color: #68d5ca;
+}
+.event-brand {
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+  max-width: 600px;
+  padding: 8px;
+}
+.event-brand strong {
+  display: block;
+  font-size: clamp(20px, 3vw, 42px);
+  line-height: 1.12;
+  color: #ffe2a0;
+  overflow-wrap: anywhere;
+}
+.event-brand small {
+  display: block;
+  margin-top: 8px;
+  color: #f9e9f5;
+  font-size: clamp(12px, 1.2vw, 18px);
+  overflow-wrap: anywhere;
+}
+.theme-controls {
+  margin-bottom: 20px;
+}
+.theme-controls summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+.theme-controls form {
+  display: grid;
+  gap: 14px;
+}
+.theme-controls label {
+  display: grid;
+  gap: 6px;
+}
+.theme-preview {
+  max-width: 900px;
+  min-width: 0;
+}
+.theme-preview .event-brand strong {
+  font-size: 24px;
 }

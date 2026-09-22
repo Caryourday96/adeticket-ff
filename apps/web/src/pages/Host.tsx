@@ -25,6 +25,7 @@ import { FastControls } from "../components/FastControls";
 import { BuzzerControls } from "../components/BuzzerControls";
 import { RehearsalControls } from "../components/RehearsalControls";
 import { GameResults } from "../components/GameResults";
+import { AudienceThemeControls } from "../components/AudienceThemeControls";
 export function Host({ id }: { id: string }) {
   const { state: s, connected, error, busy, send, clockOffset } = useGame<HostState>(id, "host");
   const [search, setSearch] = useState(""),
@@ -133,6 +134,7 @@ export function Host({ id }: { id: string }) {
           </button>
         </div>
         {s.rehearsal && <RehearsalControls state={s} busy={busy} />}
+        <AudienceThemeControls state={s} busy={busy} send={send} />
         <div className="game-toolbar">
           <span className={"connection " + (connected ? "online" : "offline")}>
             <Radio size={13} />

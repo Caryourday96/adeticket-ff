@@ -232,7 +232,10 @@ function Catalogue() {
             </div>
             <div className="catalogue-details">
               <div className="eyebrow">TEAMS · TRIVIA · PHONE BUZZERS</div>
-              <div className="catalogue-title-row"><h3>Family Showdown</h3><span className="alpha-badge">ALPHA</span></div>
+              <div className="catalogue-title-row">
+                <h3>Family Showdown</h3>
+                <span className="alpha-badge">ALPHA</span>
+              </div>
               <p>
                 Two teams. One survey board. Guess the popular answers, race to buzz in, and go for
                 the steal.

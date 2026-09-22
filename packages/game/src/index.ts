@@ -106,6 +106,10 @@ function settleFace(s: GameState) {
 export function transition(input: GameState, cmd: Command, now = Date.now()): GameState {
   const s = structuredClone(input);
   requireThat(cmd.type !== "undo", "Undo is handled by the game store.");
+  if (cmd.type === "audienceTheme") {
+    s.audienceTheme = structuredClone(cmd.theme);
+    return s;
+  }
   if (cmd.type === "endGame") {
     requireThat(s.phase !== "finished", "This game has already ended.");
     s.phase = "finished";

@@ -4,7 +4,11 @@ import { Trophy } from "lucide-react";
 export function Board({ state, compact = false }: { state: PublicState; compact?: boolean }) {
   const winner = state.winner !== null ? state.teams[state.winner] : null;
   return (
-    <div className={"stage " + (compact ? "compact" : "")}>
+    <div
+      className={
+        "stage theme-" + (state.audienceTheme?.preset ?? "classic") + (compact ? " compact" : "")
+      }
+    >
       <div className="stage-lights" />
       <div className="stage-top">
         <span className="stage-label">
@@ -14,7 +18,14 @@ export function Board({ state, compact = false }: { state: PublicState; compact?
               ? "SUDDEN DEATH"
               : "ROUND " + String(state.round + 1).padStart(2, "0")}
         </span>
-        <Brand />
+        {state.audienceTheme?.title ? (
+          <div className="event-brand">
+            <strong>{state.audienceTheme.title}</strong>
+            <small>{state.audienceTheme.subtitle}</small>
+          </div>
+        ) : (
+          <Brand />
+        )}
         <span className="stage-label">
           {state.fast ? "TARGET · 200" : state.multiplier + "× POINTS"}
         </span>
