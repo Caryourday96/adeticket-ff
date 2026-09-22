@@ -845,6 +845,19 @@ small {
   content: "✓";
   color: #138a61;
 }
+
+.fast-reveal-prompt,
+.fast-results {
+  padding: 1rem;
+  border: 1px solid var(--line, #d8dce8);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, #536dfe 7%, transparent);
+}
+
+.fast-reveal-prompt h2,
+.fast-results h2 {
+  margin-top: 0;
+}
 .online {
   color: var(--green);
 }

@@ -32,7 +32,8 @@ export function FastControls({
     ),
   );
   const question = state.fastQuestions[q],
-    entries = f.entries[f.player];
+    entries = f.entries[f.player],
+    expired = f.stage === "reveal" && state.message.startsWith("Time's up");
   const nextQuestion = () => {
     for (let step = 1; step < 5; step++) {
       const index = (q + step) % 5;
@@ -188,7 +189,7 @@ export function FastControls({
                 setText("");
               }}
             >
-              Pass / next
+              Pass and return later
             </button>
             <button
               className="button danger-button"
@@ -203,8 +204,8 @@ export function FastControls({
             automatically.
           </p>
           <p className="host-note">
-            Pass leaves the question unanswered. Use the numbered tabs to return, or keep passing to
-            cycle through unanswered questions.
+            Passing leaves this question unanswered for now. Use the numbered tabs to return before
+            the timer ends.
           </p>
           <details>
             <summary>{entries.filter(Boolean).length} / 5 answers recorded</summary>
@@ -217,13 +218,20 @@ export function FastControls({
         </>
       )}
       {f.stage === "reveal" && (
-        <button
-          className="button primary"
-          disabled={busy}
-          onClick={() => send({ type: "fastReveal" })}
-        >
-          Reveal answer {f.revealed[f.player] + 1} / 5
-        </button>
+        <div className="fast-reveal-prompt" role="status">
+          <h2>{expired ? "Time's up" : "Turn complete"}</h2>
+          <p>
+            {entries.filter(Boolean).length} of 5 answers recorded. Reveal each answer to show its
+            points on the board.
+          </p>
+          <button
+            className="button primary"
+            disabled={busy}
+            onClick={() => send({ type: "fastReveal" })}
+          >
+            Reveal answer {f.revealed[f.player] + 1} / 5
+          </button>
+        </div>
       )}
       {f.stage === "between" && (
         <button
@@ -235,7 +243,7 @@ export function FastControls({
         </button>
       )}
       {f.stage === "done" && (
-        <>
+        <section className="fast-results" aria-live="polite">
           <h2>Fast Money results</h2>
           {f.entries.map((row, player) => (
             <div key={player} className="host-note">
@@ -250,7 +258,9 @@ export function FastControls({
               ))}
             </div>
           ))}
-          <h3>{f.entries.flat().reduce((sum, a) => sum + (a?.points ?? 0), 0)} / 200 points</h3>
+          <h3>
+            Total: {f.entries.flat().reduce((sum, a) => sum + (a?.points ?? 0), 0)} / 200 points
+          </h3>
           <p>
             {f.entries.flat().reduce((sum, a) => sum + (a?.points ?? 0), 0) >= 200
               ? "They did it! Fast Money won."
@@ -263,7 +273,7 @@ export function FastControls({
           >
             Show final celebration
           </button>
-        </>
+        </section>
       )}
     </section>
   );
