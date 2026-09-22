@@ -11,6 +11,8 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Hosts can lock new player joins and remove all registered player phones with confirmation.
 - Player buzzers show a readiness checklist for connection, approval, stage assignment and open buzzers.
 - Azure deployment runs smoke checks for `/api/health`, `/api/config`, `/cast` and `/ads.txt`.
+- Brief-disconnect recovery now keeps the last confirmed host/audience state in the current browser and refreshes from the server after reconnecting. Commit `432b6ba`.
+- Player pages now explain when the host has paused new joins and disable the join action.
 - Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
 - Visible branding is now Friends Showdown. Commit `bfe380f`.
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
@@ -23,10 +25,10 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 
 ## P1 — game-night reliability
 
-- **Offline recovery:** preserve the last board and host state during a short outage, then reconcile safely from the server.
+- **Offline recovery:** short-outage state retention is shipped; longer-outage reconciliation and conflict messaging remain to be tested and hardened.
 - **Host handoff:** allow a second trusted host device to take over a room if the original device fails.
 - **Fast Money polish:** improve pass-and-return wording, timer visibility and the final results presentation; expiry sound is complete.
-- **Moderation:** add join-code regeneration, a clearer “lock joins” state on the player page and independent audience-sound mute control.
+- **Moderation:** add join-code regeneration and independent audience-sound mute control. Locking joins and the player-facing status are shipped.
 - **Diagnostics:** add a visible audience Cast status and last server-update timestamp to the host panel.
 
 ## P2 — presentation and accessibility
