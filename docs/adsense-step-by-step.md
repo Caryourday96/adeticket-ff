@@ -67,7 +67,7 @@ Keep **Auto ads off** for the site. We use one manual unit and do not want Googl
 
 In AdSense open **Privacy & messaging → European regulations → Create message** (or manage the automatically created message). Select the applicable site, supply the site's name and actual privacy-policy URL, configure the message and publish it. Google's CMP is one certified option for EEA, UK and Swiss visitors. Review other regional messages applicable to your audience in the same area.
 
-Use `https://ff.kayodeadetunji.com/privacy` as the game privacy URL after completing its operator/contact, retention and actual advertising details. The existing page is only a basic description.
+Use `https://ff.kayodeadetunji.com/privacy` as the game privacy URL after completing its operator/contact, retention and actual advertising details. The page now includes the confirmed operator, Adeticket Inc., and contact adeticket@gmail.com. Privacy-choice reopening is prepared; a live CMP and its behaviour still need verification.
 
 **Remaining developer work before activation:** verify that the published CMP loads with this app's manual/lazy ad loader, provides a working way to reopen privacy choices, and respects consent acceptance/refusal/revocation. Run the checks in a controlled test deployment with the real account and Google's testing tools. Publishing a message alone is not proof this integration works. `ADS_CONSENT_READY` is only a configuration gate; it does not collect visitor consent.
 
@@ -99,3 +99,9 @@ Set `ADS_ENABLED=false` in Azure and Apply. New page loads stop loading the ad c
 ## What to do first
 
 Create the account, add the root domain, and obtain the publisher ID. Then establish access to the root site's hosting for verification/ads.txt. Do not turn either activation flag on yet. We can complete account-specific consent integration and verification once those details are available.
+
+## Setup checkpoint — 22 September 2026
+
+AdSense sign-in has been opened for the owner. No publisher or slot ID has been obtained, and ads remain disabled. Public checks found `kayodeadetunji.com` and its `/ads.txt` could not resolve (ENOTFOUND), while `ff.kayodeadetunji.com` is healthy. Confirm the authoritative DNS provider and configure suitable root-domain hosting before verification. Do not overwrite existing DNS records or point the root at Azure until its current configuration and intended landing page are reviewed.
+
+Account setup: publisher `ca-pub-2467796901387108`; responsive unit **Family Showdown - Game rules footer**, slot `8774068970`. The deployment workflow sets these public IDs and keeps both activation flags false. Change the workflow when activating; portal-only settings will be overwritten on deployment. Auto ads were confirmed OFF. Root hosting is reserved for the owner's personal/business site; await those hosting details, do not point the root to the game. Site status is Requires review; ownership not yet verified.

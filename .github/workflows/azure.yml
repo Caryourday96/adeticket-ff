@@ -38,8 +38,8 @@ jobs:
           client-id: ${{ env.AZURE_CLIENT_ID }}
           tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
-      - name: Configure public Cast receiver ID
-        run: az webapp config appsettings set --resource-group Kayode_IGO --name "$AZURE_WEBAPP_NAME" --settings CAST_APP_ID=0AF8BA4D --output none
+      - name: Configure public Cast and advertising settings
+        run: az webapp config appsettings set --resource-group Kayode_IGO --name "$AZURE_WEBAPP_NAME" --settings CAST_APP_ID=0AF8BA4D ADSENSE_CLIENT=ca-pub-2467796901387108 ADSENSE_RULES_SLOT=8774068970 ADS_ENABLED=false ADS_CONSENT_READY=false --output none
       - uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
