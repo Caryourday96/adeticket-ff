@@ -48,6 +48,12 @@ type CastWindow = Window & {
   };
 };
 export const castWindow = () => window as CastWindow;
+export function isIOSBrowser() {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
 let sender: Promise<SenderContext> | undefined;
 export function loadSender(): Promise<SenderContext> {
   return (sender ??= new Promise((resolve, reject) => {
@@ -57,7 +63,11 @@ export function loadSender(): Promise<SenderContext> {
     const timer = setTimeout(
       () =>
         reject(
-          new Error("Cast could not load. Use Chrome on a computer and check your connection."),
+          new Error(
+            isIOSBrowser()
+              ? "iPad browsers cannot send to Google Cast. Use desktop Chrome or Android Chrome."
+              : "Cast could not load. Use Chrome on a computer and check your connection.",
+          ),
         ),
       15000,
     );
@@ -65,7 +75,14 @@ export function loadSender(): Promise<SenderContext> {
       clearTimeout(timer);
       if (available && w.cast?.framework.CastContext)
         resolve(w.cast.framework.CastContext.getInstance());
-      else reject(new Error("Casting is unavailable in this browser. Use Chrome on a computer."));
+      else
+        reject(
+          new Error(
+            isIOSBrowser()
+              ? "iPad browsers cannot send to Google Cast. Use desktop Chrome or Android Chrome."
+              : "Casting is unavailable in this browser. Use Chrome on a computer.",
+          ),
+        );
     };
     script.src = "https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1";
     script.onerror = () => {
