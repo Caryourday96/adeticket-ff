@@ -3,6 +3,7 @@ import type { PlayerView, PublicState, Side } from "@naija/contracts";
 import { Brand } from "../components/Brand";
 import { useGame } from "../hooks/useGame";
 import { useBuzzers } from "../hooks/useBuzzers";
+import { AlphaNotice } from "../components/AlphaNotice";
 export function Player({ id }: { id: string }) {
   const {
     state: s,
@@ -32,6 +33,7 @@ export function Player({ id }: { id: string }) {
   return (
     <main className="phone-page">
       <Brand />
+      <AlphaNotice />
       <div className="eyebrow">PLAYER BUZZER · ROOM {id}</div>
       {!s || !data ? (
         <p>Connecting to the game…</p>

@@ -9,6 +9,7 @@ test("unconfigured ads make no advertising requests on rules or player pages", a
   for (const path of ["/rules", "/play", "/join", "/privacy"]) {
     await page.goto(path);
     await expect(page.locator("h1")).toBeVisible();
+    await expect(page.getByRole("status", { name: "Alpha release notice" })).toBeVisible();
     await expect(page.locator("#adsense-loader, .advertisement")).toHaveCount(0);
   }
   expect(requests).toEqual([]);

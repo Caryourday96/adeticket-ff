@@ -338,6 +338,33 @@ small {
   letter-spacing: 0.12em;
 }
 
+.alpha-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 2rem;
+  padding: 0.35rem 1rem;
+  color: #fff7df;
+  background: linear-gradient(90deg, #43266e, #6d3693, #43266e);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+.alpha-notice strong {
+  padding: 0.18rem 0.45rem;
+  border: 1px solid #ffd56f;
+  border-radius: 999px;
+  color: #ffd56f;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+}
+
+.audience-page > .alpha-notice {
+  position: relative;
+  z-index: 2;
+}
+
 .brand .alpha-badge {
   margin-top: 8px;
 }

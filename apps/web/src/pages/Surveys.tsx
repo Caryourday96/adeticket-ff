@@ -5,6 +5,7 @@ import { Brand } from "../components/Brand";
 import { api, download } from "../lib/api";
 import { QRCodeSVG } from "qrcode.react";
 import { parseCustomQuestions, surveyDraftError } from "../lib/surveyDraft";
+import { AlphaNotice } from "../components/AlphaNotice";
 
 export function SurveyForm({ id }: { id: string }) {
   const [survey, setSurvey] = useState<PublicSurvey | null>(null),
@@ -31,6 +32,7 @@ export function SurveyForm({ id }: { id: string }) {
   return (
     <main className="page survey-public">
       <Brand />
+      <AlphaNotice />
       <h1>{survey?.title ?? "Game-night survey"}</h1>
       {error && (
         <p role="alert" className="error">

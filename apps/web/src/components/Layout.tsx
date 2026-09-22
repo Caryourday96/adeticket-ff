@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { LayoutDashboard, Library, BookOpen, ArrowUpRight, Radio } from "lucide-react";
 import { Brand } from "./Brand";
+import { AlphaNotice } from "./AlphaNotice";
 export function Layout({ children, active = "desk" }: { children: ReactNode; active?: string }) {
   return (
     <div className="app-shell">
@@ -54,6 +55,7 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
         </div>
       </aside>
       <div className="workspace">
+        <AlphaNotice />
         <header className="topbar">
           <span>
             <Radio size={14} /> THE HOST'S CORNER

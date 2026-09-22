@@ -4,6 +4,7 @@ import type { PublicState } from "@naija/contracts";
 import { useGame } from "../hooks/useGame";
 import { AudienceAudio } from "../components/AudienceAudio";
 import { Board } from "../components/Board";
+import { AlphaNotice } from "../components/AlphaNotice";
 export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
   const { state, connected, error, clockOffset } = useGame<PublicState>(id, "audience"),
     [now, setNow] = useState(Date.now());
@@ -14,6 +15,7 @@ export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
   return (
     <main className="audience-page">
       <AudienceAudio state={state} connected={connected} tv={tv} now={now + clockOffset} />
+      <AlphaNotice />
       <header>
         <span>
           <Radio size={14} />
