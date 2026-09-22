@@ -4,6 +4,7 @@ import { Layout } from "../components/Layout";
 import { Brand } from "../components/Brand";
 import { api, download } from "../lib/api";
 import { QRCodeSVG } from "qrcode.react";
+import { parseCustomQuestions, surveyDraftError } from "../lib/surveyDraft";
 
 export function SurveyForm({ id }: { id: string }) {
   const [survey, setSurvey] = useState<PublicSurvey | null>(null),
@@ -98,6 +99,7 @@ export function Surveys() {
     [selected, setSelected] = useState<string[] | null>(null);
   const [title, setTitle] = useState("Nigerian game-night survey"),
     [custom, setCustom] = useState("");
+  const [source, setSource] = useState<"preset" | "custom">("preset");
   const [kind, setKind] = useState<"regular" | "fast-money">("regular");
   const [active, setActive] = useState<SurveyResults | null>(null),
     [error, setError] = useState(""),
@@ -105,6 +107,9 @@ export function Surveys() {
     [busy, setBusy] = useState(false);
   const bank = packs.find((p) => p.id === packId)?.bank;
   const ids = selected ?? bank?.questions.slice(0, 5).map((q) => q.id) ?? [];
+  const customQuestions = parseCustomQuestions(custom);
+  const questionCount = source === "custom" ? customQuestions.length : ids.length;
+  const draftError = surveyDraftError({ title, kind, questionCount });
   async function refresh() {
     setList(await api<Summary[]>("/surveys"));
   }
@@ -113,6 +118,8 @@ export function Surveys() {
       .then(([p, s]) => {
         setPacks(p);
         setList(s);
+        const first = p.find((pack) => (pack.bank.roundType ?? "regular") === "regular") ?? p[0];
+        if (first) setPackId(first.id);
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -132,15 +139,17 @@ export function Surveys() {
     setActive(await api<SurveyResults>(`/surveys/${id}/manage`));
   }
   async function create() {
-    const questions = custom.trim()
-      ? custom
-          .split(/\r?\n/)
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .map((prompt) => ({ prompt }))
-      : (bank?.questions.filter((q) => ids.includes(q.id)).map((q) => ({ prompt: q.prompt })) ??
-        []);
-    const s = await api<{ id: string }>("/surveys", { title, roundType: kind, questions });
+    if (draftError) throw new Error(draftError);
+    const questions =
+      source === "custom"
+        ? customQuestions.map((prompt) => ({ prompt }))
+        : (bank?.questions.filter((q) => ids.includes(q.id)).map((q) => ({ prompt: q.prompt })) ??
+          []);
+    const s = await api<{ id: string }>("/surveys", {
+      title: title.trim(),
+      roundType: kind,
+      questions,
+    });
     await refresh();
     await open(s.id);
   }
@@ -185,9 +194,9 @@ export function Surveys() {
                 <input value={title} maxLength={100} onChange={(e) => setTitle(e.target.value)} />
               </label>
               <label>
-                Question library
+                Survey type
                 <select
-                  aria-label="Question library"
+                  aria-label="Survey type"
                   value={kind}
                   onChange={(e) => {
                     const k = e.target.value as typeof kind;
@@ -205,6 +214,10 @@ export function Surveys() {
                 <select
                   aria-label="Source pack"
                   value={packId}
+                  disabled={
+                    source === "custom" ||
+                    !packs.some((p) => (p.bank.roundType ?? "regular") === kind)
+                  }
                   onChange={(e) => {
                     setPackId(e.target.value);
                     setSelected(null);
@@ -219,39 +232,69 @@ export function Surveys() {
                     ))}
                 </select>
               </label>
-              <details>
-                <summary>Choose preset questions ({ids.length} selected)</summary>
-                {bank?.questions.map((q) => (
-                  <label key={q.id} className="survey-choice">
-                    <input
-                      type="checkbox"
-                      checked={ids.includes(q.id)}
-                      onChange={(e) =>
-                        setSelected(
-                          e.target.checked ? [...ids, q.id] : ids.filter((id) => id !== q.id),
-                        )
-                      }
-                    />
-                    {q.prompt}
-                  </label>
-                ))}
-              </details>
+              <fieldset>
+                <legend>Question source</legend>
+                <label className="survey-choice">
+                  <input
+                    type="radio"
+                    checked={source === "preset"}
+                    onChange={() => setSource("preset")}
+                  />
+                  Use questions from the selected library ({ids.length} selected)
+                </label>
+                <label className="survey-choice">
+                  <input
+                    type="radio"
+                    checked={source === "custom"}
+                    onChange={() => setSource("custom")}
+                  />
+                  Enter questions manually ({customQuestions.length} ready)
+                </label>
+              </fieldset>
+              {source === "preset" && (
+                <details>
+                  <summary>Choose preset questions ({ids.length} selected)</summary>
+                  {bank?.questions.map((q) => (
+                    <label key={q.id} className="survey-choice">
+                      <input
+                        type="checkbox"
+                        checked={ids.includes(q.id)}
+                        onChange={(e) =>
+                          setSelected(
+                            e.target.checked ? [...ids, q.id] : ids.filter((id) => id !== q.id),
+                          )
+                        }
+                      />
+                      {q.prompt}
+                    </label>
+                  ))}
+                </details>
+              )}
               <label>
-                Or enter your own questions, one per line
+                Manual questions, one per line
                 <textarea
                   rows={5}
                   value={custom}
                   onChange={(e) => setCustom(e.target.value)}
-                  placeholder="Leave blank to use the selected preset questions"
+                  disabled={source !== "custom"}
+                  placeholder="Choose manual entry above, then add one question per line"
                 />
               </label>
               <p>
-                Choose 5–30 questions. Respondents see questions only, never the existing game
-                answers. Questions stay fixed once created.
+                {kind === "fast-money"
+                  ? "Fast Money requires exactly 5 questions."
+                  : "Choose 5–30 questions."}{" "}
+                Respondents see questions only, never the existing game answers. Questions stay
+                fixed once created.
               </p>
+              {draftError && (
+                <p role="alert" className="error">
+                  {draftError}
+                </p>
+              )}
               <button
                 className="button primary"
-                disabled={busy || !title.trim() || !packs.length}
+                disabled={busy || Boolean(draftError)}
                 onClick={() => void run(create)}
               >
                 Create survey
