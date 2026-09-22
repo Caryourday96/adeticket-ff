@@ -12,7 +12,8 @@ export function BuzzerControls({
   send: (c: Command) => Promise<boolean>;
 }) {
   const { data, error, connected, busy, act, lastUpdated } = useBuzzers<HostBuzzers>(s.id, true);
-  const [invite, setInvite] = useState(false);
+  const [invite, setInvite] = useState(false),
+    [handoffCopied, setHandoffCopied] = useState(false);
   const [diagnostics, setDiagnostics] = useState<{
     revision: number;
     phase: string;
@@ -109,6 +110,24 @@ export function BuzzerControls({
         <p className="muted">
           Keep one host desk open. If the connection drops, wait for the reconnect banner or refresh
           server state before judging the next answer.
+        </p>
+        <button
+          className="button small"
+          onClick={() => {
+            void navigator.clipboard
+              .writeText(`${location.origin}/host/${s.id}`)
+              .then(() => {
+                setHandoffCopied(true);
+                setTimeout(() => setHandoffCopied(false), 2000);
+              })
+              .catch(() => setHandoffCopied(false));
+          }}
+        >
+          {handoffCopied ? "Host link copied" : "Copy trusted host handoff link"}
+        </button>
+        <p className="muted">
+          The second device must sign in as host. Wait until Host sockets shows 2 before handing
+          over control, and avoid judging from both devices at once.
         </p>
       </details>
       {data?.players.length ? (
