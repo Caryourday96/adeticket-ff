@@ -18,14 +18,14 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Host diagnostics provide a trusted handoff link and show the number of connected host desks so a second signed-in device can take over safely. Commit `9549cc7`.
 - Host diagnostics now show current Cast sender/device status and the latest server response time.
 - Alpha release notice now appears on the player and audience room-code entry forms, as well as the in-game player screen.
-- Corrected three Playwright assertions exposed by the latest CI run: join-page alpha notice coverage, the survey success status selector, and the player roster summary selector.
+- Corrected the join-page alpha notice coverage and survey success selector. The latest Playwright run still found one selector targeting the wrong details panel; that final selector correction is in progress.
 - Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
 - Visible branding is now Friends Showdown. Commit `bfe380f`.
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
 
 ## P0 — verify before a major event
 
-- **Deployment verification:** latest commit `d9e3b63` has successful GitHub Validate and Azure deployment workflows, including the production smoke-check step. Its Playwright workflow reported 12 passed and 3 failed; the specific failures are being corrected locally now and still need a fresh CI run. Direct production HTTPS requests from this environment fail TLS, so the Azure smoke check is the current live-route evidence.
+- **Deployment verification:** latest code deployment `a85b28c` passed validation and Azure deployment, including production smoke checks. Its Playwright run passed 13 tests and failed 1 player-approval-flow check because the test opened the wrong collapsible panel. A selector correction is ready for the next commit; direct production HTTPS requests from this environment fail TLS, so Azure smoke checks are the current live-route evidence.
 - **Scraper calibration:** capture matching partial and complete Nigerian board screenshots, tune slot geometry and completion detection, then validate a full episode with preceding spoken questions and variable answer counts.
 - **Cast acceptance:** test the registered receiver on the actual Google Cast TV for discovery, handoff, reconnect, board updates and audio. Build and test the iPad sender wrapper on macOS.
 

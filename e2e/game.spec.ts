@@ -176,7 +176,7 @@ test("players enter their names and only buzz on stage with saved team names", a
     await phone.getByLabel("Your name").fill("Funke");
     await phone.getByRole("button", { name: "Join game", exact: true }).click();
     await expect(phone.getByText("Waiting for host approval", { exact: true })).toBeVisible();
-    await page.locator(".roster-summary > summary").click();
+    await page.locator(".buzzer-controls > details:not(.host-diagnostics) > summary").click();
     await page.getByRole("button", { name: "Approve Funke", exact: true }).click();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeDisabled();
