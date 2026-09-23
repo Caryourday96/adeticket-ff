@@ -251,7 +251,6 @@ test("rehearsal buzz reaches the host and an independent audience", async ({ pag
   }
 });
 
-
 test("public screens expose landmarks and labeled join inputs", async ({ page }) => {
   for (const path of ["/rules", "/play", "/join", "/privacy"]) {
     await page.goto(path);
