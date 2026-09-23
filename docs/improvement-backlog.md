@@ -17,6 +17,8 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Hosts can mute or re-enable audience and Cast sound independently while board updates continue. Commit `5dfbb24`.
 - Host diagnostics provide a trusted handoff link and show the number of connected host desks so a second signed-in device can take over safely. Commit `9549cc7`.
 - Host diagnostics now show current Cast sender/device status and the latest server response time.
+- All generated game, audience, buzzer, survey and host-handoff URLs use `https://ff.adeticket.com`; legacy game subdomains redirect there while preserving path and query string.
+- Azure deployment applies an explicit `APP_ORIGIN` allowlist. Its production smoke step sends a safe invalid-password request from the deployed host and fails if the server replies `Origin not allowed`.
 - Alpha release notice now appears on the player and audience room-code entry forms, as well as the in-game player screen.
 - Fixed the missing alpha notice on `/play` and `/join` and corrected the survey success and player approval browser selectors. Commit `a4f797c` passes the Playwright browser suite.
 - Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
@@ -24,6 +26,8 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
 
 ## P0 — verify before a major event
+
+- **Canonical domain/origin fix:** code redirects old game URLs, generates canonical Adeticket links, and deploys the matching origin allowlist. Confirm the latest Azure smoke check passes on the live service.
 
 - **Deployment verification:** application release `a4f797c` passed GitHub validation, all Playwright browser tests, Azure deployment and production smoke checks. Direct production HTTPS requests from this environment fail TLS, so Azure smoke checks are the current live-route evidence. Before an event, rehearse survey creation, join locking and host diagnostics on the deployed site.
 - **Scraper calibration:** capture matching partial and complete Nigerian board screenshots, tune slot geometry and completion detection, then validate a full episode with preceding spoken questions and variable answer counts.

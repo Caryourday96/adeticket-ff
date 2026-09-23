@@ -26,6 +26,7 @@ import { BuzzerControls } from "../components/BuzzerControls";
 import { RehearsalControls } from "../components/RehearsalControls";
 import { GameResults } from "../components/GameResults";
 import { AudienceThemeControls } from "../components/AudienceThemeControls";
+import { gameOrigin } from "../lib/links";
 export function Host({ id }: { id: string }) {
   const {
     state: s,
@@ -110,7 +111,7 @@ export function Host({ id }: { id: string }) {
       </Layout>
     );
   const q = currentQuestion(s),
-    url = location.origin + "/audience/" + id;
+    url = gameOrigin() + "/audience/" + id;
   const judging = ["faceoff", "play", "steal"].includes(s.phase);
   const active: Side =
     s.phase === "steal"

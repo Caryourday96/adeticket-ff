@@ -10,6 +10,7 @@ env:
   AZURE_CLIENT_ID: 28395708-62f0-43af-9320-4eeb93f83e2e
   AZURE_TENANT_ID: eebc63f8-ba15-4204-b127-5b6c929e7c95
   AZURE_SUBSCRIPTION_ID: bd83bca5-9234-4923-b95f-0dc160ec962c
+  APP_ORIGIN: "https://ff.adeticket.com,https://play.adeticket.com,https://naijafeud.kayodeadetunji.com,https://ff.kayodeadetunji.com"
 concurrency:
   group: azure-production
   cancel-in-progress: false
@@ -39,7 +40,7 @@ jobs:
           tenant-id: ${{ env.AZURE_TENANT_ID }}
           subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
       - name: Configure public Cast and advertising settings
-        run: az webapp config appsettings set --resource-group Kayode_IGO --name "$AZURE_WEBAPP_NAME" --settings CAST_APP_ID=0AF8BA4D ADSENSE_CLIENT=ca-pub-2467796901387108 ADSENSE_RULES_SLOT=8774068970 ADS_ENABLED=false ADS_CONSENT_READY=false --output none
+        run: az webapp config appsettings set --resource-group Kayode_IGO --name "$AZURE_WEBAPP_NAME" --settings APP_ORIGIN="$APP_ORIGIN" CAST_APP_ID=0AF8BA4D ADSENSE_CLIENT=ca-pub-2467796901387108 ADSENSE_RULES_SLOT=8774068970 ADS_ENABLED=false ADS_CONSENT_READY=false --output none
       - uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}

@@ -5,6 +5,7 @@ import { api } from "../lib/api";
 import { Layout } from "../components/Layout";
 import { TeamEditor } from "../components/TeamEditor";
 import { commandId } from "../lib/commandId";
+import { gameOrigin } from "../lib/links";
 export function Setup() {
   const [selfJoin, setSelfJoin] = useState(true);
   const [fastPackId, setFastPackId] = useState("fast-starter");
@@ -241,7 +242,7 @@ export function Setup() {
           Players enter their own names
         </label>
         <p>
-          Set the team names, create the game, then share {location.origin}/play and the game code.
+          Set the team names, create the game, then share {gameOrigin()}/play and the game code.
           Approve players in Phone buzzers.
         </p>
         <div className="team-editors">

@@ -6,6 +6,7 @@ import { api, download } from "../lib/api";
 import { QRCodeSVG } from "qrcode.react";
 import { parseCustomQuestions, surveyDraftError } from "../lib/surveyDraft";
 import { AlphaNotice } from "../components/AlphaNotice";
+import { gameOrigin } from "../lib/links";
 
 export function SurveyForm({ id }: { id: string }) {
   const [survey, setSurvey] = useState<PublicSurvey | null>(null),
@@ -332,20 +333,16 @@ export function Surveys() {
                 {active.responseCount} submissions ·{" "}
                 {active.open ? "Open for responses" : "Closed for review"}
               </p>
-              <a href={`/survey/${active.id}`} target="_blank" rel="noreferrer">
+              <a href={`${gameOrigin()}/survey/${active.id}`} target="_blank" rel="noreferrer">
                 Open respondent form
               </a>
               <input
                 aria-label="Survey share link"
                 readOnly
-                value={`${location.origin}/survey/${active.id}`}
+                value={`${gameOrigin()}/survey/${active.id}`}
                 onFocus={(e) => e.target.select()}
               />
-              <QRCodeSVG
-                value={`${location.origin}/survey/${active.id}`}
-                size={160}
-                marginSize={3}
-              />
+              <QRCodeSVG value={`${gameOrigin()}/survey/${active.id}`} size={160} marginSize={3} />
               <div className="button-row">
                 <button
                   className="button"

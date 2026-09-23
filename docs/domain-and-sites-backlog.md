@@ -13,8 +13,8 @@
 ## Deferred by owner
 
 - [x] Bind ff.adeticket.com to Friends Showdown.
-- [ ] Redirect old game domains to ff.adeticket.com, preserving paths and query strings.
-- [ ] Update generated links and QR codes after the game-domain migration.
+- [x] Redirect `ff.kayodeadetunji.com` and `naijafeud.kayodeadetunji.com` to `ff.adeticket.com`, preserving paths and query strings.
+- [x] Generate game, audience, buzzer, survey and host-handoff links from the canonical `https://ff.adeticket.com` origin (local development keeps its local origin).
 - [ ] Update and test Google Cast receiver configuration after the migration.
 - [ ] Add additional playable games to the catalogue as they become available.
 

@@ -5,6 +5,7 @@ import { useBuzzers } from "../hooks/useBuzzers";
 import { phoneStatus } from "../lib/phoneStatus";
 import { api } from "../lib/api";
 import { CAST_STATUS_EVENT, type CastStatusDetail } from "../lib/cast";
+import { gameOrigin } from "../lib/links";
 export function BuzzerControls({
   state: s,
   send,
@@ -28,7 +29,7 @@ export function BuzzerControls({
     status: "Cast has not been opened on this host yet.",
     device: "",
   });
-  const url = location.origin + "/play/" + s.id;
+  const url = gameOrigin() + "/play/" + s.id;
   useEffect(() => {
     let alive = true;
     const refresh = () =>
@@ -137,7 +138,7 @@ export function BuzzerControls({
           className="button small"
           onClick={() => {
             void navigator.clipboard
-              .writeText(`${location.origin}/host/${s.id}`)
+              .writeText(`${gameOrigin()}/host/${s.id}`)
               .then(() => {
                 setHandoffCopied(true);
                 setTimeout(() => setHandoffCopied(false), 2000);
@@ -177,7 +178,7 @@ export function BuzzerControls({
       <p>
         Players join at{" "}
         <a href="/play" target="_blank" rel="noreferrer">
-          {location.origin}/play
+          {gameOrigin()}/play
         </a>{" "}
         · Game code <strong>{s.id}</strong>. Approve their names, then put one player from each team
         on stage.

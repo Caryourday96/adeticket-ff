@@ -42,11 +42,19 @@ export function createApplication(options: {
       : []),
   ]);
   const originAllowed = (origin: string | undefined) => !origin || origins.has(origin);
+  const legacyGameHosts = new Set(["ff.kayodeadetunji.com", "naijafeud.kayodeadetunji.com"]);
   const io = new Server(http, {
     maxHttpBufferSize: 20000,
     allowRequest: (req, cb) => cb(null, originAllowed(req.headers.origin)),
   });
   app.disable("x-powered-by");
+  app.use((req, res, next) => {
+    if (legacyGameHosts.has(req.hostname.toLowerCase())) {
+      res.redirect(308, `https://ff.adeticket.com${req.originalUrl}`);
+      return;
+    }
+    next();
+  });
   const ads = options.advertising ?? advertisingConfig({});
   app.use(
     helmet({
