@@ -265,3 +265,31 @@ test("Fast Money rehearsal starts the real timer and enables question navigation
     "step",
   );
 });
+
+
+test("a second signed-in host desk can safely take over", async ({ page, browser }) => {
+  await signIn(page);
+  await page.getByRole("button", { name: "Create game", exact: true }).click();
+  await expect(page).toHaveURL(/\\/host\\/[A-F0-9]{6}$/);
+  const id = page.url().split("/").pop()!;
+  const firstDiagnostics = page.locator("details.host-diagnostics");
+  await firstDiagnostics.locator("summary").click();
+  await expect(firstDiagnostics).toContainText(/Host sockets: 1/, { timeout: 10000 });
+
+  const secondContext = await browser.newContext();
+  try {
+    const secondPage = await secondContext.newPage();
+    await signIn(secondPage);
+    await secondPage.goto(new URL(`/host/${id}`, page.url()).href);
+    const secondDiagnostics = secondPage.locator("details.host-diagnostics");
+    await secondDiagnostics.locator("summary").click();
+    await expect(secondDiagnostics).toContainText(/Host sockets: 2/, { timeout: 10000 });
+
+    await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
+    await expect(
+      secondPage.getByRole("button", { name: "Lock buzzers", exact: true }),
+    ).toBeVisible();
+  } finally {
+    await secondContext.close();
+  }
+});
