@@ -27,7 +27,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 
 ## P0 — verify before a major event
 
-- **Canonical domain/origin fix:** code redirects old game URLs, generates canonical Adeticket links, and deploys the matching origin allowlist. Confirm the latest Azure smoke check passes on the live service.
+- **Canonical domain/origin fix — verified:** commit `4bb6e78` passed validation, Playwright, Azure deployment and production smoke checks. Smoke confirmed `POST /api/login` from `https://ff.adeticket.com` reached login validation (401), not the origin-rejection response (403). Local tests cover both legacy redirects; direct external requests to the legacy hosts are not accessible from this environment.
 
 - **Deployment verification:** application release `a4f797c` passed GitHub validation, all Playwright browser tests, Azure deployment and production smoke checks. Direct production HTTPS requests from this environment fail TLS, so Azure smoke checks are the current live-route evidence. Before an event, rehearse survey creation, join locking and host diagnostics on the deployed site.
 - **Scraper calibration:** capture matching partial and complete Nigerian board screenshots, tune slot geometry and completion detection, then validate a full episode with preceding spoken questions and variable answer counts.
