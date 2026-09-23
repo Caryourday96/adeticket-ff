@@ -94,7 +94,7 @@ function HostGate({ children }: { children: ReactNode }) {
 function Join({ player = false }: { player?: boolean }) {
   const [code, setCode] = useState("");
   return (
-    <div className="entry-page">
+    <main className="entry-page">
       <Brand large />
       <AlphaNotice />
       <section className="entry-card">
@@ -132,7 +132,7 @@ function Join({ player = false }: { player?: boolean }) {
           I'm hosting instead →
         </a>
       </section>
-    </div>
+    </main>
   );
 }
 function Rules() {
