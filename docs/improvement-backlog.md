@@ -25,12 +25,13 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Visible branding is now Friends Showdown. Commit `bfe380f`.
 - Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
 - Ihechi’s audience theme now uses burgundy and earth tones. Commit `765ca06`; GitHub validation, Playwright, Azure deployment and production smoke checks passed.
+- Player and audience join-code pages now expose a main landmark; Playwright checks core-page landmarks and labeled join fields. Commit `b2b2bbed`; validation, browser tests and Azure smoke checks passed.
 
 ## P0 — verify before a major event
 
 - **Canonical domain/origin fix — verified:** commit `4bb6e78` passed validation, Playwright, Azure deployment and production smoke checks. Smoke confirmed `POST /api/login` from `https://ff.adeticket.com` reached login validation (401), not the origin-rejection response (403). Local tests cover both legacy redirects; direct external requests to the legacy hosts are not accessible from this environment.
 
-- **Deployment verification:** application release `765ca06` passed GitHub validation, Playwright, Azure deployment and production smoke checks. Direct production HTTPS requests from this environment fail TLS, so Azure smoke checks are the current live-route evidence. Before an event, rehearse survey creation, join locking and host diagnostics on the deployed site.
+- **Deployment verification:** application release `b2b2bbed` passed GitHub validation, Playwright, Azure deployment and production smoke checks. Direct production HTTPS requests from this environment fail TLS, so Azure smoke checks are the current live-route evidence. Before an event, rehearse survey creation, join locking and host diagnostics on the deployed site.
 - **Scraper calibration:** current references include a partial board with 4 of 8 answers visible and a separate complete 8-answer board; they verify OCR text but are not a matched calibration pair. The supplied video sample reaches 7 of 8 answers before the scene changes. Capture clean partial and complete frames from one matching board sequence, tune slot geometry/completion detection, then validate a full episode with question matching and variable answer counts.
 - **Cast acceptance:** test the registered receiver on the actual Google Cast TV for discovery, handoff, reconnect, board updates and audio. Build and test the iPad sender wrapper on macOS.
 
@@ -48,7 +49,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Downloadable scorecard with round winners, steals, Fast Money totals and timestamps.
 - Reusable event templates for team names, themes, question packs and sponsor text.
 - High-contrast mode, reduced motion, larger text, keyboard focus and screen-reader audit.
-- Automated accessibility checks in CI.
+- Basic Playwright accessibility smoke checks for core page landmarks and join-form labels are shipped. Full WCAG/axe audit, keyboard/focus, contrast, reduced-motion and screen-reader review remain.
 
 ## P3 — operations and growth
 
