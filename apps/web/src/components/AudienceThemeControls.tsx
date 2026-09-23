@@ -41,7 +41,7 @@ export function AudienceThemeControls({
             }
           >
             <option value="classic">Classic Friends Showdown</option>
-            <option value="birthday">Ihechi’s birthday · plum & gold</option>
+            <option value="birthday">Ihechi’s birthday · burgundy & earth tones</option>
             <option value="midnight">Midnight · teal & navy</option>
           </select>
         </label>

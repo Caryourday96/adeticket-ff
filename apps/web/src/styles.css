@@ -3161,15 +3161,46 @@ small {
 
 /* Event themes also apply to host previews and Cast. */
 .stage.theme-birthday {
-  background: radial-gradient(ellipse at top, #732557, #301333 55%, #160d20);
-  border-color: #d8ae64;
+  background: radial-gradient(ellipse at top, #78343d, #49332c 55%, #211a17);
+  border-color: #d3b487;
 }
 .theme-birthday .stage-lights {
-  background: linear-gradient(90deg, transparent, #ffe0a0, #f5a2d4, transparent);
+  background: linear-gradient(90deg, transparent, #f1ddbd, #c9825f, transparent);
 }
 .theme-birthday .question-plaque {
-  background: #421c3d;
-  border-color: #d8ae64;
+  background: #542830;
+  border-color: #c9a477;
+}
+.theme-birthday .event-brand strong {
+  color: #f1d9b8;
+}
+.theme-birthday .event-brand small {
+  color: #f1e7d8;
+}
+.theme-birthday .answer-frame {
+  border-color: #b88f68;
+  background: #291f1b;
+  box-shadow:
+    0 0 0 3px #4b3428,
+    0 0 0 5px #c49c70,
+    0 0 18px #c9825f33,
+    inset 0 0 8px #000;
+}
+.theme-birthday .answer-tile {
+  border-color: #b99070;
+  background: linear-gradient(180deg, #76513d, #594032 65%, #403027);
+}
+.theme-birthday .answer-tile.revealed {
+  background: linear-gradient(#a46d4c, #79503b);
+}
+.theme-birthday .answer-number {
+  background: linear-gradient(#51392e, #382a24);
+  border-color: #b99070;
+}
+.theme-birthday .answer-tile.revealed strong {
+  background: #53352e;
+  border-left-color: #c6a17a;
+  color: #f2dfc2;
 }
 .stage.theme-midnight {
   background: radial-gradient(ellipse at top, #104b56, #092633 55%, #06131e);
