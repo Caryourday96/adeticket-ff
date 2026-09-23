@@ -266,7 +266,6 @@ test("Fast Money rehearsal starts the real timer and enables question navigation
   );
 });
 
-
 test("a second signed-in host desk can safely take over", async ({ page, browser }) => {
   await signIn(page);
   await page.getByRole("button", { name: "Create game", exact: true }).click();
