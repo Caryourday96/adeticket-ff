@@ -252,7 +252,9 @@ test("rehearsal buzz reaches the host and an independent audience", async ({ pag
 });
 
 
-test("key public and host screens expose named controls and a main landmark", async ({\n  page,\n}) => {
+test("key public and host screens expose named controls and a main landmark", async ({
+  page,
+}) => {
   const audit = () =>
     page.evaluate(() => {
       const mainCount = document.querySelectorAll("main").length;
