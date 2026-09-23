@@ -45,7 +45,7 @@ test("library review filter and completed game scorecard are available", async (
   await page.goto(gameUrl);
   const downloadEvent = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download scorecard", exact: true }).click();
-  expect((await downloadEvent).suggestedFilename()).toBe(`naija-feud-${id}-scorecard.csv`);
+  expect((await downloadEvent).suggestedFilename()).toBe(`friends-showdown-${id}-scorecard.csv`);
 });
 
 test("question history filters recorded boards and links back to their game", async ({ page }) => {
@@ -169,8 +169,8 @@ test("players enter their names and only buzz on stage with saved team names", a
   try {
     const phone = await context.newPage();
     await phone.goto(new URL("/play", page.url()).href);
-    await phone.getByLabel("Room code").fill(id.toLowerCase());
-    await expect(phone.getByLabel("Room code")).toHaveValue(id);
+    await phone.getByLabel("Game code").fill(id.toLowerCase());
+    await expect(phone.getByLabel("Game code")).toHaveValue(id);
     await phone.getByRole("button", { name: "Join as a player" }).click();
     await expect(phone.getByLabel("Team", { exact: true })).toContainText("Lagos Stars");
     await phone.getByLabel("Your name").fill("Funke");
@@ -259,10 +259,10 @@ test("public screens expose landmarks and labeled join inputs", async ({ page })
   }
 
   await page.goto("/play");
-  await expect(page.getByLabel("Room code")).toBeVisible();
+  await expect(page.getByLabel("Game code")).toBeVisible();
   await expect(page.getByRole("button", { name: "Join as a player" })).toBeVisible();
   await page.goto("/join");
-  await expect(page.getByLabel("Room code")).toBeVisible();
+  await expect(page.getByLabel("Game code")).toBeVisible();
   await expect(page.getByRole("button", { name: "Join audience" })).toBeVisible();
 
   await signIn(page);

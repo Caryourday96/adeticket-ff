@@ -538,7 +538,7 @@ export function Host({ id }: { id: string }) {
                 <QRCodeSVG value={url} size={190} level="M" marginSize={3} />
               </div>
               <div className="room-code">{id}</div>
-              <p>Or enter this room code on the Join screen.</p>
+              <p>Or enter this game code on the Join screen.</p>
               <div className="button-row">
                 <button
                   className="button"

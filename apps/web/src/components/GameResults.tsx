@@ -32,7 +32,7 @@ export function GameResults({ state }: { state: HostState }) {
         className="button"
         onClick={() =>
           download(
-            `naija-feud-${state.id}-scorecard.csv`,
+            `friends-showdown-${state.id}-scorecard.csv`,
             scorecard(state),
             "text/csv;charset=utf-8",
           )

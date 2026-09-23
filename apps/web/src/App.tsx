@@ -100,11 +100,11 @@ function Join({ player = false }: { player?: boolean }) {
       <section className="entry-card">
         <div className="eyebrow">{player ? "PLAYER JOIN" : "TAKE YOUR SEAT"}</div>
         <h1>
-          The family's
+          Your friends are
           <br />
           waiting for you.
         </h1>
-        <p>Enter the room code from your host, or scan their QR code to join directly.</p>
+        <p>Enter the game code from your host, or scan their QR code to join directly.</p>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -112,7 +112,7 @@ function Join({ player = false }: { player?: boolean }) {
           }}
         >
           <label>
-            Room code
+            Game code
             <input
               className="code-input"
               value={code}
@@ -220,11 +220,11 @@ function Catalogue() {
         <section id="games" className="catalogue-games">
           <div className="catalogue-section-heading">
             <h2>Your next game night</h2>
-            <span>01 / AVAILABLE NOW</span>
+            <span>01 / ALPHA ACCESS</span>
           </div>
           <article className="catalogue-card">
             <div className="catalogue-art" aria-hidden="true">
-              <span>FAMILY</span>
+              <span>FRIENDS</span>
               <strong>SHOWDOWN</strong>
               <div>
                 <i>1</i>
@@ -234,11 +234,12 @@ function Catalogue() {
               </div>
             </div>
             <div className="catalogue-details">
-              <div className="eyebrow">TEAMS · TRIVIA · PHONE BUZZERS</div>
+              <div className="eyebrow">TEAMS · SURVEY ANSWERS · PHONE BUZZERS</div>
               <div className="catalogue-title-row">
                 <h3>Friends Showdown</h3>
                 <span className="alpha-badge">ALPHA</span>
               </div>
+              <p>Early access — features are still being refined.</p>
               <p>
                 Two teams. One survey board. Guess the popular answers, race to buzz in, and go for
                 the steal.
