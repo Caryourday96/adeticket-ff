@@ -252,41 +252,39 @@ test("rehearsal buzz reaches the host and an independent audience", async ({ pag
 });
 
 
-test("key public and host screens expose named controls and a main landmark", async ({
-  page,
-}) => {
+test("main screens have accessible names", async ({ page }) => {
   const audit = () =>
     page.evaluate(() => {
-      const mainCount = document.querySelectorAll("main").length;
-      const isVisible = (element: HTMLElement) =>
+      const visible = (element: HTMLElement) =>
         element.getClientRects().length > 0 &&
-        getComputedStyle(element).visibility !== "hidden" &&
-        element.closest('[aria-hidden="true"]') === null;
-      const controls = Array.from(
-        document.querySelectorAll<HTMLElement>(
-          "main button, main a[href], main input:not([type='hidden']), main select, main textarea",
-        ),
-      ).filter(isVisible);
-      const hasName = (element: HTMLElement) => {
-        const labelledBy = element
-          .getAttribute("aria-labelledby")
-          ?.split(/\s+/)
-          .map((id) => document.getElementById(id)?.textContent?.trim() ?? "")
-          .join(" ");
-        const labels = (element as HTMLInputElement).labels;
-        return Boolean(
-          element.getAttribute("aria-label")?.trim() ||
-            labelledBy?.trim() ||
-            element.getAttribute("title")?.trim() ||
-            element.innerText?.trim() ||
-            labels?.length,
-        );
-      };
+        getComputedStyle(element).visibility !== "hidden";
+      const interactives = Array.from(
+        document.querySelectorAll<HTMLElement>("main button, main a[href]"),
+      ).filter(visible);
+      const fields = Array.from(
+        document.querySelectorAll<
+          HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+        >("main input:not([type='hidden']), main select, main textarea"),
+      ).filter(visible);
       return {
-        mainCount,
-        unnamed: controls
-          .filter((element) => !hasName(element))
+        mainCount: document.querySelectorAll("main").length,
+        unnamed: interactives
+          .filter(
+            (element) =>
+              !element.innerText?.trim() &&
+              !element.getAttribute("aria-label") &&
+              !element.getAttribute("aria-labelledby") &&
+              !element.getAttribute("title"),
+          )
           .map((element) => element.outerHTML.slice(0, 160)),
+        unlabeled: fields
+          .filter(
+            (field) =>
+              !field.labels?.length &&
+              !field.getAttribute("aria-label") &&
+              !field.getAttribute("aria-labelledby"),
+          )
+          .map((field) => field.outerHTML.slice(0, 160)),
       };
     });
 
@@ -295,6 +293,7 @@ test("key public and host screens expose named controls and a main landmark", as
     const result = await audit();
     expect(result.mainCount, path).toBe(1);
     expect(result.unnamed, path).toEqual([]);
+    expect(result.unlabeled, path).toEqual([]);
   }
 
   await signIn(page);
@@ -302,8 +301,8 @@ test("key public and host screens expose named controls and a main landmark", as
   const host = await audit();
   expect(host.mainCount, "host desk").toBe(1);
   expect(host.unnamed, "host desk").toEqual([]);
+  expect(host.unlabeled, "host desk").toEqual([]);
 });
-
 test("Fast Money rehearsal starts the real timer and enables question navigation", async ({
   page,
 }) => {
