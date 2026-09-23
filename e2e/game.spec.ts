@@ -271,6 +271,7 @@ test("public screens expose landmarks and labeled join inputs", async ({ page })
   await expect(page.locator("main")).toHaveCount(1);
   await expect(page.getByRole("button", { name: "Open buzzers" })).toBeVisible();
 });
+
 test("Fast Money rehearsal starts the real timer and enables question navigation", async ({
   page,
 }) => {
