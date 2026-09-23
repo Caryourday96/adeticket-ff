@@ -149,8 +149,8 @@ export function BuzzerControls({
           {handoffCopied ? "Host link copied" : "Copy trusted host handoff link"}
         </button>
         <p className="muted">
-          The second device must sign in as host. Wait until Host sockets shows 2 before handing
-          over control, and avoid judging from both devices at once.
+          The second device must sign in as host. Wait until the host socket count rises after it connects,
+          then hand over control and avoid judging from both devices at once.
         </p>
       </details>
       {data?.players.length ? (

@@ -37,7 +37,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 ## P1 — game-night reliability
 
 - **Offline recovery:** short-outage state retention is shipped; longer-outage reconciliation and conflict messaging remain to be tested and hardened.
-- **Host handoff:** the trusted-link and connected-host-count flow is shipped. The second-host takeover Playwright test passed in commit `821c098`; a live two-device rehearsal is still required.
+- **Host handoff:** the trusted-link and connected-host-count flow is shipped. The second-host takeover Playwright test passed in commit `821c098`; diagnostics report raw sockets and can exceed device count, so the test checks 2+ plus synchronized controls. A live two-device rehearsal is still required.
 - **Fast Money polish:** expiry sound, timer-expiry messaging, pass-and-return wording and final-results presentation are shipped. Remaining work is optional visual refinement after a live game-night rehearsal.
 - **Moderation:** add join-code regeneration. Treat as a deliberate identity migration: the current code is the game’s primary key across persistence, routes and socket rooms. Locking joins, player-facing status and independent audience-sound control are shipped.
 - **Diagnostics:** current Cast sender/device status and latest server response time are now shown. Confirm accuracy during a live TV session.

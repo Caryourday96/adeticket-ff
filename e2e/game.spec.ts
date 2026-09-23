@@ -282,7 +282,7 @@ test("a second signed-in host desk can safely take over", async ({ page, browser
     await secondPage.goto(new URL(`/host/${id}`, page.url()).href);
     const secondDiagnostics = secondPage.locator("details.host-diagnostics");
     await secondDiagnostics.locator("summary").click();
-    await expect(secondDiagnostics).toContainText(/Host sockets: 2/, { timeout: 10000 });
+    await expect(secondDiagnostics).toContainText(/Host sockets: (?:[2-9]|\\d{2,})/, { timeout: 10000 });
 
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(
