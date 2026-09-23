@@ -82,10 +82,10 @@ function HostGate({ children }: { children: ReactNode }) {
           </button>
         </form>
         <a className="entry-link" href="/play">
-          Playing? Join with your game code →
+          Playing? Join with your game code
         </a>
         <a className="entry-link" href="/join">
-          Here to watch? Join the audience →
+          Here to watch? Join the audience
         </a>
       </section>
     </div>
@@ -202,7 +202,7 @@ function Catalogue() {
         <a className="catalogue-brand" href="/catalogue">
           adeticket<span>play</span>
         </a>
-        <a href="mailto:adeticket@gmail.com">Get in touch ↗</a>
+        <a href="mailto:adeticket@gmail.com">Get in touch</a>
       </header>
       <main>
         <section className="catalogue-intro">
@@ -214,7 +214,7 @@ function Catalogue() {
           </h1>
           <p>Pick your game, gather your people, and make a night of it.</p>
           <a className="button primary" href="#games">
-            Explore games ↓
+            Explore games
           </a>
         </section>
         <section id="games" className="catalogue-games">
@@ -246,9 +246,9 @@ function Catalogue() {
               </p>
               <div className="catalogue-actions">
                 <a className="button primary" href="https://ff.adeticket.com/">
-                  Open game ↗
+                  Open game
                 </a>
-                <a href="https://ff.adeticket.com/play">Join with a game code →</a>
+                <a href="https://ff.adeticket.com/play">Join with a game code</a>
               </div>
               <a href="https://ff.adeticket.com/rules">Read the rules</a>
             </div>

@@ -145,7 +145,7 @@ export function Player({ id }: { id: string }) {
           {error || gameError}
         </p>
       )}
-      <a href={"/audience/" + id}>Watch the audience board →</a>
+      <a href={"/audience/" + id}>Watch the audience board</a>
     </main>
   );
 }
