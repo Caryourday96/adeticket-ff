@@ -270,7 +270,7 @@ test("Fast Money rehearsal starts the real timer and enables question navigation
 test("a second signed-in host desk can safely take over", async ({ page, browser }) => {
   await signIn(page);
   await page.getByRole("button", { name: "Create game", exact: true }).click();
-  await expect(page).toHaveURL(/\\/host\\/[A-F0-9]{6}$/);
+  await expect(page).toHaveURL(new RegExp("/host/[A-F0-9]{6}$"));
   const id = page.url().split("/").pop()!;
   const firstDiagnostics = page.locator("details.host-diagnostics");
   await firstDiagnostics.locator("summary").click();
