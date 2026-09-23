@@ -303,6 +303,7 @@ test("main screens have accessible names", async ({ page }) => {
   expect(host.unnamed, "host desk").toEqual([]);
   expect(host.unlabeled, "host desk").toEqual([]);
 });
+
 test("Fast Money rehearsal starts the real timer and enables question navigation", async ({
   page,
 }) => {
