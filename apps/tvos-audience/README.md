@@ -7,7 +7,9 @@ This is a native tvOS screen for the public Friends Showdown audience state. It 
 1. On a Mac, create a new Xcode **tvOS App** project named `FriendsShowdownTV` with SwiftUI.
 2. Replace the generated app and content files with `AudienceTVApp.swift` and `AudienceTVView.swift`. Confirm both are in the tvOS target.
 3. Use a unique bundle identifier and select your Apple Account's Personal Team in Signing & Capabilities. Pair the Apple TV with Xcode and run the app.
-4. Enter the six-character game code from the host. The board updates without a sender app.
+4. For manual use, enter the six-character game code from the host. For iPad control, read the eight-character pairing code shown on the TV, enter it once in the iPad sender app, then choose **Show on Apple TV** there. The board still renders on the TV without mirroring.
+
+The pairing flow needs the server changes in this branch to be deployed. Until then, manual code entry continues to use the existing public audience endpoint. This source has not yet been compiled in Xcode or verified on Apple TV hardware.
 
 No CocoaPods, Cast SDK or new server resource is required for this receiver. Apple Personal Team provisioning expires periodically, so this is for personal testing rather than App Store distribution. The code has not been compiled or tested on Apple TV from the Windows development workspace.
 

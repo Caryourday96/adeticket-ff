@@ -35,7 +35,73 @@ private struct AudienceState: Decodable {
 private final class AudienceFeed: ObservableObject {
     @Published var state: AudienceState?
     @Published var status = "Enter the game code shown by the host."
+    @Published var pairingCode = ""
+    @Published var paired = false
     private var polling: Task<Void, Never>?
+    private var pairing: Task<Void, Never>?
+    private var activeRoom = ""
+
+    func startPairing() {
+        guard pairing == nil else { return }
+        let defaults = UserDefaults.standard
+        let id = defaults.string(forKey: "tvDeviceId") ?? UUID().uuidString.lowercased()
+        let secret = defaults.string(forKey: "tvDeviceSecret") ??
+            (UUID().uuidString + UUID().uuidString).replacingOccurrences(of: "-", with: "").lowercased()
+        defaults.set(id, forKey: "tvDeviceId")
+        defaults.set(secret, forKey: "tvDeviceSecret")
+        pairing = Task {
+            var lastRegistration = Date.distantPast
+            while !Task.isCancelled {
+                do {
+                    if !paired && Date().timeIntervalSince(lastRegistration) > 240 {
+                        let response: RegisterReply = try await post("register", body: [
+                            "deviceId": id, "deviceSecret": secret, "name": "Friends Showdown Apple TV"])
+                        pairingCode = response.pairingCode ?? ""
+                        paired = response.paired
+                        lastRegistration = Date()
+                    }
+                    let response: PollReply = try await post("poll", body: [
+                        "deviceId": id, "deviceSecret": secret])
+                    pairingCode = response.pairingCode ?? ""
+                    paired = response.paired
+                    if let room = response.room, room != activeRoom {
+                        activeRoom = room
+                        start(code: room)
+                    }
+                } catch {
+                    status = "Apple TV connection lost. Retrying…"
+                }
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+            }
+        }
+    }
+
+    func requestNewPairingCode() {
+        guard let id = UserDefaults.standard.string(forKey: "tvDeviceId"),
+              let secret = UserDefaults.standard.string(forKey: "tvDeviceSecret") else { return }
+        Task {
+            do {
+                let response: RegisterReply = try await post("register", body: [
+                    "deviceId": id, "deviceSecret": secret,
+                    "name": "Friends Showdown Apple TV", "renew": true])
+                pairingCode = response.pairingCode ?? ""
+            } catch { status = "Could not generate a pairing code. Try again." }
+        }
+    }
+
+    private struct RegisterReply: Decodable { let pairingCode: String?; let paired: Bool }
+    private struct PollReply: Decodable { let pairingCode: String?; let paired: Bool; let room: String? }
+    private func post<T: Decodable>(_ action: String, body: [String: Any]) async throws -> T {
+        var request = URLRequest(url: URL(string: "https://ff.adeticket.com/api/tv/\(action)")!)
+        request.httpMethod = "POST"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let response = response as? HTTPURLResponse, response.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+        return try JSONDecoder().decode(T.self, from: data)
+    }
 
     func start(code: String) {
         stop()
@@ -68,7 +134,7 @@ private final class AudienceFeed: ObservableObject {
         }
     }
 
-    func stop() { polling?.cancel(); polling = nil }
+    func stop() { polling?.cancel(); polling = nil; pairing?.cancel(); pairing = nil }
 }
 
 struct AudienceTVView: View {
@@ -81,6 +147,13 @@ struct AudienceTVView: View {
                 Text("FRIENDS SHOWDOWN").font(.title.bold())
                 Spacer()
                 Text(feed.status).font(.headline).foregroundStyle(.secondary)
+            }
+            if !feed.pairingCode.isEmpty {
+                Text("Pair from iPad with code \(feed.pairingCode)")
+                    .font(.title3.bold())
+            } else if feed.paired {
+                Text("Apple TV paired with iPad").font(.title3)
+                Button("Pair another iPad") { feed.requestNewPairingCode() }
             }
             if let game = feed.state {
                 HStack {
@@ -140,7 +213,7 @@ struct AudienceTVView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(red: 0.03, green: 0.07, blue: 0.2))
         .foregroundStyle(.white)
-        .onAppear { if !room.isEmpty { feed.start(code: room) } }
+        .onAppear { feed.startPairing(); if !room.isEmpty { feed.start(code: room) } }
         .onDisappear { feed.stop() }
     }
 }

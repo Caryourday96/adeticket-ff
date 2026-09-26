@@ -136,6 +136,26 @@ export function createApplication(options: {
     }),
   );
   app.get("/api/health", (_req, res) => res.json({ ok: true }));
+  const tvPairLimiter = rateLimit({ windowMs: 60000, limit: 5, standardHeaders: true, legacyHeaders: false });
+  const tvRegisterLimiter = rateLimit({ windowMs: 60000, limit: 20, standardHeaders: true, legacyHeaders: false });
+  const tvCredentials = z.object({ deviceId: z.string().uuid(), deviceSecret: z.string().regex(/^[a-f0-9]{64}$/) });
+  app.post("/api/tv/register", tvRegisterLimiter, (req, res) => {
+    const body = tvCredentials.extend({ name: z.string().trim().min(1).max(40), renew: z.boolean().optional() }).parse(req.body);
+    res.json(store.tvRegister(body.deviceId, body.deviceSecret, body.name, body.renew));
+  });
+  app.post("/api/tv/poll", (req, res) => {
+    const body = tvCredentials.parse(req.body);
+    res.json(store.tvPoll(body.deviceId, body.deviceSecret));
+  });
+  app.post("/api/tv/pair", tvPairLimiter, (req, res) => {
+    const body = z.object({ pairingCode: z.string().regex(/^[A-F0-9]{8}$/) }).parse(req.body);
+    res.json(store.tvPair(body.pairingCode));
+  });
+  app.post("/api/tv/show", (req, res) => {
+    const body = z.object({ deviceId: z.string().uuid(), controllerToken: z.string().regex(/^[a-f0-9]{64}$/), room: z.string().regex(/^[A-F0-9]{6}$/) }).parse(req.body);
+    if (!store.has(body.room)) { res.status(404).json({ error: "Game not found." }); return; }
+    res.json(store.tvSend(body.deviceId, body.controllerToken, body.room));
+  });
   app.get("/ads.txt", (_req, res) => {
     res.type("text/plain").setHeader("Cache-Control", "public, max-age=300");
     if (!ads.publisher) {
