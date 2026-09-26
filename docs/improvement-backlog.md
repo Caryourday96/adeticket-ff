@@ -45,6 +45,7 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 
 ## P2 — presentation and accessibility
 
+- Audience audio: original, more differentiated buzz/reveal/strike/timer/win cues are implemented; listen on the actual TV and adjust levels and tone to suit the room. The Nigerian Family Feud broadcast is a pacing reference, not an audio source. The native Apple TV receiver still needs its own sound implementation.
 - Audience layouts: board-only, scoreboard-only, waiting room, QR join and final-score modes.
 - Downloadable scorecard with round winners, steals, Fast Money totals and timestamps.
 - Reusable event templates for team names, themes, question packs and sponsor text.
