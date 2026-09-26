@@ -12,6 +12,10 @@ This is a small native iOS sender for the existing Google Cast receiver. It is i
 6. Run on the iPad. Enable Developer Mode if Xcode asks, and keep the iPad and Cast TV on the same Wi-Fi.
 7. Enter the six-character host game code and tap Cast. The app sends `SHOW_ROOM` to the receiver at `/cast` using Cast application ID `0AF8BA4D`.
 
+The supplied `artwork/owner-icon-source.jpg` is the owner's exact logo. In Xcode, open `Assets.xcassets` → `AppIcon`, choose the single-size icon layout, and use a 1024×1024 PNG export of this source. Keep the mark and signature unchanged. The uploaded source is 700×700 JPEG, so it is preserved here as artwork rather than incorrectly labelled as a ready-to-build app icon. The generated image variant was rejected because it altered the logo's proportions.
+
+For an Apple TV with an independent board, see `../tvos-audience/README.md`. A Cast-enabled smart TV works with this sender; a TV browser can open the audience URL directly. Other smart TVs need their own receiver app or an external Cast/Apple TV device.
+
 The free Personal Team is for personal device testing. The app must be re-provisioned periodically and cannot be distributed through the App Store or TestFlight without paid Apple Developer membership.
 
 ## Receiver contract

@@ -3,5 +3,5 @@
 <key>NSBonjourServices</key>
 <array>
   <string>_googlecast._tcp</string>
-  <string>_googlezone._tcp</string>
+  <string>_0AF8BA4D._googlecast._tcp</string>
 </array>
