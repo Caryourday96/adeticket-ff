@@ -26,7 +26,9 @@ export class Store {
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS players(id TEXT PRIMARY KEY, game TEXT NOT NULL, hash TEXT NOT NULL, body TEXT NOT NULL)",
     );
-    this.db.exec("CREATE TABLE IF NOT EXISTS tv_devices(id TEXT PRIMARY KEY, secret_hash TEXT NOT NULL, control_hash TEXT, pair_code TEXT, pair_expires INTEGER NOT NULL DEFAULT 0, last_seen INTEGER NOT NULL DEFAULT 0, room TEXT, revision INTEGER NOT NULL DEFAULT 0, name TEXT NOT NULL)");
+    this.db.exec(
+      "CREATE TABLE IF NOT EXISTS tv_devices(id TEXT PRIMARY KEY, secret_hash TEXT NOT NULL, control_hash TEXT, pair_code TEXT, pair_expires INTEGER NOT NULL DEFAULT 0, last_seen INTEGER NOT NULL DEFAULT 0, room TEXT, revision INTEGER NOT NULL DEFAULT 0, name TEXT NOT NULL)",
+    );
     // Partial index keeps the frequent timer check independent of archived game size.
     this.db.exec(`
       CREATE INDEX IF NOT EXISTS games_running_deadline
@@ -215,39 +217,73 @@ export class Store {
     return createHash("sha256").update(token).digest("hex");
   }
   tvRegister(id: string, secret: string, name: string, renew = false) {
-    const existing = this.db.prepare("SELECT secret_hash,control_hash FROM tv_devices WHERE id=?").get(id) as
-      { secret_hash: string; control_hash: string | null } | undefined;
-    if (existing && existing.secret_hash !== this.hash(secret)) throw new Error("TV identity mismatch.");
+    const existing = this.db
+      .prepare("SELECT secret_hash,control_hash FROM tv_devices WHERE id=?")
+      .get(id) as { secret_hash: string; control_hash: string | null } | undefined;
+    if (existing && existing.secret_hash !== this.hash(secret))
+      throw new Error("TV identity mismatch.");
     if (existing?.control_hash && !renew) {
-      this.db.prepare("UPDATE tv_devices SET last_seen=?,name=? WHERE id=?").run(Date.now(), name, id);
+      this.db
+        .prepare("UPDATE tv_devices SET last_seen=?,name=? WHERE id=?")
+        .run(Date.now(), name, id);
       return { pairingCode: null, paired: true };
     }
     const code = randomBytes(4).toString("hex").toUpperCase();
     const now = Date.now();
-    this.db.prepare("INSERT INTO tv_devices(id,secret_hash,pair_code,pair_expires,last_seen,name) VALUES (?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET pair_code=excluded.pair_code,pair_expires=excluded.pair_expires,last_seen=excluded.last_seen,name=excluded.name")
+    this.db
+      .prepare(
+        "INSERT INTO tv_devices(id,secret_hash,pair_code,pair_expires,last_seen,name) VALUES (?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET pair_code=excluded.pair_code,pair_expires=excluded.pair_expires,last_seen=excluded.last_seen,name=excluded.name",
+      )
       .run(id, this.hash(secret), code, now + 5 * 60000, now, name);
     return { pairingCode: code, paired: !!existing?.control_hash };
   }
   tvPoll(id: string, secret: string) {
-    const row = this.db.prepare("SELECT secret_hash,control_hash,pair_code,pair_expires,room,revision FROM tv_devices WHERE id=?").get(id) as
-      { secret_hash: string; control_hash: string | null; pair_code: string | null; pair_expires: number; room: string | null; revision: number } | undefined;
+    const row = this.db
+      .prepare(
+        "SELECT secret_hash,control_hash,pair_code,pair_expires,room,revision FROM tv_devices WHERE id=?",
+      )
+      .get(id) as
+      | {
+          secret_hash: string;
+          control_hash: string | null;
+          pair_code: string | null;
+          pair_expires: number;
+          room: string | null;
+          revision: number;
+        }
+      | undefined;
     if (!row || row.secret_hash !== this.hash(secret)) throw new Error("TV identity mismatch.");
     this.db.prepare("UPDATE tv_devices SET last_seen=? WHERE id=?").run(Date.now(), id);
-    return { pairingCode: row.pair_expires > Date.now() ? row.pair_code : null, paired: !!row.control_hash, room: row.room, revision: row.revision };
+    return {
+      pairingCode: row.pair_expires > Date.now() ? row.pair_code : null,
+      paired: !!row.control_hash,
+      room: row.room,
+      revision: row.revision,
+    };
   }
   tvPair(code: string) {
-    const row = this.db.prepare("SELECT id,name FROM tv_devices WHERE pair_code=? AND pair_expires>? AND last_seen>?")
+    const row = this.db
+      .prepare(
+        "SELECT id,name FROM tv_devices WHERE pair_code=? AND pair_expires>? AND last_seen>?",
+      )
       .get(code, Date.now(), Date.now() - 30000) as { id: string; name: string } | undefined;
     if (!row) throw new Error("Pairing code expired or TV is offline.");
     const token = randomBytes(32).toString("hex");
-    this.db.prepare("UPDATE tv_devices SET control_hash=?,pair_code=NULL,pair_expires=0 WHERE id=?")
+    this.db
+      .prepare("UPDATE tv_devices SET control_hash=?,pair_code=NULL,pair_expires=0 WHERE id=?")
       .run(this.hash(token), row.id);
     return { deviceId: row.id, deviceName: row.name, controllerToken: token };
   }
   tvSend(id: string, token: string, room: string) {
-    const row = this.db.prepare("SELECT control_hash,last_seen FROM tv_devices WHERE id=?").get(id) as
-      { control_hash: string | null; last_seen: number } | undefined;
-    if (!row || !row.control_hash || row.control_hash !== this.hash(token) || row.last_seen < Date.now() - 30000)
+    const row = this.db
+      .prepare("SELECT control_hash,last_seen FROM tv_devices WHERE id=?")
+      .get(id) as { control_hash: string | null; last_seen: number } | undefined;
+    if (
+      !row ||
+      !row.control_hash ||
+      row.control_hash !== this.hash(token) ||
+      row.last_seen < Date.now() - 30000
+    )
       throw new Error("TV is offline or pairing is invalid.");
     this.db.prepare("UPDATE tv_devices SET room=?,revision=revision+1 WHERE id=?").run(room, id);
     return { ok: true };
