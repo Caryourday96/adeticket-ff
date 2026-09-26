@@ -22,4 +22,4 @@ No CocoaPods, Cast SDK or new server resource is required for this receiver. App
 
 ## Icon
 
-The owner supplied `../ios-cast-sender/artwork/owner-icon-source.jpg`. Keep this original unmodified. Export an appropriately sized PNG for Xcode's tvOS App Icon & Top Shelf Image asset catalog; tvOS uses layered icon assets, so the owner should review the resulting focus effect on an Apple TV before treating it as final. Do not substitute generated artwork that changes the mark.
+The owner supplied `../ios-cast-sender/artwork/owner-icon-source.jpg`. `Assets.xcassets/IconArtwork.imageset` contains an exact-design 1024×1024 PNG export. Add it to the tvOS project's asset catalog and use that image in the generated **App Icon & Top Shelf Image** stack. tvOS uses layered icon assets, so the owner should review the resulting focus effect on Apple TV before treating it as final. Do not substitute generated artwork that changes the mark.
