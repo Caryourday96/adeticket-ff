@@ -1,3 +1,20 @@
+## Released — 1 October 2026
+
+- Friends Showdown release commit 6c9ad06dc127ec41ddb4af5b154a470f1208da15 is deployed at https://ff.adeticket.com. Azure run https://github.com/Caryourday96/adeticket-ff/actions/runs/36942037370 completed successfully, including deployment and production smoke. CI 36942037435 and browser tests 36942037531 also succeeded.
+- Live verification: /api/health, /api/config, /cast, /ads.txt return 200; deployed API accepts the ff.adeticket.com write origin and rejects invalid login with 401. Live JS fingerprint /assets/index-Dfs_4WER.js matches local build and contains the question-mix preview, event-readiness and selected-five rehearsal controls. Rendered production host sign-in inspected; no production authenticated games or survey responses created/modified during release checks.
+- Released: built-in birthday question bank; shared regular/Fast Money selection and saved-game usage limits; checkbox selection/history refresh; question-mix preview; advisory event readiness; selected-question Fast Money rehearsal/coaching. Preview, real game and rehearsal use the same final-question pack order. Existing games/surveys preserved by no schema or record rewrites.
+- Verification: 93 Vitest + 7 Node tests; 18 Playwright tests; typecheck/build/format/diff; clean dependency audit. Release fixes include Node-test exclusion from Vitest, transitive ip-address 10.7.2 and safe root-relative SPA fallback for hidden local checkout paths. Screenshot: outputs/naija-feud/docs/evidence/selected-fast-rehearsal-mobile.png (local rehearsal, 390px).
+- Remaining limitations: local/browser tests do not establish real TV audio, casting or phone latency; production authenticated feature flow still needs owner sign-in/device check. Birthday bank retains source illustrative scores; surveyed answers require closing/reviewing the live survey before saving a surveyed pack. No paid resources, DNS, authentication or production workflows changed.
+- Exact next action: sign in to ff.adeticket.com, choose the birthday or reviewed survey bank, enable shared bank if desired, preview/mix the five, and rehearse; then use Event readiness with the actual audience display/phones before the event. Earlier local-only/blocker statuses below are historical and superseded by this release.
+
+## Release pushed — 1 October 2026
+
+- Commit 6c9ad06dc127ec41ddb4af5b154a470f1208da15 pushed normally (no force) to Caryourday96/adeticket-ff main from content/ihechi-birthday. Includes birthday bank, shared selection/usage caps, previews, event readiness, selected Fast Money rehearsal and scoped release fixes.
+- Final checks: typecheck/build/format/diff pass, audit clean, 93 Vitest + 7 Node tests pass, all 18 Playwright tests pass including mixed selected-final questions at 390px and zero rehearsal usage impact. Browser preview confirmed no overflow. Physical TV sound/casting/latency remain owner checks.
+- GitHub Actions: Azure deploy 36942037370; CI 36942037435; browser tests 36942037531. All in progress at this checkpoint. Do not claim live deployment yet.
+- No production data mutations, DNS changes or paid provisioning performed. Prior blockers resolved after environment permissions changed; no previous-policy bypass performed.
+- Next action: wait for these workflows, resolve any verified release failure, then run production route/origin smoke and confirm live JS fingerprint and new UI text at ff.adeticket.com. Record deployment evidence and remaining device checks in checkpoints/backlog.
+
 ## Release verification restored — 1 October 2026
 
 - Owner authorized deploy again after filesystem/network access changed. Remote main/base is 162dcea; no concurrent remote changes found. Prior session approval and dependency blockers are resolved in this session.

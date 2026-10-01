@@ -1,3 +1,16 @@
+## Latest release — 1 October 2026
+
+Released in 6c9ad06 at https://ff.adeticket.com. Azure deploy/production smoke (36942037370), CI (36942037435) and Playwright workflow (36942037531) succeeded. Live JS /assets/index-Dfs_4WER.js contains the new controls; public route/origin checks pass. Previous local-only and blocked release entries below are historical, superseded by this section.
+
+| Completed item                          | Evidence                                                                                                     | Remaining owner verification                                        |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
+| Birthday bank and shared-bank/cap setup | API/privacy/cap regressions; deployed release                                                                | Review real survey answers before treating scores as surveyed data. |
+| 2. Question-mix preview                 | 390px browser test verifies separated regular/final pools; final order aligned across preview/game/rehearsal | Confirm preferred selection before the event.                       |
+| 5. Event readiness                      | Three deterministic regressions and phone-width browser toggles; connections alone never prove audio/picture | Actual TV picture/audio and staged phones.                          |
+| 6. Selected Fast Money rehearsal        | Factory/API and mixed-selected-five browser test; rehearsals leave usage counts unchanged                    | Practise timed turns and point reveals with the actual display.     |
+
+Checks: 93 Vitest + seven Node tests, 18 Playwright tests, typecheck, build, formatting, diff and clean dependency audit. No remaining implementation/release blocker for these items. Real hardware audio/casting/latency and authenticated production feature checks remain device verification, not completed claims. No paid resources provisioned.
+
 # Friends Showdown improvement backlog
 
 This is the current handoff list. “Shipped” means the code is in `main`; live deployment or physical-device verification is called out separately.

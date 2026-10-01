@@ -77,4 +77,4 @@ Choose **Rehearse these five Fast Money questions** to create a separate practic
 
 In the host's Phone buzzers card, expand **Event readiness**. Confirm the picture and audible sound yourself; connected-screen counts cannot establish those. Check approved active staged phones for both teams, or explicitly choose spoken answers. Silent play is also supported. The checklist is advisory and local to the current host page, not a persistent certification. Test actual phone latency and TV audio before the event.
 
-These additions are currently local and await full build/UI verification and publication.
+These additions were released to ff.adeticket.com on 1 October 2026 after API and phone-width browser verification. Check actual display audio and phone latency before the event.
