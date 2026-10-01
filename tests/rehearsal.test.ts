@@ -4,6 +4,23 @@ import { createApplication } from "../apps/server/src/app";
 import { createRehearsal } from "../apps/server/src/rehearsal";
 import { transition } from "@naija/game";
 import { passwordVerifier } from "../apps/server/src/password";
+import { birthdayBank } from "@naija/content";
+
+it("practises the selected birthday questions without recording real question usage", async () => {
+  const server = createApplication({ database: ":memory:" });
+  try {
+    const selected = birthdayBank.questions.slice(0, 5);
+    const practice = createRehearsal("ABC123", "fast", selected);
+    expect(practice.fastQuestions.map((q) => q.id)).toEqual(selected.map((q) => q.id));
+    expect(practice.phase).toBe("fast");
+    expect(practice.rehearsal).toBe(true);
+    server.store.add(practice);
+    expect(server.store.questionUsage()).toEqual([]);
+    expect(() => createRehearsal("ABC124", "fast", selected.slice(0, 4))).toThrow("five questions");
+  } finally {
+    await server.close();
+  }
+});
 
 it("changes a ready Fast Money timer without allowing changes during a running turn", () => {
   const ready = createRehearsal("ABC123", "fast");
@@ -84,6 +101,34 @@ it("requires host access and a current revision to delete only the selected game
         body: JSON.stringify(body),
       });
     expect((await post("/api/rehearsals", { scenario: "round" }, false)).status).toBe(401);
+    const selectedIds = birthdayBank.questions.slice(0, 5).map((q) => q.id);
+    const selectedResponse = await post("/api/rehearsals", {
+      scenario: "fast",
+      packId: "ihechi-birthday",
+      questionIds: selectedIds,
+    });
+    expect(selectedResponse.status).toBe(201);
+    const selectedGame = await selectedResponse.json();
+    expect(server.store.host(selectedGame.id).fastQuestions.map((q) => q.id)).toEqual(selectedIds);
+    expect(server.store.questionUsage()).toEqual([]);
+    expect(
+      (
+        await post("/api/rehearsals", {
+          scenario: "fast",
+          packId: "missing",
+          questionIds: selectedIds,
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await post("/api/rehearsals", {
+          scenario: "fast",
+          packId: "ihechi-birthday",
+          questionIds: Array(5).fill(selectedIds[0]),
+        })
+      ).status,
+    ).toBe(400);
     const created = await post("/api/rehearsals", { scenario: "round" });
     expect(created.status).toBe(201);
     const { id } = await created.json();

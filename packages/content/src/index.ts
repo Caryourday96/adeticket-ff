@@ -1,6 +1,8 @@
 import { bankSchema, type Question } from "@naija/contracts";
 import raw from "../data/starter-questions.json";
 import fastRaw from "../data/fast-money.json";
+import birthdayRaw from "../data/ihechi-birthday.json";
+export const birthdayBank = bankSchema.parse(birthdayRaw);
 export const starterBank = bankSchema.parse(raw);
 export const fastBank = bankSchema.parse({ ...fastRaw, roundType: "fast-money" });
 export const fastQuestions = fastBank.questions;

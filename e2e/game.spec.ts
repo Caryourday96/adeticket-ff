@@ -176,7 +176,10 @@ test("players enter their names and only buzz on stage with saved team names", a
     await phone.getByLabel("Your name").fill("Funke");
     await phone.getByRole("button", { name: "Join game", exact: true }).click();
     await expect(phone.getByText("Waiting for host approval", { exact: true })).toBeVisible();
-    await page.locator(".buzzer-controls > details:not(.host-diagnostics) > summary").click();
+    await page
+      .locator(".buzzer-controls > details > summary")
+      .filter({ hasText: /^\d+ phones · \d+ awaiting approval$/ })
+      .click();
     await page.getByRole("button", { name: "Approve Funke", exact: true }).click();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeDisabled();
@@ -208,9 +211,10 @@ test("players enter their names and only buzz on stage with saved team names", a
 test("regular and Fast Money libraries stay separate through setup", async ({ page }) => {
   await signIn(page);
   await expect(page.getByLabel("Fast Money pack", { exact: true })).toHaveValue("fast-starter");
-  await expect(page.getByLabel("Five Fast Money questions").locator("option:checked")).toHaveCount(
-    5,
-  );
+  await page.getByText("Choose Fast Money questions (5 of 5 selected)", { exact: true }).click();
+  await expect(
+    page.getByRole("group", { name: "Five Fast Money questions" }).locator("input:checked"),
+  ).toHaveCount(5);
   await page.getByRole("link", { name: "Question library", exact: true }).click();
   await expect(page.getByLabel("Question pack", { exact: true })).toHaveValue("starter");
   await page.getByRole("button", { name: "Fast Money", exact: true }).click();
@@ -275,7 +279,7 @@ test("Fast Money rehearsal starts the real timer and enables question navigation
   page,
 }) => {
   await signIn(page);
-  await page.getByRole("button", { name: "Practice Fast Money", exact: true }).click();
+  await page.getByRole("button", { name: "Practice sample Fast Money", exact: true }).click();
   await page.getByLabel("Timer duration", { exact: true }).selectOption("45");
   await page.getByRole("button", { name: "Start 45-second timer" }).click();
   await expect(page.getByRole("navigation", { name: "Fast Money questions" })).toBeVisible();

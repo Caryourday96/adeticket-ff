@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
-import type { Bank, Team } from "@naija/contracts";
+import {
+  eligibleQuestions,
+  questionKey,
+  questionUseCounts,
+  type QuestionUse,
+  type Bank,
+  type Team,
+} from "@naija/contracts";
 import { ArrowRight, Monitor, Users, Layers, Play, Shuffle } from "lucide-react";
 import { api } from "../lib/api";
 import { Layout } from "../components/Layout";
@@ -7,6 +14,10 @@ import { TeamEditor } from "../components/TeamEditor";
 import { commandId } from "../lib/commandId";
 import { gameOrigin } from "../lib/links";
 export function Setup() {
+  const [sharedQuestionBank, setSharedQuestionBank] = useState(false);
+  const [excludeAfterUses, setExcludeAfterUses] = useState<number | undefined>();
+  const [usage, setUsage] = useState<QuestionUse[]>([]);
+  const [usageReady, setUsageReady] = useState(false);
   const [selfJoin, setSelfJoin] = useState(true);
   const [fastPackId, setFastPackId] = useState("fast-starter");
   const [fastIds, setFastIds] = useState<string[] | null>(null);
@@ -78,11 +89,19 @@ export function Setup() {
       setBusy(false);
     }
   }
-  async function rehearse(scenario: "round" | "fast") {
+  async function rehearse(scenario: "round" | "fast", useSelection = false) {
     setBusy(true);
     setError("");
     try {
-      const game = await api<{ id: string }>("/rehearsals", { scenario });
+      const game = await api<{ id: string }>("/rehearsals", {
+        scenario,
+        ...(useSelection
+          ? {
+              packId: sharedQuestionBank ? packId : fastPackId,
+              questionIds: fastPool.filter((q) => chosenFastIds.includes(q.id)).map((q) => q.id),
+            }
+          : {}),
+      });
       location.href = "/host/" + game.id;
     } catch (e) {
       setError((e as Error).message);
@@ -122,13 +141,95 @@ export function Setup() {
   }
   const [required, setRequired] = useState<Record<string, number>>({});
   const selectedPack = packs.find((p) => p.id === packId)?.bank;
-  const selectedFastPack = packs.find((p) => p.id === fastPackId)?.bank;
-  const chosenFastIds = fastIds ?? selectedFastPack?.questions.slice(0, 5).map((q) => q.id) ?? [];
+  const selectedFastPack = sharedQuestionBank
+    ? selectedPack
+    : packs.find((p) => p.id === fastPackId)?.bank;
+  const regularPool = eligibleQuestions(selectedPack?.questions ?? [], usage, excludeAfterUses);
+  const fastPool = eligibleQuestions(selectedFastPack?.questions ?? [], usage, excludeAfterUses);
+  const chosenFastIds =
+    fastIds?.filter((id) => fastPool.some((q) => q.id === id)) ??
+    fastPool.slice(0, 5).map((q) => q.id);
+  const reservedPrompts = new Set(
+    fastPool.filter((q) => chosenFastIds.includes(q.id)).map((q) => questionKey(q.prompt)),
+  );
+  const regularQuestions = regularPool.filter(
+    (q) => !sharedQuestionBank || !reservedPrompts.has(questionKey(q.prompt)),
+  );
+  const useCounts = questionUseCounts(usage);
+  const excludedQuestions = (selectedPack?.questions ?? []).filter(
+    (q) =>
+      excludeAfterUses !== undefined &&
+      (useCounts.get(questionKey(q.prompt)) ?? 0) >= excludeAfterUses,
+  );
+  const excludedFastQuestions = (selectedFastPack?.questions ?? []).filter(
+    (q) =>
+      excludeAfterUses !== undefined &&
+      (useCounts.get(questionKey(q.prompt)) ?? 0) >= excludeAfterUses,
+  );
+  const attainable = fastPool
+    .filter((q) => chosenFastIds.includes(q.id))
+    .reduce((sum, q) => sum + q.answers[0].points + q.answers[1].points, 0);
+  const selectionError = Object.entries(required).some(
+    ([category, count]) => count > regularQuestions.filter((q) => q.category === category).length,
+  )
+    ? "A required group has too few remaining questions. Reduce its quota or change the selection."
+    : excludeAfterUses !== undefined &&
+        (!Number.isInteger(excludeAfterUses) || excludeAfterUses < 1 || excludeAfterUses > 1000)
+      ? "Use a whole-number limit from 1 to 1000, or leave blank."
+      : chosenFastIds.length !== 5
+        ? "Choose exactly five eligible Fast Money questions."
+        : attainable < 200
+          ? "These Fast Money questions cannot reach 200 with distinct answers. Choose another set."
+          : regularQuestions.length < 5
+            ? "At least five regular questions must remain after reserving Fast Money and applying the usage limit."
+            : "";
+  function rotateFastQuestions() {
+    const candidates = [...fastPool];
+    for (let attempt = 0; attempt < 50; attempt++) {
+      for (let i = candidates.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+      }
+      const picked = candidates.slice(0, 5);
+      if (
+        picked.length === 5 &&
+        picked.reduce((sum, q) => sum + q.answers[0].points + q.answers[1].points, 0) >= 200 &&
+        picked.some((q) => !chosenFastIds.includes(q.id))
+      ) {
+        setFastIds(picked.map((q) => q.id));
+        setRequired({});
+        setError("");
+        return;
+      }
+    }
+    candidates.sort(
+      (a, b) =>
+        b.answers[0].points + b.answers[1].points - (a.answers[0].points + a.answers[1].points),
+    );
+    const picked = candidates.slice(0, 5);
+    if (
+      picked.length !== 5 ||
+      picked.reduce((sum, q) => sum + q.answers[0].points + q.answers[1].points, 0) < 200
+    )
+      setError(
+        "Not enough eligible answers for a valid Fast Money set. Change the bank or usage limit.",
+      );
+    else {
+      setFastIds(picked.map((q) => q.id));
+      setError("");
+    }
+  }
   const categories = [...new Set(selectedPack?.questions.map((q) => q.category) ?? [])];
   const requiredTotal = Object.values(required).reduce((n, v) => n + v, 0);
   useEffect(() => {
-    Promise.all([api<typeof packs>("/packs"), api<typeof games>("/games")])
-      .then(([p, g]) => {
+    Promise.all([
+      api<typeof packs>("/packs"),
+      api<typeof games>("/games"),
+      api<QuestionUse[]>("/question-usage"),
+    ])
+      .then(([p, g, u]) => {
+        setUsage(u);
+        setUsageReady(true);
         setPacks(p);
         setGames(g);
       })
@@ -138,7 +239,8 @@ export function Setup() {
     setBusy(true);
     setError("");
     try {
-      const ids = packs.find((p) => p.id === packId)!.bank.questions.map((q) => q.id);
+      if (selectionError) throw new Error(selectionError);
+      const ids = regularQuestions.map((q) => q.id);
       if (shuffle)
         for (let i = ids.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -155,7 +257,9 @@ export function Setup() {
           : teams,
         packId,
         fastPackId,
-        fastQuestionIds: chosenFastIds,
+        sharedQuestionBank,
+        excludeAfterUses,
+        fastQuestionIds: fastPool.filter((q) => chosenFastIds.includes(q.id)).map((q) => q.id),
         requiredGroups: Object.entries(required)
           .filter(([, count]) => count > 0)
           .map(([category, count]) => ({ category, count })),
@@ -225,7 +329,7 @@ export function Setup() {
               Practice a round
             </button>
             <button className="button" disabled={busy} onClick={() => void rehearse("fast")}>
-              Practice Fast Money
+              Practice sample Fast Money
             </button>
           </div>
         </section>
@@ -269,6 +373,7 @@ export function Setup() {
               onChange={(e) => {
                 setPackId(e.target.value);
                 setRequired({});
+                setFastIds(null);
               }}
             >
               {packs
@@ -304,18 +409,62 @@ export function Setup() {
           </div>
         </section>
         <section className="settings-card">
+          <label className="survey-choice">
+            <input
+              type="checkbox"
+              checked={sharedQuestionBank}
+              onChange={(e) => {
+                setSharedQuestionBank(e.target.checked);
+                setFastIds(null);
+                setRequired({});
+              }}
+            />
+            Use the regular question bank for Fast Money too
+          </label>
+          <p>
+            Reserve five questions for Fast Money. In shared-bank mode, these are excluded from
+            every regular round, including sudden death.
+          </p>
+          <label>
+            Exclude questions after this many recorded uses
+            <input
+              type="number"
+              min={1}
+              max={1000}
+              value={excludeAfterUses ?? ""}
+              placeholder="No limit"
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                setExcludeAfterUses(e.target.value ? n : undefined);
+                setFastIds(null);
+                setRequired({});
+              }}
+            />
+          </label>
+          <p className="host-note">
+            Leave blank for no limit. Counts combine regular and Fast Money use across matching
+            saved-game prompts; rehearsals are excluded. Deleted games and undone uses no longer
+            count.
+          </p>
+          <p>
+            {regularQuestions.length} regular questions available · {fastPool.length} eligible for
+            Fast Money.
+          </p>
           <label>
             Fast Money pack
             <select
               aria-label="Fast Money pack"
-              value={fastPackId}
+              disabled={sharedQuestionBank}
+              value={sharedQuestionBank ? packId : fastPackId}
               onChange={(e) => {
                 setFastPackId(e.target.value);
                 setFastIds(null);
               }}
             >
               {packs
-                .filter((p) => p.bank.roundType === "fast-money")
+                .filter((p) =>
+                  sharedQuestionBank ? p.id === packId : p.bank.roundType === "fast-money",
+                )
                 .map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.bank.title}
@@ -323,29 +472,138 @@ export function Setup() {
                 ))}
             </select>
           </label>
-          <label>
-            Five Fast Money questions
-            <select
-              multiple
-              aria-label="Five Fast Money questions"
-              size={5}
-              value={chosenFastIds}
-              onChange={(e) =>
-                setFastIds(Array.from(e.target.selectedOptions, (option) => option.value))
-              }
-            >
-              {selectedFastPack?.questions.map((q) => (
-                <option key={q.id} value={q.id}>
+          <details>
+            <summary>Choose Fast Money questions ({chosenFastIds.length} of 5 selected)</summary>
+            <fieldset>
+              <legend>Five Fast Money questions</legend>
+              {fastPool.map((q) => (
+                <label className="survey-choice" key={q.id}>
+                  <input
+                    type="checkbox"
+                    checked={chosenFastIds.includes(q.id)}
+                    onChange={(e) => {
+                      setFastIds(
+                        e.target.checked
+                          ? [...chosenFastIds, q.id]
+                          : chosenFastIds.filter((id) => id !== q.id),
+                      );
+                      setRequired({});
+                    }}
+                  />
                   {q.prompt}
-                </option>
+                </label>
               ))}
-            </select>
-          </label>
+            </fieldset>
+          </details>
           <p className="host-note">
-            Choose exactly five. This library is separate from your regular rounds. Hold Ctrl
-            (Windows) or Command (Mac) to change multiple selections. The selected set must be able
-            to reach 200 points with distinct answers.
+            Choose exactly five, or use “Mix Fast Money questions” to rotate a suitable set. Tap the
+            checkboxes to change selections. The selected set must be able to reach 200 points with
+            distinct answers.
           </p>
+          <button
+            type="button"
+            className="button"
+            disabled={busy || fastPool.length < 5}
+            onClick={rotateFastQuestions}
+          >
+            Mix Fast Money questions
+          </button>
+          <details>
+            <summary>Preview the question mix</summary>
+            <h4>Regular-round pool ({regularQuestions.length})</h4>
+            <p>
+              {shuffle ? "This pool is shuffled when you create the game." : "Pack order is used."}{" "}
+              Required groups fill the opening slots. Only questions reached during play are used;
+              the rest remain available for sudden death.
+            </p>
+            <ol>
+              {regularQuestions.map((q) => (
+                <li key={q.id}>
+                  {q.prompt} <small>· {q.category}</small>
+                </li>
+              ))}
+            </ol>
+            <h4>Fast Money ({chosenFastIds.length} of 5)</h4>
+            <ol>
+              {fastPool
+                .filter((q) => chosenFastIds.includes(q.id))
+                .map((q) => (
+                  <li key={q.id}>{q.prompt}</li>
+                ))}
+            </ol>
+            <p>
+              {sharedQuestionBank
+                ? "These five are reserved and will not appear in regular rounds."
+                : "These come from the separate Fast Money pack."}
+            </p>
+            <h4>Excluded by the usage limit ({excludedQuestions.length})</h4>
+            {excludedQuestions.length ? (
+              <ul>
+                {excludedQuestions.map((q) => (
+                  <li key={q.id}>
+                    {q.prompt} · {useCounts.get(questionKey(q.prompt))} recorded games
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>No regular-bank questions excluded by this limit.</p>
+            )}
+            {!sharedQuestionBank && (
+              <>
+                <h4>Fast Money pack exclusions ({excludedFastQuestions.length})</h4>
+                {excludedFastQuestions.length ? (
+                  <ul>
+                    {excludedFastQuestions.map((q) => (
+                      <li key={q.id}>
+                        {q.prompt} · {useCounts.get(questionKey(q.prompt))} recorded games
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>No Fast Money questions excluded by this limit.</p>
+                )}
+              </>
+            )}
+            <p className="host-note">
+              Usage reflects saved history at the last refresh; the server checks it again when
+              creating a game. Previewing does not record a use.
+            </p>
+          </details>
+          <button
+            type="button"
+            className="button"
+            disabled={busy || !usageReady || chosenFastIds.length !== 5 || attainable < 200}
+            onClick={() => void rehearse("fast", true)}
+          >
+            Rehearse these five Fast Money questions
+          </button>
+          <p className="host-note">
+            Creates a separate practice game. Rehearsals never count toward question-use limits.
+          </p>
+          <button
+            type="button"
+            className="button"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                setUsage(await api<QuestionUse[]>("/question-usage"));
+                setUsageReady(true);
+                setError("");
+              } catch (e) {
+                setError((e as Error).message);
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            Refresh question history
+          </button>
+          {selectionError && (
+            <p role="alert" className="error">
+              {selectionError}
+            </p>
+          )}
         </section>
         <section className="required-groups settings-card">
           <div>
@@ -359,9 +617,7 @@ export function Setup() {
           </div>
           <div className="group-options">
             {categories.map((category) => {
-              const available = selectedPack!.questions.filter(
-                (q) => q.category === category,
-              ).length;
+              const available = regularQuestions.filter((q) => q.category === category).length;
               return (
                 <label className="group-quota" key={category}>
                   <span>
@@ -407,7 +663,9 @@ export function Setup() {
           </span>
           <button
             className="button primary"
-            disabled={busy || !packs.length || requiredTotal > 4 || chosenFastIds.length !== 5}
+            disabled={
+              busy || !usageReady || !packs.length || requiredTotal > 4 || Boolean(selectionError)
+            }
             onClick={start}
           >
             {busy ? "Preparing your board…" : "Create game"}

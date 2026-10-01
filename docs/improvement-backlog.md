@@ -66,3 +66,41 @@ This is the current handoff list. “Shipped” means the code is in `main`; liv
 - Do not claim a feature is live until the corresponding GitHub Actions/Azure run and a production check succeed.
 - Do not enable advertising until AdSense approval, consent management and rollback testing are complete.
 - Keep the scraper’s uncertain boards in review status; never export a partial board as verified.
+
+## Completed locally — Ihechi's birthday bank (30 September 2026)
+
+30 regular questions and 153 source answers added in .deploy/ihechi-birthday; import-ready JSON is in outputs/naija-feud/question-banks/ihechi-birthday.json. Focused API/privacy tests 7/7, typecheck and build passed. Built-in release remains unpublished. Source questions 26/27 total 170; scores retained. Fast Money and unscored lightning questions excluded because the supplied data does not meet bank requirements. Next: import and select the pack, or authorize publication of the built-in integration.
+
+### Birthday survey — created live (30 September 2026)
+
+All 30 regular prompts are collecting answers at https://ff.adeticket.com/survey/7a0c3545aaa500533383 . Public form and unauthenticated API inspected; no scores/answer suggestions included and no fabricated responses submitted. Next owner step: share link, close when ready, group/review results, then save the surveyed bank. No code deployment required.
+
+### Birthday Fast Money survey — created live (30 September 2026)
+
+Reuses source questions 1, 2, 12, 21, 24 in a separate five-question fast-money survey: https://ff.adeticket.com/survey/6fb8c61b5ea32a135208 . UI and unauthenticated public API verified; no sample responses. Next: collect/review results, save Fast Money bank and omit those five from regular gameplay.
+
+### Birthday survey without red-flag question — completed live (1 October 2026)
+
+29-question survey created at https://ff.adeticket.com/survey/69d5e8ce093451997556 . Only source question 16 omitted. Existing surveys unchanged. Public form checked for 29 fields and absent removed prompt; no test submissions. Next: share and collect, then close/review/export.
+
+### Shared-bank Fast Money + usage cap — implemented locally, verification pending
+
+Type: game setup/replay UX; priority P1. Opt-in one bank supplies regular and five reserved Fast Money questions; rotate final set; exclude at owner-specified distinct saved-game use count across both modes. Acceptance: no regular/final overlap, at least five regular boards, attainable 200-point final, cap honored on both client and fresh server history; separate-bank mode unchanged; existing games untouched. Four dependency-free helper tests pass. API regression added; typecheck/build/browser/API runs blocked by unreadable installed dependencies. Files: Setup.tsx, app.ts, contracts/questionSelection.ts and setupSchema; tests/birthday-bank.test.ts. Next: restore dependency access, verify local UI/API/build, then seek release authorization. Not deployed.
+
+### Release follow-up — publication blocked
+
+Owner authorized release. Main confirmed at 162dcea via GitHub read. Repository write attempt refused because approval is required while session policy forbids approval; no main update or deploy. Temporary verification workflow removed. Phone-friendly Fast Money checkboxes and history refresh added locally; pnpm test now includes 4 passing Node selection regressions. Full formatter/typecheck/Vitest/build/browser verification still required after dependency access is restored. Next: verified release in a publication-enabled session. Existing surveys and games unchanged.
+
+### Requested improvements 2, 5, 6 — implemented locally; verification/release pending
+
+| Item                             | Priority/type          | Benefit and testable acceptance                                                                                                                                                                                                                               | Status / next action                                                                                                                   |
+| -------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 2. Question-mix preview          | P1 / host UX           | Host sees eligible regular pool, exact reserved Fast Money prompts and cap-excluded questions from each bank; shuffled/required-group order is described accurately; preview never records use.                                                               | Implemented in Setup.tsx. Verify phone layout and shared/separate-bank previews after dependencies are readable.                       |
+| 5. Event readiness               | P1 / event reliability | Shows audience connection and active approved face-off phones for both teams. Socket counts alone never confirm picture/audio. Manual confirmations, intentionally silent and spoken-answer options work without changing scores or blocking normal controls. | Implemented in BuzzerControls.tsx/lib/eventReadiness.ts. Three Node readiness regressions pass. Real screen/audio/phone check pending. |
+| 6. Selected Fast Money rehearsal | P1 / hosting practice  | Rehearse chosen five in game pack order with timer, pass/return, duplicate-answer and reveal guidance. Fresh independent rehearsal has no impact on real game or question-use counts; invalid IDs/packs/sets rejected.                                        | Implemented in Setup.tsx, app.ts/rehearsal.ts and RehearsalControls.tsx. Selected-set factory/API regressions added, Vitest blocked.   |
+
+Dependencies: readable installed packages for formatter/typecheck/build/API/browser checks; repository publication permitted for release. Seven dependency-free selection/readiness regressions pass; diff check passes. Not deployed. Existing owner release authorization persists, but GitHub write action was refused under this session's approval policy. Next: finish these checks before publication; do not classify device or release acceptance as completed.
+
+### Release verification — 1 October 2026
+
+Previous dependency/publication blockers are resolved in this session. Birthday bank, shared-bank selection/usage cap and requested improvements 2/5/6 pass typecheck, build, 93 Vitest tests, seven Node regressions and 18 Chromium browser tests (including 390px preview/rehearsal/readiness/no-overflow). Scoped release fixes: test-runner separation, transitive ip-address security patch, SPA fallback in hidden local checkout and UI regression selectors. Final order-alignment rerun passed before push. Release status: not yet deployed; next verify GitHub Actions/Azure and live bundle. Physical TV sound, casting and phone latency still require an owner device check.

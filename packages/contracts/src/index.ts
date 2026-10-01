@@ -1,5 +1,6 @@
 import { z } from "zod";
 export * from "./surveys";
+export * from "./questionSelection";
 
 const label = z.string().trim().min(1).max(100);
 export const answerSchema = z.object({
@@ -60,6 +61,8 @@ export const setupSchema = z
     rules: rulesSchema.default({}),
     packId: z.string().optional(),
     fastPackId: z.string().optional(),
+    sharedQuestionBank: z.boolean().default(false),
+    excludeAfterUses: z.number().int().min(1).max(1000).optional(),
     fastQuestionIds: z
       .array(label)
       .length(5)

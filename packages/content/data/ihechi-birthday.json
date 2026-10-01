@@ -1,0 +1,1167 @@
+{
+  "schemaVersion": 1,
+  "title": "Ihechi's birthday",
+  "roundType": "regular",
+  "scoringSource": "illustrative",
+  "notice": "Owner-supplied birthday questions with hypothetical survey scores; no real survey was verified. Points are preserved exactly: questions 26–27 total 170 and 28–30 total 200. The game applies its configured round multipliers. Source Fast Money and unscored lightning questions are not included.",
+  "questions": [
+    {
+      "id": "ihechi-birthday-01",
+      "category": "How well do you know her?",
+      "prompt": "Name something the birthday girl can’t leave the house without.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 1.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Phone",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Lip gloss",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Perfume",
+          "points": 18,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Purse/bag",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Keys",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-02",
+      "category": "How well do you know her?",
+      "prompt": "Name something that instantly puts the birthday girl in a good mood.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 2.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Good food",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "A trip/vacation",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Chai Latte/Matcha",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Compliments/attention",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Shopping",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-03",
+      "category": "How well do you know her?",
+      "prompt": "Name something the birthday girl is most likely to spend too much money on.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 3.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Clothes",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Shoes",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Travel",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Bags/accessories",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Food/restaurants",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-04",
+      "category": "How well do you know her?",
+      "prompt": "Name something the birthday girl considers essential for a good night out.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 4.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "A good outfit",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Good shoes",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Makeup/hair",
+          "points": 18,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Good friends",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Good music",
+          "points": 12,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-05",
+      "category": "How well do you know her?",
+      "prompt": "Name something that would make the birthday girl say, “This is the perfect day.”",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 5.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Travelling/getaway",
+          "points": 28,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Time with friends",
+          "points": 22,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Amazing food/dinner",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Spa/self-care",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Getting dressed up",
+          "points": 15,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-06",
+      "category": "Birthday girl behaviour",
+      "prompt": "If the birthday girl says, “I’m almost ready,” what does that REALLY mean?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 6.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "She hasn’t started getting ready",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Give her another 20 minutes",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "She’s doing her makeup",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "She’s changing outfits",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "She’s actually almost ready",
+          "points": 8,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-07",
+      "category": "Birthday girl behaviour",
+      "prompt": "Name something the birthday girl is likely to overthink.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 7.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "A text/message",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "A relationship/crush",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Her outfit",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "A decision",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Something she said/did",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-08",
+      "category": "Birthday girl behaviour",
+      "prompt": "Name something the birthday girl is most likely to do when she’s annoyed.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 8.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Go quiet / stop talking",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Vent to her friends",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Overthink the situation",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Do something to clear her head",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Pretend she’s fine",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-09",
+      "category": "Birthday girl behaviour",
+      "prompt": "Name something that could ruin the birthday girl’s night.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 9.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Bad service",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Bad outfit/hair day",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Someone ruining the vibe",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Being disrespected",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Bad food",
+          "points": 15,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-10",
+      "category": "Birthday girl behaviour",
+      "prompt": "What is the birthday girl most likely to do when she has a crush?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 10.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Overthink everything",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Act like she doesn’t care",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Talk about him to her friends",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Analyze his messages",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Stalk his social media 😂",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-11",
+      "category": "The birthday girl’s taste",
+      "prompt": "What would the birthday girl choose for a perfect date?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 11.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Activity then dinner after",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Weekend getaway",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Concert/show",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Spa/luxury experience",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Romantic dinner",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-12",
+      "category": "The birthday girl’s taste",
+      "prompt": "Name something the birthday girl would splurge on.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 12.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Vacation",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Perfume",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Clothes/accessories",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Hotel/spa experience",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Restaurant/dining experience",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-13",
+      "category": "The birthday girl’s taste",
+      "prompt": "What makes an outfit a 10/10 for the birthday girl?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 13.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Perfect fit",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Shoes",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Accessories/bag",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Hair & makeup",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Colour",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-14",
+      "category": "The birthday girl’s taste",
+      "prompt": "Name something the birthday girl would rather receive than a basic gift.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 14.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "A trip",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Money",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Jewelry",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "A luxury experience",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Flowers",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-15",
+      "category": "The birthday girl’s taste",
+      "prompt": "If the birthday girl could choose one for free, what would she pick?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 15.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Luxury vacation",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Dream wardrobe",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Luxury hotel stay",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Shopping spree",
+          "points": 12,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Spa package",
+          "points": 8,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-16",
+      "category": "Expose the birthday girl",
+      "prompt": "Name the birthday girl’s biggest red flag.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 16.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Overthinking",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Being indecisive",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Expecting perfection",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Stubbornness",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Will say “I’m fine when is absolutely not fine",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-17",
+      "category": "Expose the birthday girl",
+      "prompt": "Name something the birthday girl would NEVER admit she likes.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 17.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Being right",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Attention",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Knowing the tea/gist",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Romance",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Having things planned for her",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-18",
+      "category": "Expose the birthday girl",
+      "prompt": "What would the birthday girl do if she unexpectedly saw her ex?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 18.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Pretend she didn’t see him",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Look amazing on purpose",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Tell her friends immediately",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Ignore him",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Say hello",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-19",
+      "category": "Expose the birthday girl",
+      "prompt": "Name something the birthday girl could talk about for hours.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 19.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Travel",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Fashion/beauty",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "God",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Food",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Life plans/goals",
+          "points": 15,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-20",
+      "category": "Expose the birthday girl",
+      "prompt": "Name something the birthday girl would absolutely judge someone for.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 20.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Bad manners",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Bad style",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Being rude",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Bad hygiene",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Poor communication",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-21",
+      "category": "The people who really know her",
+      "prompt": "What is the birthday girl’s ideal vacation?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 21.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Luxury tropical vacation",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "European getaway",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "City trip",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Resort/spa vacation",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Adventure trip",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-22",
+      "category": "The people who really know her",
+      "prompt": "Name something that will ALWAYS make the birthday girl happy.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 22.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Travel",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Food",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Quality time with friends",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Flowers",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Sweet treat",
+          "points": 15,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-23",
+      "category": "The people who really know her",
+      "prompt": "What is most likely to be in the birthday girl’s purse?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 23.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Lip gloss",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Phone",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Perfume",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Wallet",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Random receipts 😂",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-24",
+      "category": "The people who really know her",
+      "prompt": "Name one word her friends would use to describe her.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 24.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Sweet",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Fun",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Stylish",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Caring",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Dramatic 😂",
+          "points": 15,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-25",
+      "category": "The people who really know her",
+      "prompt": "What is something the birthday girl secretly loves about being the birthday girl?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 25.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Being celebrated",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Getting dressed up",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Attention",
+          "points": 20,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Flowers/gifts",
+          "points": 15,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Having everyone together",
+          "points": 10,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-26",
+      "category": "Birthday girl or bust",
+      "prompt": "Name something that screams “birthday girl.”",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 26. Source final-round values are preserved as supplied. The game applies its own round multiplier; these are not normalized to 100. These answers total 170, although the source says 200. No missing points have been invented.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Dress/glam outfit",
+          "points": 50,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Crown/sash",
+          "points": 40,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Flowers",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Heels",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Champagne/toast",
+          "points": 20,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-27",
+      "category": "Birthday girl or bust",
+      "prompt": "What is the birthday girl most likely to photograph during her birthday?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 27. Source final-round values are preserved as supplied. The game applies its own round multiplier; these are not normalized to 100. These answers total 170, although the source says 200. No missing points have been invented.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Herself",
+          "points": 50,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Food",
+          "points": 40,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Outfit",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Friends",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Decor",
+          "points": 20,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-28",
+      "category": "Birthday girl or bust",
+      "prompt": "Name something the birthday girl wants people to remember about her.",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 28. Source final-round values are preserved as supplied. The game applies its own round multiplier; these are not normalized to 100.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Her personality",
+          "points": 45,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "How she makes people feel",
+          "points": 40,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Her style",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Her kindness",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Her sense of humour",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Her confidence",
+          "points": 25,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-29",
+      "category": "Birthday girl or bust",
+      "prompt": "What is the birthday girl most likely to say after receiving a compliment?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 29. Source final-round values are preserved as supplied. The game applies its own round multiplier; these are not normalized to 100.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "“Thank you!”",
+          "points": 45,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "“Stopppp 😂”",
+          "points": 40,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "“Oh Really?”",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "“Oh my gosh” 🙈",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Compliment them back",
+          "points": 25,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Pretend she’s embarrassed",
+          "points": 25,
+          "acceptedAlternatives": []
+        }
+      ]
+    },
+    {
+      "id": "ihechi-birthday-30",
+      "category": "Birthday girl or bust",
+      "prompt": "If the birthday girl could describe her perfect birthday in THREE words, what would they be?",
+      "hostNotes": "Owner-supplied hypothetical survey points; no real survey is verified. Source question 30. Source final-round values are preserved as supplied. The game applies its own round multiplier; these are not normalized to 100.",
+      "answers": [
+        {
+          "id": "a1",
+          "text": "Glamorous",
+          "points": 40,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a2",
+          "text": "Fun",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a3",
+          "text": "Memorable",
+          "points": 35,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a4",
+          "text": "Luxurious",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a5",
+          "text": "Romantic",
+          "points": 30,
+          "acceptedAlternatives": []
+        },
+        {
+          "id": "a6",
+          "text": "Unforgettable",
+          "points": 30,
+          "acceptedAlternatives": []
+        }
+      ]
+    }
+  ]
+}

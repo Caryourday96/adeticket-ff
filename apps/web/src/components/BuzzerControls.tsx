@@ -6,6 +6,7 @@ import { phoneStatus } from "../lib/phoneStatus";
 import { api } from "../lib/api";
 import { CAST_STATUS_EVENT, type CastStatusDetail } from "../lib/cast";
 import { gameOrigin } from "../lib/links";
+import { eventReadiness } from "../lib/eventReadiness";
 export function BuzzerControls({
   state: s,
   send,
@@ -30,6 +31,40 @@ export function BuzzerControls({
     device: "",
   });
   const url = gameOrigin() + "/play/" + s.id;
+  const [boardConfirmed, setBoardConfirmed] = useState(false);
+  const [soundConfirmed, setSoundConfirmed] = useState(false);
+  const [silentEvent, setSilentEvent] = useState(false);
+  const [spokenAnswers, setSpokenAnswers] = useState(false);
+  useEffect(() => {
+    setBoardConfirmed(false);
+    setSoundConfirmed(false);
+    setSilentEvent(false);
+    setSpokenAnswers(false);
+  }, [s.id]);
+  useEffect(() => {
+    setSoundConfirmed(false);
+  }, [s.audienceSoundEnabled]);
+  const stagedTeams = ([0, 1] as const).filter((team) =>
+    data?.players.some(
+      (p) =>
+        p.team === team &&
+        p.member === s.turns[team] &&
+        p.name === s.teams[team].members[s.turns[team]] &&
+        p.approved &&
+        p.onStage !== false &&
+        p.connection === "ready",
+    ),
+  ).length;
+  const readiness = eventReadiness({
+    audienceConnections: diagnostics?.audienceConnections ?? null,
+    boardConfirmed,
+    soundEnabled: s.audienceSoundEnabled !== false,
+    soundConfirmed,
+    silentEvent,
+    spokenAnswers,
+    buzzerConnected: connected && !error && Boolean(data),
+    stagedTeams,
+  });
   useEffect(() => {
     let alive = true;
     const refresh = () =>
@@ -52,6 +87,77 @@ export function BuzzerControls({
   return (
     <section className="control-card buzzer-controls">
       <div className="section-eyebrow">PHONE BUZZERS</div>
+      <details className="event-readiness">
+        <summary>
+          Event readiness · {Object.values(readiness).filter(Boolean).length} of 3 checks ready
+        </summary>
+        <p>
+          Check before starting. This checklist is advisory and resets when this host page is
+          reopened.
+        </p>
+        <p role="status">
+          Audience:{" "}
+          {diagnostics
+            ? `${diagnostics.audienceConnections} connected screen(s)`
+            : "connection status unavailable"}
+          . A connection alone does not confirm the TV picture or audio.
+        </p>
+        <a className="button small" href={`/audience/${s.id}`} target="_blank" rel="noreferrer">
+          Open audience screen
+        </a>
+        <label className="survey-choice">
+          <input
+            type="checkbox"
+            checked={boardConfirmed}
+            onChange={(e) => setBoardConfirmed(e.target.checked)}
+          />
+          I can see this game's board on the audience display
+        </label>
+        <p>
+          Audience sound is {s.audienceSoundEnabled === false ? "muted" : "enabled"}. Enable sound
+          on the audience screen too; check its volume. Use a separate rehearsal to test a reveal or
+          miss without changing this game's score.
+        </p>
+        <label className="survey-choice">
+          <input
+            type="checkbox"
+            checked={soundConfirmed}
+            disabled={s.audienceSoundEnabled === false || silentEvent}
+            onChange={(e) => setSoundConfirmed(e.target.checked)}
+          />
+          I heard a game sound on the audience display
+        </label>
+        <label className="survey-choice">
+          <input
+            type="checkbox"
+            checked={silentEvent}
+            onChange={(e) => setSilentEvent(e.target.checked)}
+          />
+          We intend to play without sound
+        </label>
+        <p>
+          Phones: {stagedTeams} of 2 teams have an approved, active face-off phone on stage. Open
+          buzzers only after reading the question.
+        </p>
+        <label className="survey-choice">
+          <input
+            type="checkbox"
+            checked={spokenAnswers}
+            onChange={(e) => setSpokenAnswers(e.target.checked)}
+          />
+          We are using spoken answers without phone buzzers
+        </label>
+        <ul>
+          <li>Display: {readiness.display ? "confirmed" : "needs checking"}</li>
+          <li>Audio: {readiness.audio ? "confirmed or intentionally silent" : "needs checking"}</li>
+          <li>
+            Contestants:{" "}
+            {readiness.contestants
+              ? "ready for the chosen method"
+              : "check phones or choose spoken answers"}
+          </li>
+        </ul>
+      </details>
       <div className="phone-health" aria-label="Player connection panel">
         <h3>Player connections</h3>
         {!connected || error ? (

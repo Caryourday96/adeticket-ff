@@ -60,6 +60,30 @@ export function RehearsalControls({ state: s, busy }: { state: HostState; busy: 
           ? "The game is paused. Resume with the normal host controls when ready."
           : guides[s.phase]}
       </p>
+      {s.phase === "fast" && (
+        <details open>
+          <summary>Fast Money practice checklist</summary>
+          <ol>
+            <li>
+              Read question one, start player one's timer, then record answers to all five
+              questions. Try passing and returning.
+            </li>
+            <li>Let a timer expire once to learn the end-of-turn controls.</li>
+            <li>
+              Start player two. Try a matching answer to learn the duplicate-answer rule, then give
+              a different answer.
+            </li>
+            <li>
+              Reveal points and check the combined score and 200-point target on the audience
+              display.
+            </li>
+          </ol>
+          <p>
+            These practice answers and scores never count toward question-use limits. Phone latency
+            still needs a real-device check.
+          </p>
+        </details>
+      )}
       <div className="button-row">
         {s.phase === "faceoff" &&
           s.face.first === null &&
@@ -115,7 +139,7 @@ export function RehearsalControls({ state: s, busy }: { state: HostState; busy: 
           disabled={working || busy}
           onClick={() => void start("fast")}
         >
-          New Fast Money rehearsal
+          New sample Fast Money rehearsal
         </button>
         <a className="button small" href="/">
           Back to host desk

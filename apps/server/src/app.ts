@@ -8,8 +8,15 @@ import { resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { advertisingConfig, advertisingDocument, type AdvertisingConfig } from "./advertising";
 import { Server } from "socket.io";
-import { bankSchema, envelopeSchema, setupSchema } from "@naija/contracts";
-import { starterBank, fastBank, validateFastSet } from "@naija/content";
+import {
+  bankSchema,
+  envelopeSchema,
+  setupSchema,
+  eligibleQuestions,
+  questionKey,
+  type Question,
+} from "@naija/contracts";
+import { starterBank, fastBank, birthdayBank, validateFastSet } from "@naija/content";
 import { audience, createGame } from "@naija/game";
 import { Store } from "./store";
 import { Buzzers } from "./buzzers";
@@ -277,6 +284,7 @@ export function createApplication(options: {
     res.json([
       { id: "starter", bank: starterBank },
       { id: "fast-starter", bank: fastBank },
+      { id: "ihechi-birthday", bank: birthdayBank },
       ...store.packs(),
     ]),
   );
@@ -287,37 +295,76 @@ export function createApplication(options: {
   app.get("/api/games", auth, (_req, res) => res.json(store.list()));
   app.get("/api/question-usage", auth, (_req, res) => res.json(store.questionUsage()));
   app.post("/api/rehearsals", auth, (req, res) => {
-    const { scenario } = z.object({ scenario: z.enum(["round", "fast"]) }).parse(req.body);
+    const { scenario, packId, questionIds } = z
+      .object({
+        scenario: z.enum(["round", "fast"]),
+        packId: z.string().optional(),
+        questionIds: z.array(z.string()).length(5).optional(),
+      })
+      .parse(req.body);
+    let selected: Question[] | undefined;
+    if (packId !== undefined || questionIds !== undefined) {
+      if (scenario !== "fast" || !packId || !questionIds)
+        throw new Error("Choose a pack and five questions for a Fast Money rehearsal.");
+      const bank =
+        packId === "starter"
+          ? starterBank
+          : packId === "fast-starter"
+            ? fastBank
+            : packId === "ihechi-birthday"
+              ? birthdayBank
+              : store.pack(packId);
+      if (!bank) throw new Error("Question pack not found.");
+      const found = questionIds.map((id) => bank.questions.find((q) => q.id === id));
+      if (new Set(questionIds).size !== 5 || found.some((q) => !q))
+        throw new Error("Choose five different questions from this pack.");
+      selected = found.filter((q): q is Question => Boolean(q));
+      if (new Set(selected.map((q) => questionKey(q.prompt))).size !== 5)
+        throw new Error("Choose five different question prompts.");
+      validateFastSet(selected);
+    }
     let id = randomBytes(3).toString("hex").toUpperCase();
     while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
-    store.add(createRehearsal(id, scenario));
+    store.add(createRehearsal(id, scenario, selected));
     res.status(201).json({ id });
   });
   app.post("/api/games", auth, (req, res) => {
     const setup = setupSchema.parse(req.body);
     const bank =
-      setup.packId && setup.packId !== "starter" ? store.pack(setup.packId) : starterBank;
+      setup.packId === "ihechi-birthday"
+        ? birthdayBank
+        : setup.packId && setup.packId !== "starter"
+          ? store.pack(setup.packId)
+          : starterBank;
     if (!bank) throw new Error("Question pack not found.");
     if ((bank.roundType ?? "regular") !== "regular")
       throw new Error("Choose a regular-round pack for regular rounds.");
-    const fastPack =
-      !setup.fastPackId || setup.fastPackId === "fast-starter"
+    const fastPack = setup.sharedQuestionBank
+      ? bank
+      : !setup.fastPackId || setup.fastPackId === "fast-starter"
         ? fastBank
         : store.pack(setup.fastPackId);
-    if (!fastPack || fastPack.roundType !== "fast-money")
+    if (!fastPack || (!setup.sharedQuestionBank && fastPack.roundType !== "fast-money"))
       throw new Error("Choose a Fast Money pack for Fast Money.");
+    const usage = store.questionUsage();
+    const availableRegular = eligibleQuestions(bank.questions, usage, setup.excludeAfterUses);
+    const availableFast = eligibleQuestions(fastPack.questions, usage, setup.excludeAfterUses);
     const fastIds = setup.fastQuestionIds ?? fastPack.questions.slice(0, 5).map((q) => q.id);
     const selectedFast = fastIds.map((id) => {
-      const question = fastPack.questions.find((q) => q.id === id);
-      if (!question) throw new Error("Unknown Fast Money question: " + id);
+      const question = availableFast.find((q) => q.id === id);
+      if (!question)
+        throw new Error("Fast Money question unavailable or excluded by usage limit: " + id);
       return question;
     });
     validateFastSet(selectedFast);
-    const questions = setup.questionIds.map((id) => {
-      const q = bank.questions.find((q) => q.id === id);
-      if (!q) throw new Error("Unknown question: " + id);
-      return q;
-    });
+    const reservedFast = new Set(selectedFast.map((q) => questionKey(q.prompt)));
+    const questions = setup.questionIds
+      .map((id) => {
+        const q = availableRegular.find((q) => q.id === id);
+        if (!q) throw new Error("Question unavailable or excluded by usage limit: " + id);
+        return q;
+      })
+      .filter((q) => !setup.sharedQuestionBank || !reservedFast.has(questionKey(q.prompt)));
     let id = randomBytes(3).toString("hex").toUpperCase();
     while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
     store.add(createGame(id, setup, questions, selectedFast, bank.notice));
@@ -564,7 +611,7 @@ export function createApplication(options: {
         return;
       }
       res.setHeader("Cache-Control", "public, max-age=0, must-revalidate");
-      res.sendFile(resolve(web, "index.html"));
+      res.sendFile("index.html", { root: web });
     });
   }
   app.use(

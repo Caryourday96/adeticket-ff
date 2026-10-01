@@ -13,7 +13,7 @@
     "build": "node scripts/build.mjs",
     "start": "node --env-file-if-exists=.env dist/server.cjs",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run tests",
+    "test": "vitest run tests --exclude '**/*.node.test.mjs' && node --test tests/question-selection.node.test.mjs tests/event-readiness.node.test.mjs",
     "test:e2e": "playwright test",
     "check": "pnpm typecheck && pnpm test && pnpm build",
     "format": "prettier --write .",
