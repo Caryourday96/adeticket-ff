@@ -103,11 +103,20 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
         setState((old) => (!old || next.revision >= old.revision ? next : old));
         return true;
       } catch (e) {
-        setError((e as Error).message);
+        const message = (e as Error).message;
+        let refreshed = false;
         try {
           const latest = await api<T>("/games/" + id + "/" + role);
           setState((old) => (!old || latest.revision >= old.revision ? latest : old));
+          refreshed = true;
         } catch {}
+        setError(
+          message.startsWith("The game changed.")
+            ? refreshed
+              ? "Another host changed this game. The latest saved state is now shown. Your action was not applied; review the state before trying again."
+              : "Another host changed this game. Your action was not applied, and the latest state could not be loaded. Reconnect or use Refresh before trying again."
+            : message,
+        );
         return false;
       } finally {
         setBusy(false);

@@ -1,3 +1,11 @@
+## 2 October verification update
+
+N2 stale-host messaging is locally verified: build/typecheck and two two-host browser regressions pass, including failed snapshot refresh. Deployment pending; broader restart/hardware recovery remains unverified. Historical local-only/pending sections for the 1 October birthday/mix/readiness/rehearsal release are superseded by the Latest release section and are not outstanding work.
+
+## 2 October local N2 update
+
+Stale-command wording no longer claims a refresh before it succeeds. Client distinguishes refresh success/failure. Typecheck and four reliability tests passed; two-host/outage browser regression and deployment remain pending. N2 is not complete. No production restart or hardware check performed.
+
 ## Latest release — 1 October 2026
 
 Released in 6c9ad06 at https://ff.adeticket.com. Azure deploy/production smoke (36942037370), CI (36942037435) and Playwright workflow (36942037531) succeeded. Live JS /assets/index-Dfs_4WER.js contains the new controls; public route/origin checks pass. Previous local-only and blocked release entries below are historical, superseded by this section.

@@ -161,7 +161,9 @@ export class Store {
         return this.host(id);
       }
       if (r.state.revision !== envelope.revision)
-        throw new Error("The game changed. Your screen has been refreshed; try again.");
+        throw new Error(
+          "The game changed. Your action was not applied. Refresh and review the latest state before trying again.",
+        );
       const revision = r.state.revision + 1;
       if (envelope.command.type === "undo") {
         const previous = r.undo.pop();

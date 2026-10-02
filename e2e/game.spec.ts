@@ -316,3 +316,39 @@ test("a second signed-in host desk can safely take over", async ({ page, browser
     await secondContext.close();
   }
 });
+
+for (const refreshFails of [false, true]) {
+  test(
+    "stale host action reports " + (refreshFails ? "failed" : "successful") + " refresh accurately",
+    async ({ page, browser }) => {
+      await signIn(page);
+      await page.getByRole("button", { name: "Create game", exact: true }).click();
+      await expect(page).toHaveURL(/\/host\/[A-F0-9]{6}$/);
+      const id = page.url().split("/").pop()!;
+      const original = await (await page.request.get("/api/games/" + id + "/host")).json();
+      const second = await browser.newContext();
+      try {
+        const other = await second.newPage();
+        await signIn(other);
+        await other.goto(page.url());
+        await other.getByRole("button", { name: "Pause", exact: true }).click();
+        await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeVisible();
+        await page.route("**/api/games/" + id + "/commands", async (route) => {
+          const body = route.request().postDataJSON();
+          body.revision = original.revision;
+          await route.continue({ postData: JSON.stringify(body) });
+        });
+        if (refreshFails)
+          await page.route("**/api/games/" + id + "/host", (route) => route.abort());
+        await page.getByRole("button", { name: "Resume", exact: true }).click();
+        await expect(page.getByRole("alert")).toContainText(
+          refreshFails ? "latest state could not be loaded" : "latest saved state is now shown",
+        );
+        await expect(page.getByRole("alert")).toContainText("Your action was not applied");
+        await expect(other.getByRole("button", { name: "Resume", exact: true })).toBeVisible();
+      } finally {
+        await second.close();
+      }
+    },
+  );
+}
