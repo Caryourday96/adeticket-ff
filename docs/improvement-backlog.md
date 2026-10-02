@@ -1,3 +1,7 @@
+## 2 October released N2 messaging
+
+Scoped stale-host messaging deployed inbebdd43. Azure37058711420, CI37058711700 and browser37058711643 succeeded; live JSindex-Bhv51HVi contains both messages. Two-host success/failure regressions pass; broader outage/restart/device validation remains outstanding. Earlier pending messaging notes are superseded.
+
 ## 2 October verification update
 
 N2 stale-host messaging is locally verified: build/typecheck and two two-host browser regressions pass, including failed snapshot refresh. Deployment pending; broader restart/hardware recovery remains unverified. Historical local-only/pending sections for the 1 October birthday/mix/readiness/rehearsal release are superseded by the Latest release section and are not outstanding work.
