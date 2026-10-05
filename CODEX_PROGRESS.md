@@ -1,3 +1,9 @@
+## 5 October 2026 — final live verification complete
+
+Closed the 4 October fitness/game release. Fitness641f7ca and game6e27261 were deployed by successful Actions; documentation commits9ea2701 and6d3470b recorded evidence. After transient post-restart timeouts, fresh parallel HTTPS checks now return: fit.adeticket.com/200, /static/coach-brief.js200, anonymous /api/progress401, fitdays.adeticket.com/200, ff.adeticket.com/health200. No private account data read or modified. No new application changes or additional deployment in this closeout.
+
+Completed: optional private workout feedback and five-day outlook; offline game-command guard and accessible Audience/roster dialogs. Previous local verification remains70 fitness tests plus mobile flow;102 game unit/helper and22 browser tests, build/typecheck/format pass. Physical iPhone session and TV/restart rehearsal remain unverified. Next fitness: I2 in-workout equipment profile creation; next game: broader N3 accessibility review, with N1 rotatable join-code work separately scoped. Owner-removed infrastructure and paused OCR remain excluded.
+
 ## 4 October 2026 — coaching / host reliability deployed
 
 Fitness641f7ca deployed: Actions37254979078 success. Live coach-brief.js200 contains trainingOutlook; anonymous private progress401. Existing Web App restarted to load changed server modules. Friends Showdown6e27261 deployed: Azure37254983959, Validate37254983961, Browser37254983975 success; live health200 and index-DwVYpacY.js200 contains offline command guard. Verification: fitness70 Node tests + synthetic390/320px feedback save/refresh; game102 unit/helper +22 browser, typecheck/build/format pass. No owner records changed or new resources provisioned.
