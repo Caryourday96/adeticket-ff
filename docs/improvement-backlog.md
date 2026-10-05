@@ -1,6 +1,6 @@
-## 4 October — host reliability/accessibility batch (local, release pending)
+## 4 October — host reliability/accessibility deployed6e27261
 
-N2: disconnected commands now explicitly rejected without queueing; synthetic two-host offline/reconnect convergence passes. Existing stale-revision handling retained. Longer production restart and multi-device/hardware rehearsal remain F2/F4; no claim those passed. N3: Audience/roster dialogs now trap Tab, focus initial control, close with Escape from inputs/buttons and restore trigger. Phone keyboard regression passes. Remaining N3: broader screen-reader/contrast review outside these dialogs. Typecheck/build and102 unit/helper tests pass; full browser suite pending at checkpoint. No backend state/schema changes.
+N2: disconnected commands now explicitly rejected without queueing; synthetic two-host offline/reconnect convergence passes. Existing stale-revision handling retained. Longer production restart and multi-device/hardware rehearsal remain F2/F4; no claim those passed. N3: Audience/roster dialogs now trap Tab, focus initial control, close with Escape from inputs/buttons and restore trigger. Phone keyboard regression passes. Remaining N3: broader screen-reader/contrast review outside these dialogs. Typecheck/build and102 unit/helper tests pass; all22 browser tests pass. Azure37254983959, Validate37254983961 and Browser37254983975 succeeded; live bundle and health200. No backend state/schema changes.
 
 ## 4 October — scorecard audit details
 

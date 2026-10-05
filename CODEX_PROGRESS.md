@@ -1,3 +1,9 @@
+## 4 October 2026 — coaching / host reliability deployed
+
+Fitness641f7ca deployed: Actions37254979078 success. Live coach-brief.js200 contains trainingOutlook; anonymous private progress401. Existing Web App restarted to load changed server modules. Friends Showdown6e27261 deployed: Azure37254983959, Validate37254983961, Browser37254983975 success; live health200 and index-DwVYpacY.js200 contains offline command guard. Verification: fitness70 Node tests + synthetic390/320px feedback save/refresh; game102 unit/helper +22 browser, typecheck/build/format pass. No owner records changed or new resources provisioned.
+
+Backlogs reconciled; new Zing-inspired features are optional session feedback and private five-day outlook, with conservative existing safety precedence. Game completed scoped offline guard and host-dialog keyboard fixes. Remaining: owner Google sign-in / real workout follow-up; game production restart/actual TV check; broader N3 screen-reader review. Next unblocked fitness implementation: I2 create equipment profile in-workout (selection already exists); game next: broader accessibility review or independently scope N1 join-code separation. Do not restore removed infrastructure tasks or paused OCR.
+
 ## 4 October — verified release ready
 
 Fitness70 Node tests plus synthetic phone finish/feedback/refresh/outlook pass. Game102 unit/helper tests,22 browser tests, typecheck/build and format pass. Both release branches match fetched origin/main before commits. No owner data or paid resources changed. Usage visible at13% five-hour remaining (weekly73% remaining); stopping new scope and publishing verified batch under continuing deployment authorization. Next: verify workflows/live assets and record exact commits.
