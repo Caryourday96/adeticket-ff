@@ -1,3 +1,15 @@
+## 4 October — verified release ready
+
+Fitness70 Node tests plus synthetic phone finish/feedback/refresh/outlook pass. Game102 unit/helper tests,22 browser tests, typecheck/build and format pass. Both release branches match fetched origin/main before commits. No owner data or paid resources changed. Usage visible at13% five-hour remaining (weekly73% remaining); stopping new scope and publishing verified batch under continuing deployment authorization. Next: verify workflows/live assets and record exact commits.
+
+## 4 October 2026 — fitness coaching and game reliability implementation
+
+Fitness: optional completion feedback saved with versioned workout JSON; known-value validation; recent completed-session too-hard feedback reduces strength volume and pauses cardio progression for up to seven days. Safety/recovery gates remain first, comfortable feedback never increases load, and saved plans are never regenerated. Private five-day outlook follows account-local day and preferred weekdays; future days require fresh check-in. Sources: official Zing Coach help, reviewed 2026-10-04; inspiration only, no integration or new paid service. Files: server.js, security.js, training.js, public/app.js/app.css/coach-brief.js; focused tests and browser verification. All70 Node tests pass; synthetic390/320px feedback finish/refresh/outlook passes. F8 forged-header probes blocked, real Google sign-in follow-up remains.
+
+Game: shared modal focus hook fixes Audience/roster initial focus, Tab containment, Escape from inputs/buttons and trigger restoration. Disconnected commands rejected without queuing. Two-host offline/reconnect regression passes; server sends current state before join acknowledgement. Typecheck/build,95 Vitest and7 helper tests pass; full22 browser suite in progress. Files: Host.tsx, useGame.ts, useModalFocus.ts, e2e/host-recovery.spec.ts. PhysicalTV/iPhone and production restart rehearsal not performed.
+
+Deployment: not pushed yet. Next: finish browser suite, format docs, normal fast-forward push both approved release branches to main, verify Actions and live assets. No owner health records changed, no infrastructure/auth/DNS changes.
+
 ## 4 October — cross-app improvements candidate
 
 Fitness F6 daily meal rotation; game N4 outcome/time audit with backward-compatible scorecard; budget private CSV with all actuals and formula escaping; roots/catalogue keyboard skip/focus implemented. Fitness66 tests, budget13 tests, game94 Vitest+7 Node/typecheck/build, four synthetic browser scenarios pass. Added one further game audit regression awaiting final check. No owner data, auth configuration, paid resources or DNS changes. Files in release checkouts plus canonical backlogs updated; unrelated root source preserved. Next: final game tests/browser run, publish approved changes through existing workflows and budget ZIP, verify live, record SHAs.

@@ -1,3 +1,7 @@
+## 4 October — host reliability/accessibility batch (local, release pending)
+
+N2: disconnected commands now explicitly rejected without queueing; synthetic two-host offline/reconnect convergence passes. Existing stale-revision handling retained. Longer production restart and multi-device/hardware rehearsal remain F2/F4; no claim those passed. N3: Audience/roster dialogs now trap Tab, focus initial control, close with Escape from inputs/buttons and restore trigger. Phone keyboard regression passes. Remaining N3: broader screen-reader/contrast review outside these dialogs. Typecheck/build and102 unit/helper tests pass; full browser suite pending at checkpoint. No backend state/schema changes.
+
 ## 4 October — scorecard audit details
 
 N4 implemented: each newly settled round stores server-command time and clear/successful-steal/failed-steal/sudden-death outcome; host results and formula-safe CSV show details. Older awards label unavailable metadata; score totals and undo unchanged. Typecheck,95 Vitest+7 Node tests, build/format and20 browser scenarios pass. Catalogue keyboard skip link also implemented. Deployed ed4abfa; Azure37246208973, validation37246209013 and browser37246209022 succeeded. Live game bundle confirms audit labels; catalogue200 with skip link. Owner hardware/production rehearsal remains.

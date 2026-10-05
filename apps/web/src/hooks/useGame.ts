@@ -91,6 +91,12 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
   const send = useCallback(
     async (command: Command) => {
       if (!state || sending.current) return false;
+      if (!connected) {
+        setError(
+          "You are disconnected. This action was not sent or queued. Wait for Connected live, review the latest state, then try again.",
+        );
+        return false;
+      }
       sending.current = true;
       setBusy(true);
       setError("");
@@ -123,7 +129,7 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
         sending.current = false;
       }
     },
-    [id, role, state, busy],
+    [id, role, state, connected],
   );
   return { state, connected, error, setError, busy, send, refresh, clockOffset };
 }

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { HostState, Side, Team } from "@naija/contracts";
 import { audience, currentQuestion } from "@naija/game";
+import { useModalFocus } from "../hooks/useModalFocus";
 import { useGame } from "../hooks/useGame";
 import { Board } from "../components/Board";
 import { Layout } from "../components/Layout";
@@ -43,6 +44,8 @@ export function Host({ id }: { id: string }) {
     [rosters, setRosters] = useState<[Team, Team] | null>(null),
     [sound, setSound] = useState(false),
     [players, setPlayers] = useState<[number, number]>([0, 1]);
+  const shareDialog = useModalFocus(share, () => setShare(false));
+  const rosterDialog = useModalFocus(!!rosters, () => setRosters(null));
   const audio = useRef<AudioContext | null>(null),
     previous = useRef(0);
   useEffect(() => setSearch(""), [s?.round]);
@@ -517,6 +520,8 @@ export function Host({ id }: { id: string }) {
         {share && (
           <div className="modal-backdrop" onClick={() => setShare(false)}>
             <section
+              ref={shareDialog}
+              tabIndex={-1}
               className="modal share-modal"
               role="dialog"
               aria-modal="true"
@@ -578,6 +583,8 @@ export function Host({ id }: { id: string }) {
         {rosters && (
           <div className="modal-backdrop">
             <section
+              ref={rosterDialog}
+              tabIndex={-1}
               className="modal roster-modal"
               role="dialog"
               aria-modal="true"
