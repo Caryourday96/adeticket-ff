@@ -1,6 +1,6 @@
 ## 4 October — scorecard audit details
 
-N4 implemented: each newly settled round stores server-command time and clear/successful-steal/failed-steal/sudden-death outcome; host results and formula-safe CSV show details. Older awards label unavailable metadata; score totals and undo unchanged. Typecheck,95 Vitest+7 Node tests, build/format and20 browser scenarios pass. Catalogue keyboard skip link also implemented. Release pending; owner hardware/production rehearsal remains.
+N4 implemented: each newly settled round stores server-command time and clear/successful-steal/failed-steal/sudden-death outcome; host results and formula-safe CSV show details. Older awards label unavailable metadata; score totals and undo unchanged. Typecheck,95 Vitest+7 Node tests, build/format and20 browser scenarios pass. Catalogue keyboard skip link also implemented. Deployed ed4abfa; Azure37246208973, validation37246209013 and browser37246209022 succeeded. Live game bundle confirms audit labels; catalogue200 with skip link. Owner hardware/production rehearsal remains.
 
 ## 2 October released N2 messaging
 
