@@ -160,7 +160,14 @@ export type GameState = {
   audienceTheme?: AudienceTheme;
   audienceSoundEnabled?: boolean;
   lastCommand?: Command["type"];
-  roundResults?: { round: number; prompt: string; winner: Side; points: number }[];
+  roundResults?: {
+    round: number;
+    prompt: string;
+    winner: Side;
+    points: number;
+    outcome?: "clear" | "steal" | "failed-steal" | "sudden-death";
+    settledAt?: number;
+  }[];
   id: string;
   rehearsal?: boolean;
   revision: number;

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { Store } from "../apps/server/src/store";
 import { createRehearsal } from "../apps/server/src/rehearsal";
 import { reviewQuestion } from "../apps/web/src/lib/review";
+import { transition } from "../packages/game/src/index";
 import { scorecard } from "../apps/web/src/lib/scorecard";
 
 it("records a successful steal once and removes the award on undo", () => {
@@ -20,7 +21,14 @@ it("records a successful steal once and removes the award on undo", () => {
     };
     const awarded = store.apply(state.id, command);
     expect(awarded.roundResults).toEqual([
-      { round: 1, prompt: state.questions[0].prompt, winner: 1, points: awarded.bank },
+      {
+        round: 1,
+        prompt: state.questions[0].prompt,
+        winner: 1,
+        points: awarded.bank,
+        outcome: "steal",
+        settledAt: expect.any(Number),
+      },
     ]);
     expect(awarded.scores[1]).toBe(awarded.roundResults![0].points);
     expect(store.apply(state.id, command).roundResults).toHaveLength(1);
@@ -87,4 +95,35 @@ it("exports safe CSV and labels missing legacy round history", () => {
   expect(csv).toContain("'=" + 'HYPERLINK(""bad"")');
   expect(csv).toContain("Round breakdown unavailable");
   expect(csv).not.toContain("Fast Money player");
+});
+
+it("exports audit metadata and labels older round outcomes without inventing them", () => {
+  const state = createRehearsal("ABC123", "round");
+  state.roundResults = [
+    { round: 1, prompt: "Question", winner: 0, points: 50, outcome: "failed-steal", settledAt: 0 },
+    { round: 2, prompt: "Older question", winner: 1, points: 20 },
+  ];
+  const csv = scorecard(state);
+  expect(csv).toContain("failed-steal");
+  expect(csv).toContain("1970-01-01T00:00:00.000Z");
+  expect(csv).toContain("Unavailable (older game)");
+});
+
+it("records deterministic timestamps for defended steals and cleared boards", () => {
+  const state = createRehearsal("ABC123", "round");
+  state.phase = "steal";
+  state.control = 0;
+  state.bank = 50;
+  const defended = transition(state, { type: "miss" }, 1234);
+  expect(defended.roundResults?.[0]).toMatchObject({
+    outcome: "failed-steal",
+    settledAt: 1234,
+    winner: 0,
+    points: 50,
+  });
+  state.phase = "play";
+  const answers = state.questions[0].answers;
+  state.revealed = answers.slice(0, -1).map((a) => a.id);
+  const cleared = transition(state, { type: "answer", answerId: answers.at(-1)!.id }, 2345);
+  expect(cleared.roundResults?.[0]).toMatchObject({ outcome: "clear", settledAt: 2345, winner: 0 });
 });

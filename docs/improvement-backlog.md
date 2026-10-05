@@ -1,3 +1,7 @@
+## 4 October — scorecard audit details
+
+N4 implemented: each newly settled round stores server-command time and clear/successful-steal/failed-steal/sudden-death outcome; host results and formula-safe CSV show details. Older awards label unavailable metadata; score totals and undo unchanged. Typecheck,95 Vitest+7 Node tests, build/format and20 browser scenarios pass. Catalogue keyboard skip link also implemented. Release pending; owner hardware/production rehearsal remains.
+
 ## 2 October released N2 messaging
 
 Scoped stale-host messaging deployed inbebdd43. Azure37058711420, CI37058711700 and browser37058711643 succeeded; live JSindex-Bhv51HVi contains both messages. Two-host success/failure regressions pass; broader outage/restart/device validation remains outstanding. Earlier pending messaging notes are superseded.
@@ -25,72 +29,124 @@ Checks: 93 Vitest + seven Node tests, 18 Playwright tests, typecheck, build, for
 
 # Friends Showdown improvement backlog
 
-This is the current handoff list. “Shipped” means the code is in `main`; live deployment or physical-device verification is called out separately.
+Reconciled 22 September 2026 against the local source tree, shared `PROJECT_STATUS.md`, and GitHub `main` at `de05c54d`. A source finding is not proof of a production failure. The local checkout is older than remote `main` and has unrelated uncommitted work; reconcile it before implementation. The separate Python scraper remains the owner's stated question-bank priority.
 
-## Shipped recently
+Already shipped, so not outstanding: game deletion, player self-registration/approval and stage-gated buzzers, required question groups, separate Regular/Fast Money libraries, Fast Money expiry/results, brief-disconnect state retention, survey review/export, scorecard CSV download, audience themes/sound, alpha notices, canonical `ff.adeticket.com` links/origin configuration, and basic join-page accessibility checks. Real-device and production verification are tracked below.
 
-- Survey creation now has explicit preset/manual sources, duplicate removal, valid question-count checks and Fast Money’s exactly-five-question rule. Commit `d5d19fb`.
-- Fast Money expiry audio uses the authoritative server transition and avoids duplicate local/server cues. Commit `9aad7d8`.
-- Host reconnect recovery shows the last confirmed revision and offers a server-state refresh.
-- Host diagnostics show game revision, host sockets, audience screens, registered players and approved players.
-- Hosts can lock new player joins and remove all registered player phones with confirmation.
-- Player buzzers show a readiness checklist for connection, approval, stage assignment and open buzzers.
-- Azure deployment runs smoke checks for `/api/health`, `/api/config`, `/cast` and `/ads.txt`.
-- Brief-disconnect recovery now keeps the last confirmed host/audience state in the current browser and refreshes from the server after reconnecting. Commit `432b6ba`.
-- Player pages now explain when the host has paused new joins and disable the join action.
-- Fast Money now labels expiry versus a manually completed turn, explains pass-and-return behavior and presents final totals in a dedicated live summary. Commit `691a24d`.
-- Hosts can mute or re-enable audience and Cast sound independently while board updates continue. Commit `5dfbb24`.
-- Host diagnostics provide a trusted handoff link and show the number of connected host desks so a second signed-in device can take over safely. Commit `9549cc7`.
-- Host diagnostics now show current Cast sender/device status and the latest server response time.
-- All generated game, audience, buzzer, survey and host-handoff URLs use `https://ff.adeticket.com`; legacy game subdomains redirect there while preserving path and query string.
-- Azure deployment applies an explicit `APP_ORIGIN` allowlist. Its production smoke step sends a safe invalid-password request from the deployed host and fails if the server replies `Origin not allowed`.
-- Alpha release notice now appears on the player and audience room-code entry forms, as well as the in-game player screen.
-- Fixed the missing alpha notice on `/play` and `/join` and corrected the survey success and player approval browser selectors. Commit `a4f797c` passes the Playwright browser suite.
-- Alpha status is clearly labelled across host, audience, player and survey surfaces. Commit `40d83f4`.
-- Visible branding is now Friends Showdown. Commit `bfe380f`.
-- Game cleanup, question history, themes, audience sounds and Cast receiver integration are already in `main`.
-- Ihechi’s audience theme now uses burgundy and earth tones. Commit `765ca06`; GitHub validation, Playwright, Azure deployment and production smoke checks passed.
-- Player and audience join-code pages now expose a main landmark; Playwright checks core-page landmarks and labeled join fields. Commit `b2b2bbed`; validation, browser tests and Azure smoke checks passed.
+## Fix now
 
-## P0 — verify before a major event
+### F2. Rehearse production persistence and multi-device recovery
 
-- **Canonical domain/origin fix — verified:** commit `4bb6e78` passed validation, Playwright, Azure deployment and production smoke checks. Smoke confirmed `POST /api/login` from `https://ff.adeticket.com` reached login validation (401), not the origin-rejection response (403). Local tests cover both legacy redirects; direct external requests to the legacy hosts are not accessible from this environment.
+- **Type / priority:** Data/reliability validation / P0.
+- **Why:** Production requires `DATA_DIR`, but authenticated Azure restart recovery and a real host/player/audience rehearsal are not in the verification record. A health endpoint does not prove saved-game durability.
+- **Acceptance:** Create a disposable deployed game, register/approve a player, reveal an answer, restart the App Service, and confirm game, roster, score, pack and revision survive. Confirm reconnect and clear stale-command conflict. Record date and deployed commit, then delete the disposable game. No restore feature is requested.
+- **Dependencies:** Owner's authenticated host session and controlled Azure restart window; never restart during a live event.
+- **Files:** `apps/server/src/index.ts`, `store.ts`, `apps/web/src/hooks/useGame.ts`, `docs/azure-deployment.md`, `docs/verification.md`.
 
-- **Deployment verification:** application release `b2b2bbed` passed GitHub validation, Playwright, Azure deployment and production smoke checks. Direct production HTTPS requests from this environment fail TLS, so Azure smoke checks are the current live-route evidence. Before an event, rehearse survey creation, join locking and host diagnostics on the deployed site.
-- **Scraper calibration:** current references include a partial board with 4 of 8 answers visible and a separate complete 8-answer board; they verify OCR text but are not a matched calibration pair. The supplied video sample reaches 7 of 8 answers before the scene changes. Capture clean partial and complete frames from one matching board sequence, tune slot geometry/completion detection, then validate a full episode with question matching and variable answer counts.
-- **Cast acceptance:** test the registered receiver on the actual Google Cast TV for discovery, handoff, reconnect, board updates and audio. Build and test the iPad sender wrapper on macOS.
+### F3. Reconcile the dirty local checkout with remote `main`
 
-## P1 — game-night reliability
+- **Type / priority:** Delivery/process risk / P0.
+- **Why:** Local HEAD is `13393afb`, remote `main` was `de05c54d` at audit, and the working tree has unrelated modifications and untracked runtime data. Deployment from this checkout could revive old code or lose work.
+- **Acceptance:** Compare local changes with current remote `main`, preserve intentional edits and runtime data, create a clean reproducible branch/worktree at current remote, and pass game checks there. No deployment in this audit.
+- **Dependencies:** Review every existing local diff; Git authentication only for later publication.
+- **Files:** Git history/working tree, `.github/workflows/`, `PROJECT_STATUS.md`.
 
-- **Offline recovery:** short-outage state retention is shipped; longer-outage reconciliation and conflict messaging remain to be tested and hardened.
-- **Host handoff:** the trusted-link and connected-host-count flow is shipped. The Playwright takeover test verifies buzzer-control synchronization across independently signed-in desks; raw socket counts can fluctuate and are informational rather than a device count. The latest full browser run passed. A live two-device rehearsal is still required.
-- **Fast Money polish:** expiry sound, timer-expiry messaging, pass-and-return wording and final-results presentation are shipped. Remaining work is optional visual refinement after a live game-night rehearsal.
-- **Moderation:** add join-code regeneration. Treat as a deliberate identity migration: the current code is the game’s primary key across persistence, routes and socket rooms. Locking joins, player-facing status and independent audience-sound control are shipped.
-- **Diagnostics:** current Cast sender/device status and latest server response time are now shown. Confirm accuracy during a live TV session.
+### F4. Validate Cast and host takeover on actual devices
 
-## P2 — presentation and accessibility
+- **Type / priority:** Event-readiness test gap / P0.
+- **Why:** Cast sender/receiver and browser takeover tests exist, but TV discovery, reconnect, sound and iPad sender behavior have not been demonstrated on the owner's hardware.
+- **Acceptance:** Record a real-TV run covering discovery, handoff, board/score updates, sound toggle and reconnect; verify a separately signed-in second host controls buzzers without duplicate winners. Log defects with device versions. Build/test the iPad wrapper separately on macOS.
+- **Dependencies:** Owner's Cast TV, iPad and macOS environment for native build.
+- **Files:** `apps/web/src/lib/cast.ts`, `pages/CastReceiver.tsx`, `components/CastControls.tsx`, `apps/ios-cast-sender/`, `e2e/game.spec.ts`.
 
-- Audience audio: original, more differentiated buzz/reveal/strike/timer/win cues are implemented; listen on the actual TV and adjust levels and tone to suit the room. The Nigerian Family Feud broadcast is a pacing reference, not an audio source. The native Apple TV receiver still needs its own sound implementation.
-- Audience layouts: board-only, scoreboard-only, waiting room, QR join and final-score modes.
-- Downloadable scorecard with round winners, steals, Fast Money totals and timestamps.
-- Reusable event templates for team names, themes, question packs and sponsor text.
-- High-contrast mode, reduced motion, larger text, keyboard focus and screen-reader audit.
-- Basic Playwright accessibility smoke checks for core page landmarks and join-form labels are shipped. Full WCAG/axe audit, keyboard/focus, contrast, reduced-motion and screen-reader review remain.
+## Next up
 
-## P3 — operations and growth
+### N1. Separate the rotatable join code from the internal game ID
 
-- Load testing with a host, audience screens, two teams and many phone buzzers.
-- Deployment error logging and a small game-night status page.
-- AdSense site review, certified consent management and real ad-delivery testing; ads remain disabled.
-- Sponsor mode with an event-specific logo/message switch.
-- Paid custom question packs or hosted event packages.
-- Aggregate game analytics with an explicit privacy choice.
+- **Type / priority:** Security/moderation architecture / P1.
+- **Why:** The six-character public code is the SQLite game primary key and route/socket room key. A leaked code cannot be rotated without disrupting the game; locking new joins is a partial mitigation.
+- **Acceptance:** Host rotates a public join alias while game ID, score, host/audience sessions and approved players persist; old alias stops new joins; links/QR update; stale alias gives a clear error; authorization and concurrent-buzzer tests pass.
+- **Dependencies:** Alias lifecycle and migration for existing saves; compatibility plan for current room URLs.
+- **Files:** `apps/server/src/app.ts`, `store.ts`, `buzzers.ts`, `packages/contracts/src/index.ts`, `apps/web/src/pages/Player.tsx`, `components/BuzzerControls.tsx`, `tests/player-registration.test.ts`.
 
-## Working rules
+### N2. Harden longer-outage conflict messaging
 
-- Do not claim a feature is live until the corresponding GitHub Actions/Azure run and a production check succeed.
-- Do not enable advertising until AdSense approval, consent management and rollback testing are complete.
-- Keep the scraper’s uncertain boards in review status; never export a partial board as verified.
+- **Type / priority:** Reliability/UX / P1.
+- **Why:** Short disconnects retain a confirmed snapshot, but conflicting host edits after a longer outage have not been rehearsed end-to-end.
+- **Acceptance:** Two hosts edit the same game across a simulated disconnect; stale commands never overwrite the newer revision; the disconnected host sees authoritative state and a specific recovery message; audience/player views converge.
+- **Dependencies:** F2 rehearsal findings.
+- **Files:** `apps/web/src/hooks/useGame.ts`, `pages/Host.tsx`, `apps/server/src/store.ts`, `tests/reliability.test.ts`, `e2e/game.spec.ts`.
+
+### N3. Complete accessibility review beyond basic join labels
+
+- **Type / priority:** UX/test gap / P1.
+- **Why:** Basic landmark/label tests exist, but keyboard/focus flow, contrast, reduced motion and screen-reader announcements across host and player screens are not covered.
+- **Acceptance:** Document keyboard and screen-reader walkthroughs for join, approval, buzzing, host answers and Fast Money; fix blocking issues; add automated semantic checks plus manual contrast/motion checks.
+- **Dependencies:** Browser/device access and supported screen-reader/browser pair.
+- **Files:** `apps/web/src/App.tsx`, `pages/Player.tsx`, `pages/Host.tsx`, `styles.css`, `e2e/game.spec.ts`.
+
+### N5. Measure many-phone performance and survey sample integrity
+
+- **Type / priority:** Performance/security validation / P2.
+- **Why:** A single process serves Socket.IO, polls timers and uses SQLite; no venue-scale phone load result is recorded. Survey duplicate limits are cookie-based, so counts represent submissions, not unique people.
+- **Acceptance:** Run a documented host + audience + two-team phone load; report p95 buzz acknowledgment and missed connections; state a safe event size. Survey UI/export label counts as submissions; cookie-reset behavior is tested before stronger claims.
+- **Dependencies:** Representative devices/network and agreed event size.
+- **Files:** `apps/server/src/app.ts`, `buzzers.ts`, `surveys.ts`, `docs/surveys.md`, `tests/buzzers.test.ts`.
+
+### N6. Validate scraper on a held-out episode and package the update
+
+- **Type / priority:** Data-quality validation and delivery / P1.
+- **Why:** F1 now passes its five-round calibration episode; this is not evidence of generalization. The distribution ZIP still predates the local fixes.
+- **Acceptance:** Record manual truth on a separate episode before evaluating; report precision, recall, OCR/question errors and runtime without tuning to its final boards. Keep partial/uncertain boards review-only. Rebuild and verify the distributable ZIP, excluding runtime data, environments and secrets. Track other camera views, 5/7-answer layouts and Fast Money graphics separately if absent from the held-out episode.
+- **Dependencies:** A separate representative episode/captions; current Python 3.14 source and documented calibration profiles.
+- **Files:** `../feud_scraper_py314_v4/feud/scanner.py`, `../feud_scraper_py314_v4/feud/evaluate.py`, `../feud_scraper_py314_v4/docs/episode31-validation.md`, `../feud_scraper_py314_v4/HOW_TO_USE.md`, `../feud_scraper_py314_improved.zip`.
+
+## Nice to have
+
+### H1. Audience modes and reusable event presets
+
+- **Type / priority:** UX / P3.
+- **Why:** Operators may want board-only, waiting-room, QR, scoreboard and final-score displays with repeatable teams/themes/question settings.
+- **Acceptance:** Host switches audience mode and saves/applies a preset without changing authoritative scores or exposing private answers.
+- **Dependencies:** F2/F4 game-night behavior is settled.
+- **Files:** `apps/web/src/pages/Audience.tsx`, `components/Board.tsx`, `components/AudienceThemeControls.tsx`, `pages/Setup.tsx`.
+
+### H2. Deployment observability and concise status view
+
+- **Type / priority:** Operations / P3.
+- **Why:** Health/smoke checks catch route failures but do not offer a concise view of recent errors and room connection health.
+- **Acceptance:** Private diagnostics show actionable connection/revision status; production errors are correlated without logging passphrases or player cookies.
+- **Dependencies:** Logging/privacy policy and F2 findings.
+- **Files:** `apps/server/src/app.ts`, `apps/web/src/pages/Host.tsx`, `scripts/smoke.mjs`.
+
+### H3. Ads and optional paid event offerings
+
+- **Type / priority:** Monetization/compliance / P3.
+- **Why:** Game ad code remains disabled. The adeticket.com Google CMP is published and its ads.txt seller entry is live, but AdSense approval and live consent/revocation/ad delivery remain unverified. The root sites load the AdSense script without a visible site-specific privacy link; the game policy alone does not describe every root site's behavior. Sponsor and paid-pack ideas are not implemented.
+- **Acceptance:** After approval/consent, ads appear only in agreed non-gameplay placement, remain absent from host/player/audience screens, and can be switched off promptly. Scope sponsor/premium features separately.
+- **Dependencies:** AdSense site review, tested consent management, root-site privacy disclosures/links grounded in actual behavior, and owner decisions. Do not equate published CMP with ads being approved or live.
+- **Files:** `apps/server/src/advertising.ts`, `apps/web/src/components/Advertisement.tsx`, `docs/advertising.md`, `docs/monetization-options.md`.
+
+### H4. Confirm exact portfolio credential names
+
+- **Type / priority:** Content accuracy / P3.
+- **Why:** The portfolio contains the vague labels “Oracle expertise certification” and “Diploma studies — Algonquin College.” Exact award/course names and completion status cannot be inferred from these labels.
+- **Acceptance:** Confirm wording against the owner's resume/certificates, retain accurate completion status, and update only verified details. Do not add work history or invent credentials.
+- **Dependencies:** Owner's source documents or confirmation.
+- **Files:** `sites/portfolio/index.html`, workspace `personal_site_export/sites/portfolio/index.html`.
+
+## Completed in the focused local run — 23 September 2026
+
+### F1. Calibrate complete-board detection on a real Nigerian episode
+
+- Matched 4/6/8-answer references and five-round manual truth are recorded. Fixed half-frame proxy rounding that skipped samples and prevented round-2 original-frame refinement. Completeness, stability and manual export gates remain unchanged.
+- Full episode: 5/5 unique complete/stable regular boards; precision 100%, recall 100%; zero answer/point errors across 32 pairs and zero question errors. Scan 347.222 s plus separately measured 516.97 s proxy preparation. Zero automatic verified exports.
+- 37 tests passed; compileall and critical Ruff passed. Independent QA reproduced regression failure with the old expression. Evidence: scraper `examples/episode31/metrics.json` and `docs/episode31-validation.md`. Local source only, no game deployment or ZIP rebuild. Held-out coverage and packaging moved to N6.
+
+### Website wording consistency — completed
+
+- Published game/catalogue53d56bf and root-sites1cdb562: Friends Showdown branding, survey-answer terminology, alpha disclosure, Game code labels, accurate joining instructions and renamed scorecards. Portfolio eyebrow clarified; no credentials invented.
+- Typecheck/build,88 unit tests,3 affected local Playwright flows and full GitHub Playwright passed. Azure game/root deployments succeeded; live root/catalogue text and player join screen verified. Follow-ups remain H3/H4, not unfinished copy fixes.
 
 ## Completed locally — Ihechi's birthday bank (30 September 2026)
 
@@ -128,4 +184,4 @@ Dependencies: readable installed packages for formatter/typecheck/build/API/brow
 
 ### Release verification — 1 October 2026
 
-Previous dependency/publication blockers are resolved in this session. Birthday bank, shared-bank selection/usage cap and requested improvements 2/5/6 pass typecheck, build, 93 Vitest tests, seven Node regressions and 18 Chromium browser tests (including 390px preview/rehearsal/readiness/no-overflow). Scoped release fixes: test-runner separation, transitive ip-address security patch, SPA fallback in hidden local checkout and UI regression selectors. Final order-alignment rerun passed before push. Release status: not yet deployed; next verify GitHub Actions/Azure and live bundle. Physical TV sound, casting and phone latency still require an owner device check.
+Previous dependency/publication blockers are resolved in this session. Birthday bank, shared-bank selection/usage cap and requested improvements 2/5/6 pass typecheck, build, 93 Vitest tests, seven Node regressions and 18 Chromium browser tests (including 390px preview/rehearsal/readiness/no-overflow). Scoped release fixes: test-runner separation, transitive ip-address security patch, SPA fallback in hidden local checkout and UI regression selectors. Final order-alignment rerun pending before push. Release status: not yet deployed; next verify GitHub Actions/Azure and live bundle. Physical TV sound, casting and phone latency still require an owner device check.

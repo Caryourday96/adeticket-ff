@@ -71,10 +71,22 @@ export function createGame(
     fastQuestions: structuredClone(fastQuestions),
   };
 }
-function award(s: GameState, side: Side) {
+function award(
+  s: GameState,
+  side: Side,
+  now: number,
+  outcome: NonNullable<GameState["roundResults"]>[number]["outcome"],
+) {
   s.roundResults = [
     ...(s.roundResults ?? []),
-    { round: s.round + 1, prompt: currentQuestion(s).prompt, winner: side, points: s.bank },
+    {
+      round: s.round + 1,
+      prompt: currentQuestion(s).prompt,
+      winner: side,
+      points: s.bank,
+      outcome,
+      settledAt: now,
+    },
   ];
   s.scores[side] += s.bank;
   s.roundWinner = side;
@@ -172,7 +184,7 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
           if (answer?.id === q.answers[0].id) {
             s.revealed = [answer.id];
             s.bank = answer.points * multiplier(s);
-            award(s, s.face.current);
+            award(s, s.face.current, now, "sudden-death");
           } else {
             s.face.current = other(s.face.current);
             rotate(s, s.face.current);
@@ -200,7 +212,7 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
           s.revealed.push(answer.id);
           if (s.rules.includeStealAnswer) s.bank += answer.points * multiplier(s);
         }
-        award(s, answer ? other(s.control) : s.control);
+        award(s, answer ? other(s.control) : s.control, now, answer ? "steal" : "failed-steal");
       } else {
         requireThat(!answer || !s.revealed.includes(answer.id), "That answer is already revealed.");
         if (answer) {
@@ -212,7 +224,7 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
           s.message = "Strike " + s.strikes + ".";
         }
         rotate(s, s.control);
-        if (s.revealed.length === q.answers.length) award(s, s.control);
+        if (s.revealed.length === q.answers.length) award(s, s.control, now, "clear");
         else if (s.strikes === 3) {
           s.phase = "steal";
           s.message = s.teams[other(s.control)].name + " has one chance to steal.";

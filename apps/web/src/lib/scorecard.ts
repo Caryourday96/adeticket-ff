@@ -7,12 +7,16 @@ export function scorecard(state: GameState) {
     ["Team", "Main game points"],
     ...state.teams.map((team, index) => [team.name, state.scores[index]]),
     [],
-    ["Round", "Question", "Winner", "Points awarded"],
+    ["Round", "Question", "Winner", "Points awarded", "Outcome", "Settled at (UTC)"],
     ...(state.roundResults ?? []).map((round) => [
       round.round,
       round.prompt,
       state.teams[round.winner].name,
       round.points,
+      round.outcome ?? "Unavailable (older game)",
+      round.settledAt == null
+        ? "Unavailable (older game)"
+        : new Date(round.settledAt).toISOString(),
     ]),
   ];
   if (

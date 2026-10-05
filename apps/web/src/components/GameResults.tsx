@@ -18,7 +18,25 @@ export function GameResults({ state }: { state: HostState }) {
       <h3>Round breakdown</h3>
       {(state.roundResults ?? []).map((round) => (
         <p key={round.round}>
-          Round {round.round}: {state.teams[round.winner].name} won {round.points} points.
+          Round {round.round}: {state.teams[round.winner].name} won {round.points} points.{" "}
+          {round.outcome === "steal"
+            ? "Successful steal"
+            : round.outcome === "failed-steal"
+              ? "Steal defended"
+              : round.outcome === "clear"
+                ? "Board cleared"
+                : round.outcome === "sudden-death"
+                  ? "Sudden death"
+                  : "Outcome unavailable for this older round"}
+          {round.settledAt != null && (
+            <>
+              {" "}
+              ·{" "}
+              <time dateTime={new Date(round.settledAt).toISOString()}>
+                {new Date(round.settledAt).toLocaleString()}
+              </time>
+            </>
+          )}
         </p>
       ))}
       {(state.roundResults ?? []).reduce((sum, round) => sum + round.points, 0) !==
