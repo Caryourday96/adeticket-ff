@@ -5,6 +5,7 @@ import { api, download } from "../lib/api";
 import { fromCsv, toCsv } from "../lib/csv";
 import { Layout } from "../components/Layout";
 import { normalized, reviewQuestion } from "../lib/review";
+import { useModalFocus } from "../hooks/useModalFocus";
 export function Library() {
   const [roundType, setRoundType] = useState<"regular" | "fast-money">("regular");
   const [usage, setUsage] = useState<
@@ -23,6 +24,8 @@ export function Library() {
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
+  const importDialog = useModalFocus(Boolean(draft), () => setDraft(null));
+  const editorDialog = useModalFocus(Boolean(edit), () => setEdit(null));
   useEffect(() => {
     api<typeof usage>("/question-usage")
       .then((rows) => {
@@ -285,6 +288,8 @@ export function Library() {
               role="dialog"
               aria-modal="true"
               aria-label="Review imported pack"
+              ref={importDialog}
+              tabIndex={-1}
             >
               <h2>Review your import</h2>
               <label>
@@ -324,7 +329,11 @@ export function Library() {
                   </p>
                 ))}
               </div>
-              {error && <p className="error">{error}</p>}
+              {error && (
+                <p className="error" role="alert">
+                  {error}
+                </p>
+              )}
               <div className="button-row">
                 <button className="button" onClick={() => setDraft(null)}>
                   Cancel
@@ -343,6 +352,8 @@ export function Library() {
               role="dialog"
               aria-modal="true"
               aria-label="Edit question"
+              ref={editorDialog}
+              tabIndex={-1}
             >
               <button
                 className="modal-close icon-button"

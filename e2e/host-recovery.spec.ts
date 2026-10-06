@@ -1,5 +1,20 @@
 import { test, expect } from "@playwright/test";
 import { signIn } from "./helpers/auth";
+test("library editor keeps keyboard focus and restores the question trigger", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page);
+  await page.getByRole("link", { name: "Question library", exact: true }).click();
+  const trigger = page.locator(".question-card").first();
+  await trigger.click();
+  const dialog = page.getByRole("dialog", { name: "Edit question", exact: true });
+  await expect(dialog.getByRole("button", { name: "Close editor" })).toBeFocused();
+  await page.keyboard.press("Shift+Tab");
+  expect(await dialog.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+  await dialog.getByLabel("Question", { exact: true }).focus();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
 test("host dialogs trap keyboard focus and restore trigger on phone", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page);
