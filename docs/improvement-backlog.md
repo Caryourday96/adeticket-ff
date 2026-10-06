@@ -1,3 +1,6 @@
+## 5 October — N3 player readiness accessibility; locally verified, not deployed
+
+Player checklist now exposes each state in visible text instead of relying on colour/symbols; atomic status updates announce the whole message. Typecheck, build and focused browser join/approval/stage/buzz test pass. Files: apps/web/src/pages/Player.tsx, e2e/game.spec.ts. N3 remains open for broader keyboard, screen-reader, contrast and reduced-motion walkthroughs. F2/F4 owner/device rehearsal unchanged. No application publication this pass.
 ## 4 October — host reliability/accessibility deployed6e27261
 
 N2: disconnected commands now explicitly rejected without queueing; synthetic two-host offline/reconnect convergence passes. Existing stale-revision handling retained. Longer production restart and multi-device/hardware rehearsal remain F2/F4; no claim those passed. N3: Audience/roster dialogs now trap Tab, focus initial control, close with Escape from inputs/buttons and restore trigger. Phone keyboard regression passes. Remaining N3: broader screen-reader/contrast review outside these dialogs. Typecheck/build and102 unit/helper tests pass; all22 browser tests pass. Azure37254983959, Validate37254983961 and Browser37254983975 succeeded; live bundle and health200. No backend state/schema changes.
@@ -189,3 +192,4 @@ Dependencies: readable installed packages for formatter/typecheck/build/API/brow
 ### Release verification — 1 October 2026
 
 Previous dependency/publication blockers are resolved in this session. Birthday bank, shared-bank selection/usage cap and requested improvements 2/5/6 pass typecheck, build, 93 Vitest tests, seven Node regressions and 18 Chromium browser tests (including 390px preview/rehearsal/readiness/no-overflow). Scoped release fixes: test-runner separation, transitive ip-address security patch, SPA fallback in hidden local checkout and UI regression selectors. Final order-alignment rerun pending before push. Release status: not yet deployed; next verify GitHub Actions/Azure and live bundle. Physical TV sound, casting and phone latency still require an owner device check.
+

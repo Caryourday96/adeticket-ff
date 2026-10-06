@@ -175,6 +175,12 @@ test("players enter their names and only buzz on stage with saved team names", a
     await expect(phone.getByLabel("Team", { exact: true })).toContainText("Lagos Stars");
     await phone.getByLabel("Your name").fill("Funke");
     await phone.getByRole("button", { name: "Join game", exact: true }).click();
+    await expect(phone.locator('.phone-status[role="status"]')).toHaveText(
+      "Waiting for host approval",
+    );
+    await expect(phone.getByLabel("Buzzer readiness checklist")).toContainText(
+      "Host approval: waiting",
+    );
     await expect(phone.getByText("Waiting for host approval", { exact: true })).toBeVisible();
     await page
       .locator(".buzzer-controls > details > summary")
@@ -186,6 +192,13 @@ test("players enter their names and only buzz on stage with saved team names", a
     await page.getByRole("button", { name: "Put Funke on stage", exact: true }).click();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeEnabled();
+    await expect(phone.getByLabel("Buzzer readiness checklist")).toContainText(
+      "Host approval: approved",
+    );
+    await expect(phone.getByLabel("Buzzer readiness checklist")).toContainText(
+      "On-stage assignment: ready",
+    );
+    await expect(phone.getByLabel("Buzzer readiness checklist")).toContainText("Buzzers: open");
     await expect(page.getByLabel("Player connection panel")).toContainText("Lagos Stars · Funke");
     await expect(page.getByLabel("Player connection panel")).toContainText("Can buzz now", {
       timeout: 10000,

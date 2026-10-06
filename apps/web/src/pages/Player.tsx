@@ -97,7 +97,7 @@ export function Player({ id }: { id: string }) {
             <h1>{p.name}</h1>
             <p>{s.teams[p.team].name}</p>
           </div>
-          <div className="phone-status" aria-live="polite">
+          <div className="phone-status" role="status" aria-live="polite" aria-atomic="true">
             {!connected || !gameConnected
               ? "Reconnecting — buzzer disabled"
               : !p.approved
@@ -113,10 +113,16 @@ export function Player({ id }: { id: string }) {
                         : "Wait for the host to open buzzers"}
           </div>
           <ul className="phone-readiness" aria-label="Buzzer readiness checklist">
-            <li className={connected && gameConnected ? "done" : ""}>Phone connected</li>
-            <li className={p.approved ? "done" : ""}>Host approval</li>
-            <li className={eligible ? "done" : ""}>On-stage assignment</li>
-            <li className={b?.armed ? "done" : ""}>Host opened buzzers</li>
+            <li className={connected && gameConnected ? "done" : ""}>
+              Phone connection: {connected && gameConnected ? "connected" : "reconnecting"}
+            </li>
+            <li className={p.approved ? "done" : ""}>
+              Host approval: {p.approved ? "approved" : "waiting"}
+            </li>
+            <li className={eligible ? "done" : ""}>
+              On-stage assignment: {eligible ? "ready" : "waiting"}
+            </li>
+            <li className={b?.armed ? "done" : ""}>Buzzers: {b?.armed ? "open" : "closed"}</li>
           </ul>
           <button
             className={"phone-buzzer " + (ready ? "ready" : "")}
