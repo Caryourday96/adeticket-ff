@@ -1,3 +1,11 @@
+## 6 October — weekly highlights and host shortcuts deployed
+
+Fitness e1a6b7d deployed successfully: Actions37561067204. Live app.js200 contains Recorded highlights; anonymous weekly-review401. I5 implemented/deployed: dated workout/recovery highlights, recorded-step coverage, sparse/empty labels, no automatic plan or nutrition changes.72 Node tests pass. Actual authenticated owner/iPhone review not performed.
+
+Friends Showdown8e10f20 deployed successfully: Azure37561077678, validation37561077732, browser37561077700. Live index-BsptYRPO.js200 contains shortcut toggle; production smoke routes/origin pass.102 local unit/helper tests,4 focused keyboard browser tests, build/typecheck/audit pass; complete browser suite passed in CI. N3 shortcut opt-out complete; physical screen-reader/contrast and F2/F4 hardware/restart rehearsal remain open.
+
+No owner records, schema, DNS or paid resources changed. Next fitness: I4 optional baseline/cadence design or I6 private calendar for Sol; next game: remaining N3 verified accessibility issues, with hardware-dependent tasks separately scheduled. Release checkouts remain fitness-tracker/.deploy/accountability-link and .deploy/ihechi-birthday. Owner-removed infrastructure and paused OCR remain excluded.
+
 ## 6 October — weekly highlights and host shortcut control prepared
 
 Fitness I5: weekly review highlights list completed-workout dates, recorded planned recovery dates and step coverage, with sparse/empty wording. Missing days never imply failed workouts; no food-compensation or automated target changes. Future-dated workouts/reviews/activity do not enter current-week highlights or counts. Files: weekly-review.js, weekly-review.test.js, public/app.js. Five focused weekly tests pass, including empty/future/sparse cases; syntax passes. Existing schema and records unchanged.
