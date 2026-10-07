@@ -43,6 +43,7 @@ export function Host({ id }: { id: string }) {
     [copied, setCopied] = useState(false),
     [rosters, setRosters] = useState<[Team, Team] | null>(null),
     [sound, setSound] = useState(false),
+    [shortcuts, setShortcuts] = useState(true),
     [players, setPlayers] = useState<[number, number]>([0, 1]);
   const shareDialog = useModalFocus(share, () => setShare(false));
   const rosterDialog = useModalFocus(!!rosters, () => setRosters(null));
@@ -80,7 +81,7 @@ export function Host({ id }: { id: string }) {
       )
         return;
       if (e.key === "Escape") setShare(false);
-      if (share || rosters) return;
+      if (share || rosters || !shortcuts) return;
       if (
         s &&
         !s.paused &&
@@ -103,7 +104,7 @@ export function Host({ id }: { id: string }) {
     }
     window.addEventListener("keydown", key);
     return () => window.removeEventListener("keydown", key);
-  }, [send, s, share, rosters, busy]);
+  }, [send, s, share, rosters, busy, shortcuts]);
   if (!s)
     return (
       <Layout>
@@ -134,6 +135,22 @@ export function Host({ id }: { id: string }) {
   return (
     <Layout>
       <main className="page host-page">
+        <details>
+          <summary>Keyboard shortcuts</summary>
+          <label>
+            <input
+              type="checkbox"
+              checked={shortcuts}
+              onChange={(event) => setShortcuts(event.target.checked)}
+            />
+            Enable single-key game shortcuts
+          </label>
+          <p>
+            1–8: choose an answer; X: strike; U: undo. Turn these off when navigating with assistive
+            technology. This choice lasts until you reopen the host page; all on-screen controls
+            remain available.
+          </p>
+        </details>
         <div className="host-heading">
           <div>
             <div className="eyebrow">LIVE GAME · {id}</div>

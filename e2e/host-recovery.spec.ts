@@ -1,5 +1,22 @@
 import { test, expect } from "@playwright/test";
 import { signIn } from "./helpers/auth";
+test("host can disable single-key shortcuts while keeping controls available", async ({ page }) => {
+  await signIn(page);
+  await page.getByRole("button", { name: "Create game", exact: true }).click();
+  await expect(page.locator(".connection")).toHaveText("Connected live");
+  await page.getByRole("button", { name: "Pause", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeVisible();
+  await page.getByText("Keyboard shortcuts", { exact: true }).click();
+  const toggle = page.getByLabel("Enable single-key game shortcuts");
+  await toggle.uncheck();
+  await page.getByRole("heading", { name: "You're running the show." }).click();
+  await page.keyboard.press("u");
+  await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeVisible();
+  await toggle.check();
+  await page.getByRole("heading", { name: "You're running the show." }).click();
+  await page.keyboard.press("u");
+  await expect(page.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
+});
 test("library editor keeps keyboard focus and restores the question trigger", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page);

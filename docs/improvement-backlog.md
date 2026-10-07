@@ -1,3 +1,9 @@
+## 6 October — weekly highlights and host shortcut control prepared
+
+Fitness I5: weekly review highlights list completed-workout dates, recorded planned recovery dates and step coverage, with sparse/empty wording. Missing days never imply failed workouts; no food-compensation or automated target changes. Future-dated workouts/reviews/activity do not enter current-week highlights or counts. Files: weekly-review.js, weekly-review.test.js, public/app.js. Five focused weekly tests pass, including empty/future/sparse cases; syntax passes. Existing schema and records unchanged.
+
+Friends Showdown N3: added an explicit host single-key shortcut toggle with key descriptions and page-lifetime scope. When off, answer/strike/undo keys do nothing while buttons remain available. Files: Host.tsx, e2e/host-recovery.spec.ts. Typecheck/build and four keyboard/dialog/reconnect browser tests pass. Physical screen-reader/contrast and hardware rehearsals remain unverified. Both fetched origin/main match release HEAD before changes. Deployment authorized; next finish release checks, push both scoped commits and verify Actions/live assets.
+
 ## 5 October — fitness and Friends Showdown releases complete
 
 Fitness51e1143 deployed successfully in Actions37403525999, following equipment release42901ec. Live app.js200 confirms both features; anonymous recent-foods/progress return401. I2 inline equipment creation and I3 recent-food shortcuts are complete/deployed. 70 Node tests plus synthetic phone equipment and recent-food flows pass; actual iPhone remains owner verification.
