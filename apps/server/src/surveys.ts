@@ -209,7 +209,7 @@ export class Surveys {
       title: s.title,
       roundType: s.roundType,
       scoringSource: "collected-survey",
-      notice: `Collected survey: ${s.responseCount} submissions. Convenience sample; not population-representative. Scores are percentages of nonblank answers per question, not raw respondent counts.`,
+      notice: `Collected survey: ${s.responseCount} submissions, not verified unique people. Duplicate protection is browser-cookie based; clearing cookies or using another browser can allow another submission. Convenience sample; not population-representative. Scores are percentages of nonblank answers per question, not raw respondent counts.`,
       questions,
     });
   }

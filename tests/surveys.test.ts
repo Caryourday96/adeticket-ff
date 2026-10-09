@@ -42,6 +42,8 @@ it("counts real answers, merges reviewed variants, handles skips and gates expor
     });
     const bank = surveys.export(s.id);
     expect(bank.scoringSource).toBe("collected-survey");
+    expect(bank.notice).toContain("5 submissions, not verified unique people");
+    expect(bank.notice).toContain("clearing cookies or using another browser");
     expect(bank.questions[0].answers[0]).toMatchObject({
       text: "Jollof rice",
       points: 60,
@@ -92,6 +94,24 @@ it("does not leak existing answers or collected results to respondents", async (
     );
     expect(after.submitted).toBe(true);
     expect(JSON.stringify(after)).not.toContain("Secret survey answer");
+    await post(`/surveys/${s.id}/responses`, { answers: { q1: "Repeated submission" } }, phone);
+    const manage = () =>
+      fetch(base + `/surveys/${s.id}/manage`, { headers: { Cookie: host } }).then((r) => r.json());
+    expect((await manage()).responseCount).toBe(1);
+    // A fresh browser cookie represents another submission, not proof of another person.
+    const fresh = await fetch(base + `/surveys/${s.id}`);
+    const freshCookie = fresh.headers.get("set-cookie")!.split(";")[0];
+    expect(freshCookie).not.toBe(phone);
+    expect(
+      (
+        await post(
+          `/surveys/${s.id}/responses`,
+          { answers: { q1: "Same person, new browser" } },
+          freshCookie,
+        )
+      ).status,
+    ).toBe(200);
+    expect((await manage()).responseCount).toBe(2);
     expect(
       (await fetch(base + `/surveys/${s.id}/manage`, { headers: { Cookie: phone } })).status,
     ).toBe(401);

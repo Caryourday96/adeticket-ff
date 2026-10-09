@@ -1,3 +1,7 @@
+## 9 October — two authorized releases in progress; usage checkpoint
+
+Owner authorized deploy, backlog work, deploy again. First release100f1e1 pushed main: Fast Money drafts plus already prepared question-status change. Validation37942825980 succeeded; Azure37942825981 and browser37942826037 pending. Next N5 survey-integrity slice prepared: exported bank notice explicitly says submissions are not verified unique people and explains cookie-reset/other-browser limitation. Two focused survey tests pass, including same-cookie duplicate count1 versus fresh-cookie count2 and exported notice. No production responses modified. Many-phone load and safe event-size claims remain unverified; do not close all N5. Screen-reader work remains deferred. Usage89% five-hour used (11% remaining), weekly55% used; no reset credits redeemed. Next: finish first release checks, commit/push survey notice/tests as second batch, verify Actions/live smoke, checkpoint and stop.
+
 ## 9 October — Fast Money drafts preserved; screen-reader work deferred
 
 Owner asked to ignore screen-reader work and continue practical improvements. Existing N3 edits remain local and unchanged; no further screen-reader work. Fixed confirmed FastControls behavior where switching questions or passing discarded typed off-board answers. Drafts now stay keyed by question for the current player/turn, are cleared after successful recording and on player change, and never count as entries before Record. Reload clears drafts; UI states that limit.
