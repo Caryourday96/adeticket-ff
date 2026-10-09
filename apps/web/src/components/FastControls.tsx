@@ -13,7 +13,7 @@ export function FastControls({
 }) {
   const f = state.fast!;
   const [q, setQ] = useState(0),
-    [text, setText] = useState(""),
+    [drafts, setDrafts] = useState<Record<number, string>>({}),
     [now, setNow] = useState(Date.now());
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -22,7 +22,7 @@ export function FastControls({
   }, []);
   useEffect(() => {
     setQ(0);
-    setText("");
+    setDrafts({});
   }, [f.player]);
   const seconds = Math.max(
     0,
@@ -34,6 +34,7 @@ export function FastControls({
   const question = state.fastQuestions[q],
     entries = f.entries[f.player],
     expired = f.stage === "reveal" && state.message.startsWith("Time's up");
+  const text = drafts[q] ?? entries[q]?.text ?? "";
   const nextQuestion = () => {
     for (let step = 1; step < 5; step++) {
       const index = (q + step) % 5;
@@ -52,7 +53,11 @@ export function FastControls({
     });
     if (success) {
       setQ(nextQuestion());
-      setText("");
+      setDrafts((previous) => {
+        const next = { ...previous };
+        delete next[q];
+        return next;
+      });
       input.current?.focus();
     }
   }
@@ -114,7 +119,6 @@ export function FastControls({
                 disabled={busy}
                 onClick={() => {
                   setQ(i);
-                  setText(entries[i]?.text ?? "");
                 }}
               >
                 {i + 1}
@@ -122,7 +126,15 @@ export function FastControls({
               </button>
             ))}
           </nav>
-          <p className="fast-prompt">{question.prompt}</p>
+          <p
+            className="fast-prompt"
+            role="status"
+            aria-label="Current Fast Money question"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            Question {q + 1} of {state.fastQuestions.length}: {question.prompt}
+          </p>
           {state.rehearsal && (
             <p className="host-note">
               Simulated contestant says:{" "}
@@ -170,7 +182,7 @@ export function FastControls({
               <input
                 ref={input}
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(e) => setDrafts((previous) => ({ ...previous, [q]: e.target.value }))}
                 placeholder="Type their answer, then Enter"
                 maxLength={100}
                 disabled={busy || seconds === 0}
@@ -186,7 +198,6 @@ export function FastControls({
               disabled={busy || seconds === 0}
               onClick={() => {
                 setQ(nextQuestion());
-                setText("");
               }}
             >
               Pass and return later
@@ -204,8 +215,8 @@ export function FastControls({
             automatically.
           </p>
           <p className="host-note">
-            Passing leaves this question unanswered for now. Use the numbered tabs to return before
-            the timer ends.
+            Passing leaves this question unanswered for now. Typed drafts stay available when you
+            return during this turn, but only recorded answers count. Drafts are cleared on reload.
           </p>
           <details>
             <summary>{entries.filter(Boolean).length} / 5 answers recorded</summary>

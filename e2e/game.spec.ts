@@ -291,12 +291,24 @@ test("public screens expose landmarks and labeled join inputs", async ({ page })
 test("Fast Money rehearsal starts the real timer and enables question navigation", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await signIn(page);
   await page.getByRole("button", { name: "Practice sample Fast Money", exact: true }).click();
   await page.getByLabel("Timer duration", { exact: true }).selectOption("45");
   await page.getByRole("button", { name: "Start 45-second timer" }).click();
   await expect(page.getByRole("navigation", { name: "Fast Money questions" })).toBeVisible();
+  const questionStatus = page.getByRole("status", { name: "Current Fast Money question" });
+  await expect(questionStatus).toContainText("Question 1 of 5:");
+  await expect(questionStatus).toHaveAttribute("aria-atomic", "true");
+  await page.locator(".fast-match-list button").first().click();
+  await expect(questionStatus).toContainText("Question 2 of 5:");
+  await expect(
+    page.getByRole("button", { name: "Question 1, recorded", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Pass and return later", exact: true }).click();
+  await expect(questionStatus).toContainText("Question 3 of 5:");
   await page.getByRole("button", { name: "Question 2", exact: true }).click();
+  await expect(questionStatus).toContainText("Question 2 of 5:");
   await expect(page.getByRole("button", { name: "Question 2", exact: true })).toHaveAttribute(
     "aria-current",
     "step",

@@ -1,3 +1,15 @@
+## 9 October — Fast Money drafts preserved; screen-reader work deferred
+
+Owner asked to ignore screen-reader work and continue practical improvements. Existing N3 edits remain local and unchanged; no further screen-reader work. Fixed confirmed FastControls behavior where switching questions or passing discarded typed off-board answers. Drafts now stay keyed by question for the current player/turn, are cleared after successful recording and on player change, and never count as entries before Record. Reload clears drafts; UI states that limit.
+
+Backlog item: Fast Money draft preservation (UX/P1) implemented locally. Acceptance verified at390x844: type two drafts, navigate/pass/back, confirm zero recorded, explicitly record one, retain other, end/reveal turn and ensure player two starts empty. Dedicated e2e/fast-drafts.spec.ts passes. Typecheck/build/format pass. Relevant files: apps/web/src/components/FastControls.tsx and e2e/fast-drafts.spec.ts. No schema, scoring or production record changes. Not deployed. Next: owner selects next focus (host controls, survey/question workflow or audience/sound); publish only with deployment authorization. F2/F4 real restart/device checks remain; N3 deferred by owner. Start usage54% five-hour used,49% weekly; no credits redeemed.
+
+## 9 October — N3 Fast Money question announcements verified locally
+
+Current release checkout `.deploy/ihechi-birthday` was clean and HEAD matched fetched origin/main ba30f28. Investigated highest remaining work: F2 production restart and F4 physical devices require owner coordination; no production restart attempted. For N3, FastControls advanced the private question without a live announcement. Added visible Question X of 5 and a polite, atomic, named status region to the running-turn prompt. No audience answer exposure or game-state changes. The proposed pause-control defect was disproved: Host already passes paused/disconnected state into busy.
+
+Files: apps/web/src/components/FastControls.tsx and e2e/game.spec.ts. Typecheck/build passed; focused Playwright rehearsal passed on desktop and 390x844, covering record/auto-advance, pass and manual question return. Initial pnpm test launcher stalled; stopped only that process and reran the installed Playwright CLI with local socket permissions successfully. Formatting/diff checks checked; real VoiceOver/NVDA output remains unverified. N3 stays open for broader review. Changes are local and not deployed; no credentials, owner records or infrastructure changed. Next: review this scoped diff and obtain fresh deployment authorization before publishing; follow with physical screen-reader and F2/F4 rehearsals. Usage at start five-hour3% used, weekly41% used; no reset credits redeemed.
+
 ## 6 October — weekly highlights and host shortcuts deployed
 
 Fitness e1a6b7d deployed successfully: Actions37561067204. Live app.js200 contains Recorded highlights; anonymous weekly-review401. I5 implemented/deployed: dated workout/recovery highlights, recorded-step coverage, sparse/empty labels, no automatic plan or nutrition changes.72 Node tests pass. Actual authenticated owner/iPhone review not performed.
