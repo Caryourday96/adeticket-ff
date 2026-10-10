@@ -4,8 +4,19 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
     headers: { "Content-Type": "application/json" },
     ...(body === undefined ? {} : { method: "POST", body: JSON.stringify(body) }),
   });
-  const data = await r.json();
-  if (!r.ok) throw new Error(data.error ?? "Request failed.");
+  const fallback = r.ok
+    ? "The server returned an unreadable response. Refresh and check the latest state before trying again."
+    : `Request failed (HTTP ${r.status}). Refresh and check the latest state before trying again.`;
+  let data: unknown;
+  try {
+    data = await r.json();
+  } catch {
+    throw new Error(fallback);
+  }
+  if (!r.ok) {
+    const detail = data && typeof data === "object" && "error" in data ? data.error : undefined;
+    throw new Error(typeof detail === "string" && detail.trim() ? detail : fallback);
+  }
   return data as T;
 }
 export function download(name: string, text: string, type = "application/json") {
