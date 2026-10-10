@@ -81,3 +81,25 @@ test("offline host commands are not queued and reconnect converges with another 
   await expect(other.getByRole("button", { name: "Pause", exact: true })).toBeVisible();
   await context.close();
 });
+
+test("stalled command releases host controls without automatically retrying", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page);
+  await page.getByRole("button", { name: "Create game", exact: true }).click();
+  await expect(page.locator(".connection")).toHaveText("Connected live");
+  let commands = 0;
+  await page.route("**/api/games/*/commands", () => {
+    commands++;
+  });
+  const pause = page.getByRole("button", { name: "Pause", exact: true });
+  await pause.click();
+  await expect(pause).toBeDisabled();
+  await expect(page.getByRole("alert")).toContainText("It may already have been applied", {
+    timeout: 20000,
+  });
+  await expect(pause).toBeEnabled();
+  expect(commands).toBe(1);
+  await page.unrouteAll({ behavior: "ignoreErrors" });
+  await pause.click();
+  await expect(page.getByRole("button", { name: "Resume", exact: true })).toBeVisible();
+});

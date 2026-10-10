@@ -1,7 +1,38 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { api } from "../apps/web/src/lib/api";
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
+
+it.each(["headers", "body"])("bounds a stalled response at %s without retrying", async (stage) => {
+  vi.useFakeTimers();
+  const fetch = vi.fn((_url: string, options: RequestInit) => {
+    const stalled = () =>
+      new Promise((_resolve, reject) => {
+        options.signal!.addEventListener("abort", () =>
+          reject(new DOMException("Aborted", "AbortError")),
+        );
+      });
+    return stage === "headers" ? stalled() : Promise.resolve({ ok: true, json: stalled });
+  });
+  vi.stubGlobal("fetch", fetch);
+  const result = expect(api("/games/ABC123/commands", {})).rejects.toThrow(
+    "It may already have been applied. Refresh and check the latest state",
+  );
+  await vi.advanceTimersByTimeAsync(15000);
+  await result;
+  expect(fetch).toHaveBeenCalledTimes(1);
+  expect(vi.getTimerCount()).toBe(0);
+});
+
+it("cleans up the deadline after a successful response", async () => {
+  vi.useFakeTimers();
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ revision: 1 })));
+  await api("/games/ABC123/host");
+  expect(vi.getTimerCount()).toBe(0);
+});
 
 it("handles HTML outage responses without retrying a command", async () => {
   const fetch = vi
