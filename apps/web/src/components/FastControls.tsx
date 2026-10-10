@@ -205,7 +205,15 @@ export function FastControls({
             <button
               className="button danger-button"
               disabled={busy}
-              onClick={() => send({ type: "fastEndTurn" })}
+              onClick={() => {
+                if (
+                  window.confirm(
+                    `End this turn with ${entries.filter(Boolean).length} of 5 answers recorded? Unrecorded answers and typed drafts will not score. The timer keeps running if you cancel.`,
+                  )
+                ) {
+                  void send({ type: "fastEndTurn" });
+                }
+              }}
             >
               End turn & reveal
             </button>

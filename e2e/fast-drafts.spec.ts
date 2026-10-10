@@ -24,6 +24,14 @@ test("Fast Money drafts survive navigation and passing without recording or leak
   ).toBeVisible();
   await page.getByRole("button", { name: "Question 1", exact: true }).click();
   await expect(input).toHaveValue("Unfinished first answer");
+  page.once("dialog", async (dialog) => {
+    expect(dialog.message()).toContain("1 of 5 answers recorded");
+    await dialog.dismiss();
+  });
+  await page.getByRole("button", { name: "End turn & reveal", exact: true }).click();
+  await expect(input).toHaveValue("Unfinished first answer");
+  await expect(page.getByText("1 / 5 answers recorded", { exact: true })).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "End turn & reveal", exact: true }).click();
   for (let i = 1; i <= 5; i++) {
     await page.getByRole("button", { name: `Reveal answer ${i} / 5`, exact: true }).click();

@@ -1,3 +1,11 @@
+## 9 October — Fast Money early-end protection
+
+Confirmed a single End turn & reveal tap immediately ended a running turn. Added confirmation showing the recorded-answer count and explaining that drafts do not score; cancellation preserves the turn and draft, without pausing the authoritative timer. Automatic five-answer completion and expiry are unchanged. Phone-width Playwright regression passes cancellation, confirmation, reveal and player-two draft isolation. Typecheck/build/format pass. Files: apps/web/src/components/FastControls.tsx, e2e/fast-drafts.spec.ts. Implementation complete; deployment pending. Next: push main, verify workflows and production smoke. Physical iPhone dialog behavior remains owner verification. F2/F4 device/restart checks still open; screen-reader work deferred. Usage 63% five-hour used,71% weekly used; no credits redeemed.
+
+## 9 October — API recovery wording deployed
+
+Release8ec69e0 is live. Azure38015109749, validation38015109729 and browser38015109769 all succeeded. Production smoke passes; live index-BQVZSpH4.js200 contains unreadable-response guidance. Seven focused API tests and four host browser checks passed locally. N2 malformed-response handling complete/deployed; actual restart/hardware rehearsal remains open. Screen-reader work remains deferred. No owner data/schema changed. Next: choose the next independently testable gameplay improvement or coordinate F2/F4 device/restart validation. No reset credits redeemed.
+
 ## 9 October — N2 unreadable API response recovery prepared
 
 Confirmed api.ts blindly parsed every response as JSON, so HTML/empty outage responses surfaced parser errors. Now returns actionable HTTP/recovery wording, preserves valid server conflict messages, and never retries writes or asserts an uncertain action failed. Seven client API regressions pass (HTML502, malformed success, null/object/empty error, conflict and success). Typecheck/build and four host-recovery browser tests pass. First Vitest attempt hit sandbox temp-file EPERM; rerun outside that restriction passed. Files: apps/web/src/lib/api.ts, tests/client-api.test.ts. No state/schema changes. Release pending. Next: push, verify CI/Azure/browser and live smoke. N2 production-outage rehearsal remains open; screen-reader work deferred. Usage start3% five-hour used,61% weekly; no credits redeemed.
