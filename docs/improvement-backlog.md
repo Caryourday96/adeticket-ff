@@ -1,3 +1,7 @@
+## 9 October — Early-end protection deployed
+
+Release 0ce1bc3 is live at ff.adeticket.com. Azure 38015999172, validation 38015999121, browser 38015999123 and Push on main 38015999245 succeeded. Production smoke passes; live index-CXf0tVV8.js returns 200 and contains confirmation text. Fast Money early-end protection complete/deployed; mobile cancellation/confirmation and draft isolation verified locally. No records/schema changed. Next: owner checks confirmation on iPhone; coordinate F2 persistence restart and F4 real hardware validation separately. Screen-reader work stays deferred. No paid resources or reset credits used.
+
 ## 9 October — Fast Money early-end protection
 
 Confirmed a single End turn & reveal tap immediately ended a running turn. Added confirmation showing the recorded-answer count and explaining that drafts do not score; cancellation preserves the turn and draft, without pausing the authoritative timer. Automatic five-answer completion and expiry are unchanged. Phone-width Playwright regression passes cancellation, confirmation, reveal and player-two draft isolation. Typecheck/build/format pass. Files: apps/web/src/components/FastControls.tsx, e2e/fast-drafts.spec.ts. Implementation complete; deployment pending. Next: push main, verify workflows and production smoke. Physical iPhone dialog behavior remains owner verification. F2/F4 device/restart checks still open; screen-reader work deferred. Usage 63% five-hour used,71% weekly used; no credits redeemed.
