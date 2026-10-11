@@ -47,3 +47,11 @@ Deployment run `34656556703`, attempt 2, succeeded for commit `08d00a2`. The cus
 For SQLite, stop all app processes before copying the database and any journal files to a protected backup location. Restore while the app is stopped, then start it and verify saved games. Never expose a backup through the public web directory.
 
 Keep the previous verified release artifact. Roll back by deploying it again; keep game data outside the release directory. Schema changes require an explicit migration and backup plan.
+
+## Bible Blitz integration (2026-10-11)
+
+The existing App Service also mounts an independent Bible Blitz Socket.IO server at `/bibleblitz/socket.io`. The package is pinned to verified release `1d3bd91bcb8b8b9e6c15b527efcec372d5a23899` from Caryourday96/bible-blitz. Its only production browser origin is https://adeticket.com; the existing Friends Showdown API/socket origin list and host authentication are unchanged. The frontend is served separately at https://adeticket.com/bibleblitz by the existing Static Web App. No new Azure resource or credential is required. Online Bible Blitz rooms are memory-only and expire on restart. Keep the App Service at one process/instance until room coordination supports scale-out.
+
+Validation: 106 Vitest tests plus 7 Node tests passed; typecheck, build and dependency audit passed. Prettier passed with Windows checkout line endings preserved (`--end-of-line auto`); the existing Linux CI gate validates LF. A new integration test checks both transport paths, CORS isolation and preserved host authentication. Deployment smoke checks now verify the Bible Blitz handshake.
+
+Rollback: revert this integration commit and redeploy using the existing workflow; no database migrations were introduced.

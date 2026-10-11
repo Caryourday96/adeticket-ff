@@ -8,6 +8,7 @@ import { resolve } from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 import { advertisingConfig, advertisingDocument, type AdvertisingConfig } from "./advertising";
 import { Server } from "socket.io";
+import { attachBibleBlitz } from "bible-blitz/server";
 import {
   bankSchema,
   envelopeSchema,
@@ -53,6 +54,12 @@ export function createApplication(options: {
   const io = new Server(http, {
     maxHttpBufferSize: 20000,
     allowRequest: (req, cb) => cb(null, originAllowed(req.headers.origin)),
+  });
+  const bibleBlitz = attachBibleBlitz(http, {
+    origins: [
+      "https://adeticket.com",
+      ...(!options.production ? ["http://localhost:3000", "http://127.0.0.1:3000"] : []),
+    ],
   });
   app.disable("x-powered-by");
   app.use((req, res, next) => {
@@ -629,6 +636,7 @@ export function createApplication(options: {
     close: () =>
       new Promise<void>((resolve) => {
         clearInterval(timerWorker);
+        bibleBlitz.dispose();
         io.close(() => {
           store.close();
           resolve();

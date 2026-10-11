@@ -20,6 +20,15 @@ try {
   if (writeCheck.status !== 401)
     throw new Error(`Expected invalid smoke login to return HTTP 401, got ${writeCheck.status}.`);
   console.log(`ok API write origin ${origin} (reached login validation)`);
+  const bible = await fetch(base + "/bibleblitz/socket.io/?EIO=4&transport=polling", {
+    headers: { Origin: "https://adeticket.com" },
+    signal: controller.signal,
+  });
+  if (!bible.ok || bible.headers.get("access-control-allow-origin") !== "https://adeticket.com")
+    throw new Error("Bible Blitz transport or portfolio CORS check failed.");
+  if (!(await bible.text()).startsWith('0{"sid":'))
+    throw new Error("Bible Blitz returned a page instead of an Engine.IO handshake.");
+  console.log("ok Bible Blitz transport and portfolio origin");
 } finally {
   clearTimeout(timeout);
 }
