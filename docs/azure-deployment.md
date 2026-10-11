@@ -50,7 +50,7 @@ Keep the previous verified release artifact. Roll back by deploying it again; ke
 
 ## Bible Blitz integration (2026-10-11)
 
-The existing App Service also mounts an independent Bible Blitz Socket.IO server at `/bibleblitz/socket.io`. The package is pinned to casting release `7bafc33aa43dc087b58e2d59fe95575183e38d9c` from Caryourday96/bible-blitz. Its only production browser origin is https://adeticket.com; the existing Friends Showdown API/socket origin list and host authentication are unchanged. The frontend is served separately at https://adeticket.com/bibleblitz by the existing Static Web App. No new Azure resource or credential is required. Online Bible Blitz rooms are memory-only and expire on restart. Keep the App Service at one process/instance until room coordination supports scale-out.
+The existing App Service also mounts an independent Bible Blitz Socket.IO server at `/bibleblitz/socket.io`. The package is pinned to host tools release `4f5e094188c9f74f21752c6af29026920cfd169b` from Caryourday96/bible-blitz. Its only production browser origin is https://adeticket.com; the existing Friends Showdown API/socket origin list and host authentication are unchanged. The frontend is served separately at https://adeticket.com/bibleblitz by the existing Static Web App. No new Azure resource or credential is required. Online Bible Blitz rooms are memory-only and expire on restart. Keep the App Service at one process/instance until room coordination supports scale-out.
 
 The shared `/cast` receiver supports both games using separate namespaces. Deploy this receiver before the matching frontend manifest so new Bible Blitz senders reach a compatible receiver. The Bible Blitz static TV document alone permits embedding by this origin. See google-cast.md for protocol and physical-device acceptance details.
 
@@ -59,3 +59,5 @@ Validation: 106 Vitest tests plus 7 Node tests passed; typecheck, build and depe
 Rollback: revert this integration commit and redeploy using the existing workflow; no database migrations were introduced.
 
 Azure has a pre-existing platform CORS layer, which takes precedence over application CORS. Add `https://adeticket.com` using `az webapp cors add` (preserves the existing legacy origin). This is now an idempotent deployment step. The server continues to reject portfolio-origin writes and handshakes to Friends Showdown endpoints, while allowing the separate Bible Blitz path. The initial release smoke check detected the missing platform entry before multiplayer was marked ready.
+
+The host tools release adds server-authorized plan editing, team branding and public presentation settings. Question plans are included only in authenticated host snapshots and acknowledgements; players and displays keep the public view. Deploy this backend before the matching frontend. Friends Showdown routes, credentials and its original casting namespace are unchanged.
