@@ -24,8 +24,8 @@ importers:
         specifier: workspace:*
         version: link:packages/game
       bible-blitz:
-        specifier: github:Caryourday96/bible-blitz#1d3bd91bcb8b8b9e6c15b527efcec372d5a23899
-        version: https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/1d3bd91bcb8b8b9e6c15b527efcec372d5a23899(@babel/core@7.29.7)(@playwright/test@1.63.0)(@types/node@22.20.2)
+        specifier: github:Caryourday96/bible-blitz#7bafc33aa43dc087b58e2d59fe95575183e38d9c
+        version: https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/7bafc33aa43dc087b58e2d59fe95575183e38d9c(@babel/core@7.29.7)(@playwright/test@1.63.0)(@types/node@22.20.2)
       express:
         specifier: ^5.1.0
         version: 5.2.1
@@ -1033,8 +1033,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  bible-blitz@https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/1d3bd91bcb8b8b9e6c15b527efcec372d5a23899:
-    resolution: {gitHosted: true, integrity: sha512-QzWeLU+ws75lLXixv0fKLVZuOWAoettWN3zt34VTKtMK4Nfiuu4cIrKE0FGbCewiz5/K3xY03yvTwwlTW04goQ==, tarball: https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/1d3bd91bcb8b8b9e6c15b527efcec372d5a23899}
+  bible-blitz@https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/7bafc33aa43dc087b58e2d59fe95575183e38d9c:
+    resolution: {gitHosted: true, integrity: sha512-m/slSc3I1KwztsE4rf8fGPGr/hE7lSwua3pw5GDoJcsDgQWYifKgIfF37sVtW70yuOSQ3t0KLT9idHBepjEx1A==, tarball: https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/7bafc33aa43dc087b58e2d59fe95575183e38d9c}
     version: 1.0.0
     engines: {node: '>=22.0.0'}
 
@@ -2527,7 +2527,7 @@ snapshots:
 
   baseline-browser-mapping@2.11.21: {}
 
-  bible-blitz@https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/1d3bd91bcb8b8b9e6c15b527efcec372d5a23899(@babel/core@7.29.7)(@playwright/test@1.63.0)(@types/node@22.20.2):
+  bible-blitz@https://codeload.github.com/Caryourday96/bible-blitz/tar.gz/7bafc33aa43dc087b58e2d59fe95575183e38d9c(@babel/core@7.29.7)(@playwright/test@1.63.0)(@types/node@22.20.2):
     dependencies:
       '@fontsource/dm-sans': 5.3.0
       '@fontsource/manrope': 5.3.0

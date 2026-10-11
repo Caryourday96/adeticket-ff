@@ -36,7 +36,11 @@ export interface SenderContext {
   removeEventListener(type: string, listener: () => void): void;
 }
 export interface ReceiverContext {
-  addCustomMessageListener(namespace: string, listener: (event: { data: unknown }) => void): void;
+  addCustomMessageListener(
+    namespace: string,
+    listener: (event: { data: unknown; senderId: string }) => void,
+  ): void;
+  sendCustomMessage(namespace: string, senderId: string, message: unknown): void;
   start(options: {
     customNamespaces: Record<string, string>;
     disableIdleTimeout: boolean;

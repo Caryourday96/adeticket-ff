@@ -25,7 +25,7 @@
     "@naija/content": "workspace:*",
     "@naija/contracts": "workspace:*",
     "@naija/game": "workspace:*",
-    "bible-blitz": "github:Caryourday96/bible-blitz#1d3bd91bcb8b8b9e6c15b527efcec372d5a23899",
+    "bible-blitz": "github:Caryourday96/bible-blitz#7bafc33aa43dc087b58e2d59fe95575183e38d9c",
     "express": "^5.1.0",
     "express-rate-limit": "^8.7.0",
     "helmet": "^8.1.0",

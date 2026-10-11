@@ -29,7 +29,7 @@ test("Cast receiver accepts only room messages and opens the public board", asyn
       route.fulfill({
         contentType: "application/javascript",
         body: `window.cast={framework:{CastReceiverContext:{getInstance:()=>({
-      addCustomMessageListener:(namespace,listener)=>window.testCastMessage=listener,
+      addCustomMessageListener:(namespace,listener)=>{ if(namespace==='urn:x-cast:com.naijafeud.audience') window.testCastMessage=listener; },
       start:()=>{}
     })}}};`,
       }),

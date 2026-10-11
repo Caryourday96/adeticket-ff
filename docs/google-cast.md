@@ -1,5 +1,11 @@
 # Google Cast setup
 
+## Bible Blitz receiver support
+
+The existing receiver also accepts the independent `urn:x-cast:com.adeticket.bibleblitz` namespace. It validates a public room code and request UUID, then embeds only `https://adeticket.com/bibleblitz/tv`. It never navigates to sender-provided URLs or receives Bible Blitz host credentials. The iframe joins the existing Bible Blitz socket endpoint as a display. Readiness is relayed only from the exact iframe window/origin with a matching room/request ID, to the initiating sender.
+
+The receiver CSP permits framing the Adeticket origin only on `/cast`. The static site's TV document must explicitly permit this receiver as a frame ancestor; host/player pages retain their frame restrictions. The original Friends Showdown namespace and public audience flow remain supported. App ID `0AF8BA4D` and the receiver URL are unchanged. Real TV discovery/launch and receiver availability still require the hardware check below.
+
 The host's **Cast to TV** button launches a custom receiver at
 `https://ff.adeticket.com/cast`.
 It sends only a six-character room code. The TV opens the public audience feed directly

@@ -52,6 +52,12 @@ it.each([undefined, "A1B2C3D4"])(
       expect(receiver.headers.get("content-security-policy")).toContain(
         "script-src 'self' https://www.gstatic.com https://www.google.com",
       );
+      expect(receiver.headers.get("content-security-policy")).toContain(
+        "frame-src https://adeticket.com",
+      );
+      const host = await fetch(base + "/host");
+      await host.text();
+      expect(host.headers.get("content-security-policy")).toContain("frame-src 'self'");
       const games = await fetch(base + "/api/games");
       expect(games.status).toBe(401);
       await games.text();

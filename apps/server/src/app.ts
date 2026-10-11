@@ -81,12 +81,12 @@ export function createApplication(options: {
     }),
   );
   // Only host and receiver documents need the Google Cast SDK.
-  app.use(
-    ["/host", "/cast"],
+  const castHeaders = (receiver: boolean) =>
     helmet({
       contentSecurityPolicy: {
         directives: {
           "script-src": ["'self'", "https://www.gstatic.com", "https://www.google.com"],
+          "frame-src": receiver ? ["https://adeticket.com"] : ["'self'"],
           "connect-src": [
             "'self'",
             "ws:",
@@ -97,8 +97,9 @@ export function createApplication(options: {
         },
       },
       strictTransportSecurity: options.production ? undefined : false,
-    }),
-  );
+    });
+  app.use("/host", castHeaders(false));
+  app.use("/cast", castHeaders(true));
   // Generous shared-IP budget allows phones on one venue Wi-Fi. Do not trust caller-supplied forwarding headers.
   const apiLimiter = rateLimit({
     windowMs: 60000,
