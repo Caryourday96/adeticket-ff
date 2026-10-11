@@ -55,3 +55,5 @@ The existing App Service also mounts an independent Bible Blitz Socket.IO server
 Validation: 106 Vitest tests plus 7 Node tests passed; typecheck, build and dependency audit passed. Prettier passed with Windows checkout line endings preserved (`--end-of-line auto`); the existing Linux CI gate validates LF. A new integration test checks both transport paths, CORS isolation and preserved host authentication. Deployment smoke checks now verify the Bible Blitz handshake.
 
 Rollback: revert this integration commit and redeploy using the existing workflow; no database migrations were introduced.
+
+Azure has a pre-existing platform CORS layer, which takes precedence over application CORS. Add `https://adeticket.com` using `az webapp cors add` (preserves the existing legacy origin). This is now an idempotent deployment step. The server continues to reject portfolio-origin writes and handshakes to Friends Showdown endpoints, while allowing the separate Bible Blitz path. The initial release smoke check detected the missing platform entry before multiplayer was marked ready.
