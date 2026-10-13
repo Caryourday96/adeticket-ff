@@ -30,3 +30,7 @@ On the host setup page, choose a finished real game under **Reuse teams and phon
 Players keep their existing phone page open and tap **Continue to next game** when it appears (within the usual five-second refresh). The server verifies their old private cookie and the copied registration before setting a cookie for the new room. No credentials are placed in the QR or URL. Refreshing the new phone page retains registration. Use the same browser; cleared or expired cookies (currently seven days) require joining again. Keep the old game until all phones have continued. Repeated creation from the same previous game opens its existing next game.
 
 The audience join QR remains visible during regular rounds, Fast Money and results, including the shared Google Cast audience view. The QR does not bypass joining locks or host approval. Actual camera scanning distance depends on the TV and phone and should be checked at the venue.
+
+## Reveal the question when ready
+
+For each regular round, the public audience and player feed show **Players to the stage** until the host selects **Open buzzers**. The host can read the private question first, bring the contestants on stage, then open buzzers to reveal it. Manual buzzer fallback becomes available after opening. The reveal is saved, so locking buzzers, refreshing or reconnecting keeps the question visible; the next round hides its new question again. Fast Money keeps its existing private-question and answer-reveal flow.

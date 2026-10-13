@@ -43,6 +43,7 @@ export function createGame(
   return {
     id,
     audienceSoundEnabled: true,
+    questionRevealed: false,
     revision: 0,
     teams: structuredClone(setup.teams),
     scores: [0, 0],
@@ -160,6 +161,14 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
   }
   const q = currentQuestion(s);
   switch (cmd.type) {
+    case "openQuestion":
+      requireThat(
+        s.phase === "faceoff" && s.face.first === null,
+        "Open the question before the face-off starts.",
+      );
+      s.questionRevealed = true;
+      s.message = "Question revealed. Buzzers are opening.";
+      break;
     case "buzz":
       requireThat(
         s.phase === "faceoff" && s.face.first === null,
@@ -255,6 +264,7 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
         "No unused questions remain. Import a larger pack for a longer game.",
       );
       s.round++;
+      s.questionRevealed = false;
       s.revealed = [];
       s.bank = 0;
       s.strikes = 0;
@@ -408,17 +418,18 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
 export function audience(s: GameState): PublicState {
   const { questions, fastQuestions, revealed, fast, ...safe } = s;
   const q = currentQuestion(s);
+  const hidden = s.questionRevealed !== true && s.phase === "faceoff" && s.face.first === null;
   const out: PublicState = {
     ...safe,
     multiplier: multiplier(s),
     question: {
-      id: q.id,
-      prompt: q.prompt,
-      category: q.category,
+      id: hidden ? "waiting" : q.id,
+      prompt: hidden ? "Players to the stage" : q.prompt,
+      category: hidden ? "Question appears when buzzers open" : q.category,
       answers: q.answers.map((a, i) => {
         const visible = s.showAll || revealed.includes(a.id);
         return {
-          id: a.id,
+          id: hidden ? `waiting-${i}` : a.id,
           rank: i + 1,
           revealed: visible,
           text: visible ? a.text : null,

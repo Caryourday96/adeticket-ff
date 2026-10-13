@@ -56,10 +56,14 @@ it("accepts exactly one competing buzz and rejects repeats and stale epochs", as
     post(path("player/buzz"), { epoch }, b),
   ]);
   expect(results.map((r) => r.status).sort()).toEqual([200, 400]);
-  expect(server.store.host(id).revision).toBe(1);
+  expect(server.store.host(id).revision).toBe(2);
   expect(server.buzzers.public(id).armed).toBe(false);
   expect(server.buzzers.public(id).winner).not.toBeNull();
-  await post(path("commands"), { id: randomUUID(), revision: 1, command: { type: "undo" } });
+  await post(path("commands"), {
+    id: randomUUID(),
+    revision: server.store.host(id).revision,
+    command: { type: "undo" },
+  });
   await post(path("buzzers"), { action: "arm" });
   expect((await post(path("player/buzz"), { epoch }, a)).status).toBe(400);
 });
@@ -73,7 +77,11 @@ it("rejects teammates out of turn, paused games, and revoked phones", async () =
     (await post(path("player/buzz"), { epoch: server.buzzers.public(id).epoch }, other)).status,
   ).toBe(400);
   const epoch = server.buzzers.public(id).epoch;
-  await post(path("commands"), { id: randomUUID(), revision: 2, command: { type: "pause" } });
+  await post(path("commands"), {
+    id: randomUUID(),
+    revision: server.store.host(id).revision,
+    command: { type: "pause" },
+  });
   expect((await post(path("player/buzz"), { epoch }, a)).status).toBe(400);
   expect(server.buzzers.public(id).armed).toBe(false);
   const registered = server.store.players(id).find((p) => p.name === "Ada")!;

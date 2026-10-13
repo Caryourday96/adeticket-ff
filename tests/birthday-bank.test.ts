@@ -35,7 +35,15 @@ it("lets a signed-in host select the birthday bank and keeps unrevealed answers 
   expect(response.status).toBe(201);
   const { id } = await response.json();
   const audience = await (await fetch(base + `/api/games/${id}/audience`)).json();
-  expect(audience.question.prompt).toBe(birthdayBank.questions[0].prompt);
+  expect(audience.question.prompt).toBe("Players to the stage");
+  expect(JSON.stringify(audience)).not.toContain(birthdayBank.questions[0].prompt);
+  await fetch(base + `/api/games/${id}/buzzers`, {
+    method: "POST",
+    headers: { Cookie: cookie, "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "arm" }),
+  });
+  const opened = await (await fetch(base + `/api/games/${id}/audience`)).json();
+  expect(opened.question.prompt).toBe(birthdayBank.questions[0].prompt);
   expect(audience.question.answers.every((answer: { text: unknown }) => answer.text === null)).toBe(
     true,
   );

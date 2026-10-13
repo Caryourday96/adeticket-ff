@@ -347,14 +347,17 @@ export function Host({ id }: { id: string }) {
                 )}
                 {s.phase === "faceoff" && s.face.first === null && (
                   <>
-                    <p>Open the phone buzzers below, or select a team manually.</p>
+                    <p>
+                      Bring players on stage, then Open buzzers below to reveal the audience
+                      question. You can then select a team manually if needed.
+                    </p>
                     <details className="manual-buzz">
                       <summary>Manual buzzer fallback</summary>
                       {s.teams.map((t, i) => (
                         <button
                           className="button wide"
                           key={i}
-                          disabled={busy || s.paused}
+                          disabled={busy || s.paused || s.questionRevealed !== true}
                           onClick={() => send({ type: "buzz", team: i as Side })}
                         >
                           {t.name}

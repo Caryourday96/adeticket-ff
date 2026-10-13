@@ -123,6 +123,12 @@ export class Buzzers {
     if (action === "arm") {
       if (s.paused || s.phase !== "faceoff" || s.face.first !== null)
         throw new Error("Buzzers can only open for a waiting face-off.");
+      if (s.questionRevealed !== true)
+        this.store.apply(id, {
+          id: randomUUID(),
+          revision: s.revision,
+          command: { type: "openQuestion" },
+        });
       this.lock(id);
       this.gates.get(id)!.armed = true;
     } else if (action === "lock") this.lock(id);

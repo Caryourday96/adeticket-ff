@@ -257,9 +257,22 @@ test("rehearsal buzz reaches the host and an independent audience", async ({ pag
     const screen = await audience.newPage();
     await screen.goto(new URL(`/audience/${id}`, page.url()).href);
     await expect(screen.getByText(/REHEARSAL · LIVE/)).toBeVisible();
+    const privateState = await (await page.request.get(`/api/games/${id}/host`)).json();
+    const prompt = privateState.questions[0].prompt;
+    await expect(
+      screen.getByRole("heading", { name: "Players to the stage", exact: true }),
+    ).toBeVisible();
+    await expect(screen.getByText(prompt, { exact: true })).toHaveCount(0);
+    await screen.reload();
+    await expect(
+      screen.getByRole("heading", { name: "Players to the stage", exact: true }),
+    ).toBeVisible();
     await expect(screen.getByRole("button", { name: "Open buzzers" })).toHaveCount(0);
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Buzzers are open" })).toBeVisible();
+    await expect(screen.getByRole("heading", { name: prompt, exact: true })).toBeVisible();
+    await screen.reload();
+    await expect(screen.getByRole("heading", { name: prompt, exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Simulate Ada buzzing" }).click();
     await expect(page.getByRole("heading", { name: "Ada buzzed first" })).toBeVisible();
     await expect(screen.locator(".audience-message")).toContainText("Ada");
