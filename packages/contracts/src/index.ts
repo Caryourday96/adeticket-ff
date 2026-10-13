@@ -228,4 +228,8 @@ export type BuzzerState = {
 export type HostBuzzers = BuzzerState & {
   players: (BuzzerPlayer & { connection: "ready" | "away" | "offline" })[];
 };
-export type PlayerView = { player: BuzzerPlayer | null; buzzer: BuzzerState };
+export type PlayerView = {
+  player: BuzzerPlayer | null;
+  buzzer: BuzzerState;
+  nextGame?: string | null;
+};

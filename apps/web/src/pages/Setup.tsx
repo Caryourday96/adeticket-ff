@@ -19,6 +19,7 @@ export function Setup() {
   const [usage, setUsage] = useState<QuestionUse[]>([]);
   const [usageReady, setUsageReady] = useState(false);
   const [selfJoin, setSelfJoin] = useState(true);
+  const [reuseFrom, setReuseFrom] = useState("");
   const [fastPackId, setFastPackId] = useState("fast-starter");
   const [fastIds, setFastIds] = useState<string[] | null>(null);
   const [teams, setTeams] = useState<[Team, Team]>([
@@ -247,6 +248,7 @@ export function Setup() {
           [ids[i], ids[j]] = [ids[j], ids[i]];
         }
       const result = await api<{ id: string }>("/games", {
+        reuseFrom: reuseFrom || undefined,
         teams: selfJoin
           ? teams.map((t) => ({
               ...t,
@@ -341,15 +343,60 @@ export function Setup() {
           <input
             type="checkbox"
             checked={selfJoin}
+            disabled={!!reuseFrom || busy}
             onChange={(e) => setSelfJoin(e.target.checked)}
           />
           Players enter their own names
         </label>
-        <p>
-          Set the team names, create the game, then share {gameOrigin()}/play and the game code.
-          Approve players in Phone buzzers.
-        </p>
-        <div className="team-editors">
+        <label>
+          Reuse teams and phones
+          <select
+            value={reuseFrom}
+            disabled={busy}
+            onChange={async (e) => {
+              const source = e.target.value;
+              setReuseFrom(source);
+              if (!source) return;
+              setBusy(true);
+              setError("");
+              try {
+                const previous = await api<{ teams: [Team, Team] }>(`/games/${source}/host`);
+                setTeams(previous.teams);
+                setSelfJoin(false);
+              } catch (e) {
+                setReuseFrom("");
+                setError((e as Error).message);
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <option value="">Start with new players</option>
+            {games
+              .filter((g) => g.phase === "finished" && !g.rehearsal)
+              .map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.teams.join(" vs ")} · {g.id}
+                </option>
+              ))}
+          </select>
+        </label>
+        {reuseFrom && (
+          <p className="host-note">
+            Uses that finished game's saved team names and roster. Approved phones can tap Continue
+            to next game on their existing page. Keep the old game saved until everyone has
+            continued. Players start off stage; stage them again when ready. If a next game already
+            exists, Create game opens it.
+          </p>
+        )}
+        {!reuseFrom && (
+          <p>
+            Set the team names, create the game, then share {gameOrigin()}/play and the game code.
+            Approve players in Phone buzzers. To reuse phones, finish the previous game and choose
+            it above.
+          </p>
+        )}
+        <fieldset disabled={!!reuseFrom || busy} className="team-editors">
           {teams.map((t, i) => (
             <TeamEditor
               key={i}
@@ -359,7 +406,7 @@ export function Setup() {
               onChange={(value) => setTeams((old) => (i === 0 ? [value, old[1]] : [old[0], value]))}
             />
           ))}
-        </div>
+        </fieldset>
         <section className="settings-card">
           <div>
             <div className="section-eyebrow">SET THE STAGE</div>

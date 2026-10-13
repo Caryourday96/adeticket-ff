@@ -5,6 +5,8 @@ import { useGame } from "../hooks/useGame";
 import { AudienceAudio } from "../components/AudienceAudio";
 import { Board } from "../components/Board";
 import { AlphaNotice } from "../components/AlphaNotice";
+import { QRCodeSVG } from "qrcode.react";
+import { gameOrigin } from "../lib/links";
 export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
   const { state, connected, error, clockOffset } = useGame<PublicState>(id, "audience"),
     [now, setNow] = useState(Date.now());
@@ -16,6 +18,23 @@ export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
     <main className="audience-page">
       <AudienceAudio state={state} connected={connected} tv={tv} now={now + clockOffset} />
       <AlphaNotice />
+      <aside className="audience-join" aria-label="Join this game">
+        <QRCodeSVG
+          value={`${gameOrigin()}/play/${id}`}
+          size={140}
+          marginSize={4}
+          title="Scan to join this game"
+        />
+        <div>
+          <strong>Scan to play</strong>
+          <b>{id}</b>
+          <small>
+            {state?.joinsLocked
+              ? "New joins paused by host"
+              : "Choose your team and enter your name"}
+          </small>
+        </div>
+      </aside>
       <header>
         <span>
           <Radio size={14} />

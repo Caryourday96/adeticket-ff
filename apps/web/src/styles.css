@@ -3261,3 +3261,65 @@ small {
   border: 0;
   background: #151d17;
 }
+
+/* Keep the join code beside every audience phase without covering the board. */
+.audience-join {
+  position: fixed;
+  right: 20px;
+  top: 100px;
+  width: 160px;
+  z-index: 5;
+  padding: 10px;
+  border-radius: 12px;
+  background: #fff;
+  color: #10182b;
+  text-align: center;
+}
+.audience-join svg {
+  display: block;
+  width: 140px;
+  height: 140px;
+}
+.audience-join strong,
+.audience-join b,
+.audience-join small {
+  display: block;
+  margin-top: 6px;
+}
+.audience-join b {
+  font-size: 24px;
+  letter-spacing: 2px;
+}
+.audience-join small {
+  font-size: 12px;
+  line-height: 1.4;
+}
+@media (min-width: 900px) {
+  .audience-page {
+    padding-right: 200px;
+  }
+}
+@media (max-width: 899px) {
+  .audience-join {
+    position: sticky;
+    top: 8px;
+    right: auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .audience-join svg {
+    width: 96px;
+    height: 96px;
+    flex-shrink: 0;
+  }
+}
+fieldset.team-editors {
+  border: 0;
+  padding: 0;
+  margin-inline: 0;
+  min-width: 0;
+}

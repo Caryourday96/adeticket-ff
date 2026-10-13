@@ -1,7 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
-import { randomBytes, createHash } from "node:crypto";
+import { randomBytes, createHash, randomUUID } from "node:crypto";
 import { transition } from "@naija/game";
 import { Surveys } from "./surveys";
 import {
@@ -25,6 +25,9 @@ export class Store {
     );
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS players(id TEXT PRIMARY KEY, game TEXT NOT NULL, hash TEXT NOT NULL, body TEXT NOT NULL)",
+    );
+    this.db.exec(
+      "CREATE TABLE IF NOT EXISTS next_games(source TEXT PRIMARY KEY, target TEXT NOT NULL)",
     );
     this.db.exec(
       "CREATE TABLE IF NOT EXISTS tv_devices(id TEXT PRIMARY KEY, secret_hash TEXT NOT NULL, control_hash TEXT, pair_code TEXT, pair_expires INTEGER NOT NULL DEFAULT 0, last_seen INTEGER NOT NULL DEFAULT 0, room TEXT, revision INTEGER NOT NULL DEFAULT 0, name TEXT NOT NULL)",
@@ -55,6 +58,41 @@ export class Store {
     this.db
       .prepare("INSERT INTO players VALUES (?,?,?,?)")
       .run(player.id, game, this.hash(token), JSON.stringify(player));
+  }
+  nextGame(source: string): string | null {
+    const row = this.db.prepare("SELECT target FROM next_games WHERE source=?").get(source) as
+      { target: string } | undefined;
+    return row && this.has(row.target) ? row.target : null;
+  }
+  addWithPlayers(state: GameState, source: string) {
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      const previous = this.host(source);
+      if (previous.phase !== "finished" || previous.rehearsal)
+        throw new Error("Finish the previous real game before reusing its teams and phones.");
+      if (this.nextGame(source)) throw new Error("A next game already exists for these players.");
+      if (JSON.stringify(state.teams) !== JSON.stringify(previous.teams))
+        throw new Error("Use the previous game's teams when carrying over phones.");
+      this.add(state);
+      const rows = this.db.prepare("SELECT hash,body FROM players WHERE game=?").all(source) as {
+        hash: string;
+        body: string;
+      }[];
+      for (const row of rows) {
+        const player = JSON.parse(row.body) as BuzzerPlayer;
+        if (!player.approved || previous.teams[player.team].members[player.member] !== player.name)
+          continue;
+        const copied = { ...player, id: randomUUID(), onStage: false };
+        this.db
+          .prepare("INSERT INTO players VALUES (?,?,?,?)")
+          .run(copied.id, state.id, row.hash, JSON.stringify(copied));
+      }
+      this.db.prepare("INSERT OR REPLACE INTO next_games VALUES (?,?)").run(source, state.id);
+      this.db.exec("COMMIT");
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
   }
   updatePlayer(game: string, player: BuzzerPlayer) {
     this.db

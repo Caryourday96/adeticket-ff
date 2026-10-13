@@ -4,6 +4,7 @@ import { Brand } from "../components/Brand";
 import { useGame } from "../hooks/useGame";
 import { useBuzzers } from "../hooks/useBuzzers";
 import { AlphaNotice } from "../components/AlphaNotice";
+import { api } from "../lib/api";
 export function Player({ id }: { id: string }) {
   const {
     state: s,
@@ -13,6 +14,8 @@ export function Player({ id }: { id: string }) {
   const { data, error, connected, busy, act } = useBuzzers<PlayerView>(id);
   const [team, setTeam] = useState<Side>(0),
     [name, setName] = useState("");
+  const [continuing, setContinuing] = useState(false),
+    [continueError, setContinueError] = useState("");
   const p = data?.player,
     b = data?.buzzer;
   const eligible =
@@ -35,6 +38,30 @@ export function Player({ id }: { id: string }) {
       <Brand />
       <AlphaNotice />
       <div className="eyebrow">PLAYER BUZZER · ROOM {id}</div>
+      {p?.approved && data?.nextGame && (
+        <section className="entry-card">
+          <h2>Your next game is ready</h2>
+          <p>Keep your name and team. No QR scan needed on this browser.</p>
+          <button
+            className="button primary wide"
+            disabled={continuing}
+            onClick={async () => {
+              setContinuing(true);
+              setContinueError("");
+              try {
+                const next = await api<{ id: string }>(`/games/${id}/player/continue`, {});
+                location.href = `/play/${next.id}`;
+              } catch (e) {
+                setContinueError((e as Error).message);
+                setContinuing(false);
+              }
+            }}
+          >
+            Continue to next game
+          </button>
+          {continueError && <p role="alert">{continueError}</p>}
+        </section>
+      )}
       {!s || !data ? (
         <p>Connecting to the game…</p>
       ) : !p ? (

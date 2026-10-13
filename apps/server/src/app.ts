@@ -338,6 +338,19 @@ export function createApplication(options: {
   });
   app.post("/api/games", auth, (req, res) => {
     const setup = setupSchema.parse(req.body);
+    const reuseFrom = z
+      .string()
+      .regex(/^[A-F0-9]{6}$/)
+      .optional()
+      .parse(req.body.reuseFrom);
+    if (reuseFrom) {
+      const previous = store.host(reuseFrom);
+      if (previous.phase !== "finished" || previous.rehearsal)
+        throw new Error("Finish the previous real game before reusing its teams and phones.");
+      const existing = store.nextGame(reuseFrom);
+      if (existing) return void res.json({ id: existing });
+      setup.teams = previous.teams;
+    }
     const bank =
       setup.packId === "ihechi-birthday"
         ? birthdayBank
@@ -375,7 +388,9 @@ export function createApplication(options: {
       .filter((q) => !setup.sharedQuestionBank || !reservedFast.has(questionKey(q.prompt)));
     let id = randomBytes(3).toString("hex").toUpperCase();
     while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
-    store.add(createGame(id, setup, questions, selectedFast, bank.notice));
+    const created = createGame(id, setup, questions, selectedFast, bank.notice);
+    if (reuseFrom) store.addWithPlayers(created, reuseFrom);
+    else store.add(created);
     res.status(201).json({ id });
   });
   app.get("/api/games/:id/host", auth, (req, res) => res.json(store.host(String(req.params.id))));
@@ -461,8 +476,31 @@ export function createApplication(options: {
     res.json({
       player: store.player(req.params.id, playerToken(req)),
       buzzer: buzzers.public(req.params.id),
+      nextGame: store.player(req.params.id, playerToken(req))?.approved
+        ? store.nextGame(req.params.id)
+        : null,
     }),
   );
+  app.post("/api/games/:id/player/continue", (req, res) => {
+    const source = String(req.params.id),
+      token = playerToken(req),
+      target = store.nextGame(source);
+    if (
+      !token ||
+      !target ||
+      !store.player(source, token)?.approved ||
+      !store.player(target, token)?.approved
+    )
+      return void res.status(403).json({
+        error:
+          "This phone is not approved for the next game. Ask the host to check your registration.",
+      });
+    res.setHeader(
+      "Set-Cookie",
+      `nf_player_${target}=${token}; HttpOnly; SameSite=Strict; Path=/api/games/${target}; Max-Age=604800${options.production ? "; Secure" : ""}`,
+    );
+    res.json({ id: target });
+  });
   app.post("/api/games/:id/player", (req, res) => {
     const body = z
       .object({

@@ -22,3 +22,11 @@ Use https://ff.adeticket.com. Checked against release 83626ca on 11 October 2026
 Download the completed scorecard if wanted. Keep saved real games if using the question-use limit: deleting game history can make its questions eligible again. Delete only unwanted Practice games after reviewing the confirmation.
 
 No production restart, saved-game deletion or owner-data edits were performed for this housekeeping pass. Hardware sound/casting and production restart durability remain unverified.
+
+## Reuse teams and phones
+
+On the host setup page, choose a finished real game under **Reuse teams and phones**. Create the new game with the desired question selection. Saved team names/rosters and approved phone registrations are copied; old scores and history stay in the old game. Pending registrations are not approved automatically. Players begin off stage with buzzers closed.
+
+Players keep their existing phone page open and tap **Continue to next game** when it appears (within the usual five-second refresh). The server verifies their old private cookie and the copied registration before setting a cookie for the new room. No credentials are placed in the QR or URL. Refreshing the new phone page retains registration. Use the same browser; cleared or expired cookies (currently seven days) require joining again. Keep the old game until all phones have continued. Repeated creation from the same previous game opens its existing next game.
+
+The audience join QR remains visible during regular rounds, Fast Money and results, including the shared Google Cast audience view. The QR does not bypass joining locks or host approval. Actual camera scanning distance depends on the TV and phone and should be checked at the venue.
