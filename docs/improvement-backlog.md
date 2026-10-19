@@ -18,14 +18,15 @@ Validation: typecheck/build pass;108 Vitest+7 Node pass (initial sandbox socket 
 
 Read [partial review and acceptance criteria](agent-playtest-2026-10-15.md). Three agents attempted isolated local flows; host report incomplete after agent usage-limit errors. No app changes or deployment in this review. Existing completed entries remain completed; owner-deferred items remain deferred.
 
-| Order | ID | Priority | Work | Acceptance / dependency |
-|---|---|---|---|---|
-| 1 | AP1 | P1 | Fit normal audience board, scores and Fast Money timer to1366x768 | All essential content visible without scrolling at1366x768/1920x1080; preserve readable prompt and QR. Separately verify Cast tv mode. |
-| 2 | AP2 | P2 | Truthful audience early-end result | Null winner shows game ended, no empty champion; actual scores preserved; real winner celebration unchanged. |
-| 3 | AP3 | P2 | Explicit finished phone state | No misleading wait/open instructions after end; Continue to next game still works. |
-| 4 | AP4 | P2 | Compact small-phone buzzer layout | Entire ready buzzer visible initially at320x700/390x844, including long names; no horizontal overflow. |
+| Order | ID  | Priority | Work                                                              | Acceptance / dependency                                                                                                                |
+| ----- | --- | -------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | AP1 | P1       | Fit normal audience board, scores and Fast Money timer to1366x768 | All essential content visible without scrolling at1366x768/1920x1080; preserve readable prompt and QR. Separately verify Cast tv mode. |
+| 2     | AP2 | P2       | Truthful audience early-end result                                | Null winner shows game ended, no empty champion; actual scores preserved; real winner celebration unchanged.                           |
+| 3     | AP3 | P2       | Explicit finished phone state                                     | No misleading wait/open instructions after end; Continue to next game still works.                                                     |
+| 4     | AP4 | P2       | Compact small-phone buzzer layout                                 | Entire ready buzzer visible initially at320x700/390x844, including long names; no horizontal overflow.                                 |
 
 Evidence, effort and files are in the review. New ideas pending prioritization: clearer reveal/open wording; pending phone-transfer warning before cleanup; next-game shortcut; projector preview; venue rehearsal. F2/F4 restart/device validation remains open. AP1–AP4 implemented locally on18 October; focused viewport, ended-state and continuation checks pass. Not deployed. Remaining validation: physical TV/Cast and unusually long custom boards; finish interrupted host review separately.
+
 ## 13 October — Reveal on Open buzzers deployed
 
 Released d6e52db to ff.adeticket.com. Azure38407199306, validation38407199112, browser38407199124 and Push on main38407199303 succeeded. Live index-y4ZRRQmC.js contains Players to the stage; production smoke passes.108 unit tests and28 browser scenarios pass locally. Completed: waiting regular-round audience prompt hidden, host Open buzzers persists reveal, subsequent lock/refresh/restart retains reveal, next round conceals again. Host private reference and Fast Money flow retained. Actual TV/iPad display check remains owner verification. No production game records edited for testing. Next: refresh host/audience, stage contestants, then Open buzzers; follow up on any event feedback. No credits or paid resources used.
