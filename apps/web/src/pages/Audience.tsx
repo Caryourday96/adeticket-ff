@@ -1,3 +1,4 @@
+import { KeepAwake } from "../components/KeepAwake";
 import { useEffect, useState } from "react";
 import { Maximize, Radio } from "lucide-react";
 import type { PublicState } from "@naija/contracts";
@@ -96,6 +97,7 @@ export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
           <a href="/join">Try another room</a>
         </div>
       )}
+      {!tv && <KeepAwake />}
       <footer>Sample game points · Nigerian-inspired home game</footer>
     </main>
   );

@@ -1,3 +1,4 @@
+import { KeepAwake } from "../components/KeepAwake";
 import { useEffect, useRef, useState } from "react";
 import { CastControls } from "../components/CastControls";
 import { QRCodeSVG } from "qrcode.react";
@@ -163,6 +164,7 @@ export function Host({ id }: { id: string }) {
             Audience screen
           </button>
         </div>
+        <KeepAwake />
         {s.rehearsal && <RehearsalControls state={s} busy={busy} />}
         <AudienceThemeControls state={s} busy={busy} send={send} />
         <div className="game-toolbar">
@@ -211,6 +213,12 @@ export function Host({ id }: { id: string }) {
             </button>
           </div>
         </div>
+        {s.canUndo && (
+          <p className="host-note">
+            Undo will reverse: {s.undoDescription ?? "Previous game action"}. Check the latest state
+            before undoing.
+          </p>
+        )}
         {error && (
           <div role="alert" className="error">
             {error}

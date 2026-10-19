@@ -1,3 +1,4 @@
+import { SetupPresetControl } from "../components/SetupPresetControl";
 import { useEffect, useState } from "react";
 import {
   eligibleQuestions,
@@ -348,6 +349,45 @@ export function Setup() {
             <b>03</b> Open the big screen
           </span>
         </div>
+        <SetupPresetControl
+          busy={busy || !usageReady}
+          value={{
+            teams,
+            selfJoin,
+            packId,
+            fastPackId,
+            sharedQuestionBank,
+            excludeAfterUses,
+            shuffle,
+            steal,
+            target,
+          }}
+          load={(preset) => {
+            if (
+              !packs.some((p) => p.id === preset.packId) ||
+              !packs.some((p) => p.id === preset.fastPackId)
+            ) {
+              setError(
+                "A saved question bank is no longer available. Choose available banks before loading this setup.",
+              );
+              return false;
+            }
+            setReuseFrom("");
+            setTeams(preset.teams);
+            setSelfJoin(preset.selfJoin);
+            setPackId(preset.packId);
+            setFastPackId(preset.fastPackId);
+            setSharedQuestionBank(preset.sharedQuestionBank);
+            setExcludeAfterUses(preset.excludeAfterUses);
+            setShuffle(preset.shuffle);
+            setSteal(preset.steal);
+            setTarget(preset.target);
+            setRequired({});
+            setFastIds(null);
+            setError("");
+            return true;
+          }}
+        />
         <section className="rehearsal-panel" aria-label="Start a rehearsal">
           <div className="eyebrow">FIRST TIME HOSTING?</div>
           <h2>Try a rehearsal.</h2>

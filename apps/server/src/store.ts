@@ -1,3 +1,4 @@
+import { undoDescription } from "./undoDescription";
 import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
@@ -12,7 +13,13 @@ import {
   type HostState,
   type BuzzerPlayer,
 } from "@naija/contracts";
-type Saved = { state: GameState; undo: GameState[]; history: string[]; commands: string[] };
+type Saved = {
+  state: GameState;
+  undo: GameState[];
+  undoDescriptions?: string[];
+  history: string[];
+  commands: string[];
+};
 export class Store {
   private db: DatabaseSync;
   readonly surveys: Surveys;
@@ -135,7 +142,14 @@ export class Store {
   }
   host(id: string): HostState {
     const r = this.saved(id);
-    return { ...r.state, canUndo: r.undo.length > 0, history: r.history.slice(-12).reverse() };
+    return {
+      ...r.state,
+      canUndo: r.undo.length > 0,
+      undoDescription: r.undo.length
+        ? (r.undoDescriptions?.at(-1) ?? "Previous game action (older save)")
+        : undefined,
+      history: r.history.slice(-12).reverse(),
+    };
   }
   list() {
     return this.db
@@ -202,6 +216,7 @@ export class Store {
         throw new Error(
           "The game changed. Your action was not applied. Refresh and review the latest state before trying again.",
         );
+      r.undoDescriptions ??= r.undo.map(() => "Previous game action (older save)");
       const revision = r.state.revision + 1;
       if (envelope.command.type === "undo") {
         const previous = r.undo.pop();
@@ -210,6 +225,7 @@ export class Store {
         if (previous.fast?.stage === "running" && previous.fast.deadline) {
           previous.fast.deadline = Date.now() + previous.fast.remaining;
         }
+        r.undoDescriptions.pop();
         r.state = previous;
       } else {
         const next = transition(r.state, envelope.command);
@@ -217,8 +233,19 @@ export class Store {
         if (previous.fast?.deadline)
           previous.fast.remaining = Math.max(0, previous.fast.deadline - Date.now());
         r.undo.push(previous);
-        if (r.undo.length > 100) r.undo.shift();
+        r.undoDescriptions.push(undoDescription(r.state, envelope.command));
+        if (r.undo.length > 100) {
+          r.undo.shift();
+          r.undoDescriptions.shift();
+        }
         r.state = next;
+      }
+      if (
+        r.state.fast &&
+        (["undo", "fastClock", "fastStart", "fastNextPlayer"].includes(envelope.command.type) ||
+          !r.state.fast.draftScope)
+      ) {
+        r.state.fast.draftScope = randomUUID();
       }
       r.state.revision = revision;
       r.state.lastCommand = envelope.command.type;

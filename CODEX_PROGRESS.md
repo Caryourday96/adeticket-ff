@@ -1,3 +1,27 @@
+## 19 October — QL4/QL5/QL7/QL8 complete, release prepared
+
+Remaining scoped quality-of-life batch implemented and verified: refresh-safe turn-scoped unsent drafts; explicit named single-device setup preset (save/load/clear); opt-in visible-page wake lock; server-authoritative Undo description with legacy fallback, disk persistence and revision-conflict safety.109 Vitest+7 Node and all36 Playwright scenarios pass; build/typecheck/repository format pass. Initial format warnings were local line endings; normalization produces no unrelated tracked diff. New regression coverage: draft refresh/player isolation/Undo/storage denial; preset reload/clear; wake opt-in/release/unsupported; persisted undo stack and public-data exclusion. Tests use synthetic local data.
+
+Status: prior AP1–AP4/QL1/QL2/QL3 warning/QL6 are deployed in6fa1b2b. QL4/QL5/QL7/QL8 ready to push now. No deleted backlog items restored. Remaining: actual iPhone/TV/Cast validation; unusually long custom boards; source-phone transfer counters (not implemented); interrupted broader host exploratory report; original F2/F4 controlled restart/hardware checks. Drafts are same-tab only and not a substitute for Record; storage denial is explicitly reported. Presets store roster on this device only, not on server; remove on shared devices. Wake lock is best effort, no background connectivity claim. Next: verify second release workflows/live bundle and update checkpoint.
+
+## 19 October — Remaining quality-of-life batch ready for verification
+
+QL4/QL5/QL7/QL8 implemented locally. Undo now has host-only server-generated description stored alongside undo snapshots; pops in sync, survives restart, keeps stale-revision rejection and labels older saves conservatively. Never includes hidden answer text, and projection strips the host description.109 Vitest+7 Node checks pass, typecheck/build pass; full36-scenario browser suite running. No destructive migration: optional fields live in existing serialized state/undo record. Next: complete browser suite/format, publish authorized batch and verify workflows/live smoke. Physical wake-lock behavior remains owner device check; pending phone-transfer counters remain an optional separate item, not claimed implemented.
+
+## 19 October — QL7 verified; QL8 next
+
+Optional Keep screen awake added to host, phone and normal audience; never auto-enabled, released on disable/unmount/hidden page, reacquired when visible, clear unsupported/denied status. Browser lifecycle/unsupported checks and prior projector/mobile layout checks all pass (4 scenarios). Physical iPhone wake behavior remains unverified. QL4/QL5/QL7 local, not deployed. Next: authoritative undo description with stale-revision protection retained.
+
+## 19 October — QL4/QL5 verification checkpoint
+
+QL4:108 existing unit tests and two browser scenarios pass. QL5: opt-in named single-device setup preset saves teams/roster and selection options, no answers/phone tokens; explicit load revalidates available banks and rebuilds question selection; overwrite confirmed; clear removes stored preset without changing current setup. Invalid/unavailable storage shows recovery guidance. Typecheck/build and save/reload/load/clear browser regression pass. Both local, not yet deployed. Next: QL7 optional wake lock, then QL8 authoritative undo description. Existing live release verified separately. Usage30% five-hour used,21% weekly; no credits redeemed.
+
+## 19 October — Release verified; QL4 draft recovery verified locally
+
+Release6fa1b2b verified live: Azure39195415891, validation39195416030, browser39195415852 and Push39195415444 succeeded. Public bundle index--IYvTLYS.js contains Play again; production smoke passes health/config/Cast/ads/origins/Bible transport. Prior smoke was blocked by automatic approval review hitting usage limit, not an unsafe-action determination; today's retry succeeded after reset.
+
+QL4 implemented locally: optional persisted fast.draftScope rotates on clock/new player/Undo; same-tab session drafts recover after refresh, never score automatically, clear on turn changes, omit recorded slots, invalidate after Undo. Storage unavailable keeps normal in-memory editing/recording. Shared API clears saved drafts on401/logout. Existing saves without scope keep tracking and get scope on next command; no destructive migration. Browser checks pass refresh/navigation/player-two isolation, pause scope preservation, Undo/reload invalidation, storage-denial recording. Typecheck/build pass; unit suite running. Next: complete unit verification, then QL5 presets, QL7 optional wake lock, QL8 authoritative Undo preview. QL4 not deployed yet. No real owner game altered.
+
 ## 18 October — Authorized release pushed; usage checkpoint
 
 Owner requested deploy then remaining backlog. Pushed21c8ff4 (AP1–AP4 and QL1/QL2/QL3 warning/QL6), followed by6fa1b2b documentation formatting required by CI. Main push confirmed; deployment verification pending. Usage91% five-hour used (9% remaining),15% weekly; no reset credits redeemed. Stopped new feature work at owner's reserve threshold. QL4 investigation: Fast Money has no stable turn identifier; deadline changes on pause, so do not key persisted drafts on deadline or blindly restore after undo. Next: confirm workflows/live bundle for6fa1b2b, then add safe turn-scoped draft recovery with regressions before QL5 presets, QL7 wake lock, QL8 Undo preview. No production data/test games created. Prior build/typecheck/focused browser results remain recorded; no new feature implementation this turn.

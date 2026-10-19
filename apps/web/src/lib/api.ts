@@ -10,6 +10,12 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
       headers: { "Content-Type": "application/json" },
       ...(body === undefined ? {} : { method: "POST", body: JSON.stringify(body) }),
     });
+    if (r.status === 401 || (path === "/logout" && r.ok)) {
+      try {
+        for (const key of Object.keys(sessionStorage))
+          if (key.startsWith("ff-fast-draft:")) sessionStorage.removeItem(key);
+      } catch {}
+    }
     const fallback = r.ok
       ? "The server returned an unreadable response. Refresh and check the latest state before trying again."
       : `Request failed (HTTP ${r.status}). Refresh and check the latest state before trying again.`;

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useFastDrafts } from "../hooks/useFastDrafts";
 import type { Command, HostState } from "@naija/contracts";
 export function FastControls({
   state,
@@ -13,8 +14,18 @@ export function FastControls({
 }) {
   const f = state.fast!;
   const [q, setQ] = useState(0),
-    [drafts, setDrafts] = useState<Record<number, string>>({}),
     [now, setNow] = useState(Date.now());
+  const {
+    drafts,
+    update: setDrafts,
+    recoverable,
+  } = useFastDrafts(
+    state.id,
+    f.draftScope,
+    f.player,
+    state.phase === "fast" && f.stage === "running",
+    f.entries[f.player].map(Boolean),
+  );
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 100);
@@ -22,8 +33,7 @@ export function FastControls({
   }, []);
   useEffect(() => {
     setQ(0);
-    setDrafts({});
-  }, [f.player]);
+  }, [f.player, f.draftScope]);
   const seconds = Math.max(
     0,
     Math.ceil(
@@ -224,7 +234,10 @@ export function FastControls({
           </p>
           <p className="host-note">
             Passing leaves this question unanswered for now. Typed drafts stay available when you
-            return during this turn, but only recorded answers count. Drafts are cleared on reload.
+            return during this turn, but only recorded answers count.{" "}
+            {recoverable
+              ? "Unsent drafts recover after refresh in this browser tab. Closing the tab, ending the turn or using Undo clears them."
+              : "Draft recovery is unavailable; keep this tab open until answers are recorded."}
           </p>
           <details>
             <summary>{entries.filter(Boolean).length} / 5 answers recorded</summary>

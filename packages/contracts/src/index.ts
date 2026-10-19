@@ -149,6 +149,8 @@ export type Phase =
   "faceoff" | "choice" | "play" | "steal" | "settled" | "champion" | "fast" | "finished";
 export type FastEntry = { text: string; answerId: string | null; points: number };
 export type FastState = {
+  /** Persisted draft scope; rotated on timer start and undo. Optional for older saves. */
+  draftScope?: string;
   players: [number, number];
   player: Side;
   stage: "ready" | "running" | "reveal" | "between" | "done";
@@ -213,7 +215,11 @@ export type PublicState = Omit<GameState, "questions" | "fastQuestions" | "revea
       });
   multiplier: number;
 };
-export type HostState = GameState & { canUndo: boolean; history: string[] };
+export type HostState = GameState & {
+  canUndo: boolean;
+  undoDescription?: string;
+  history: string[];
+};
 export type BuzzerPlayer = {
   id: string;
   team: Side;

@@ -1,3 +1,4 @@
+import { KeepAwake } from "../components/KeepAwake";
 import { useState } from "react";
 import type { PlayerView, PublicState, Side } from "@naija/contracts";
 import { Brand } from "../components/Brand";
@@ -180,6 +181,7 @@ export function Player({ id }: { id: string }) {
           </p>
         </>
       )}
+      <KeepAwake />
       {(error || gameError) && (
         <p role="alert" className="error">
           {error || gameError}

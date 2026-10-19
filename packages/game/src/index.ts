@@ -416,7 +416,14 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
 }
 
 export function audience(s: GameState): PublicState {
-  const { questions, fastQuestions, revealed, fast, ...safe } = s;
+  const {
+    questions,
+    fastQuestions,
+    revealed,
+    fast,
+    undoDescription: _undoDescription,
+    ...safe
+  } = s as GameState & { undoDescription?: string };
   const q = currentQuestion(s);
   const hidden = s.questionRevealed !== true && s.phase === "faceoff" && s.face.first === null;
   const out: PublicState = {
