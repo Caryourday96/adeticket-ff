@@ -1,3 +1,5 @@
+Update19 October: all eight scoped QL items are deployed in releases6fa1b2b and6132f3e. QL3 implements deletion warning only; pending-transfer counts remain optional. Historical review below is retained as rationale, not an outstanding list. See CODEX_PROGRESS.md for verification.
+
 Update18 October: QL1, QL2, QL3 warning and QL6 implemented and locally verified; not deployed. Pending-transfer counts and QL4/QL5/QL7/QL8 remain deferred. See CODEX_PROGRESS.md for evidence.
 
 # Game-night quality-of-life review — 18 October 2026
