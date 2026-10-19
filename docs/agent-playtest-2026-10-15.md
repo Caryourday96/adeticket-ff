@@ -1,0 +1,30 @@
+# Friends Showdown agent playtest — 15 October 2026
+
+Scope: read-only local playtesting of release checkout at 1e524f1 (application release d6e52db). Three agents were assigned host, player/mobile and audience flows with separate synthetic local databases. Agent runs were interrupted by usage-limit errors: player and audience supplied interim findings; host did not deliver a completed report. This is a partial review, not full event certification. No production records or application code changed.
+
+## Verified behavior
+
+Parent build passed. Existing checks passed: 108 Vitest tests and 7 Node tests (115 total). No full browser suite rerun is claimed for this review. Player agent verified registration, approval, staging, opening buzzers, refresh recovery, offline disable/reconnect, successful buzz and continued-player access after source deletion. No horizontal overflow at 320x700. Audience fits at 1920x1080; narrow layout had no horizontal overflow. Physical iPhone/TV, sound output, Cast mode and production restart remain unverified.
+
+## Ordered decisions
+
+| ID / priority | Finding and evidence | Proposed change / effort | Testable acceptance |
+|---|---|---|---|
+| AP1 / P1 — fix next | Confirmed normal audience viewport overflow. At 1366x768 regular stage bottom854; Fast Money timer y914–966, document1065px. Saved full-page screenshot independently inspected by parent. Critical scores/time require scrolling. Files: apps/web/src/styles.css, pages/Audience.tsx, components/Board.tsx. | Height-aware compact audience layout; reserve QR and timer space, collapse secondary controls without shrinking text excessively. 0.5–1 day. Cast uses different controls and requires separate verification. | At1366x768 and1920x1080 all active answers, scores, QR and timer visible without page scrolling; long prompts remain readable. Check tv mode independently and390px for overflow. |
+| AP2 / P2 — fix next | Confirmed ended-game audience falsely says YOUR CHAMPIONS with empty name and0 points when no winner declared. Reproduce: create fresh round, End game, view audience. Board.tsx:33–38 shares champion/finished branch and optional winner name. Screenshot results.png corroborates. Host GameResults already handles no champion. | Render truthful ended/no-champion state and actual scores; preserve real winner celebration. 2–4 hours. | Early end with null winner never claims a champion; nonzero scores remain correct; declared winner still displays correctly. |
+| AP3 / P2 — fix next | Confirmed by player agent and source: finished approved-player screen still says wait for host/open buzzers and keep screen open. Player.tsx:126–172 status branches omit finished phase. | Explicit finished status, disabled interaction, retain successor Continue action. 2–4 hours. | Finished game never implies another buzz is imminent; next-game continuation and reconnect wording remain correct. |
+| AP4 / P2 — next | Player agent measured ready buzzer y574–804 at320x700, partly below initial viewport. Not horizontal overflow. Existing phone identity/checklist precede main action. Player.tsx and styles.css. | Compact secondary readiness information and prioritize status/buzzer; preserve touch target. 0.5 day. | At320x700 and390x844 main ready action fully visible at initial scroll with long player/team names; errors remain reachable. |
+
+## New improvement ideas (not confirmed defects)
+
+1. Clarify host reveal timing: BuzzerControls.tsx says open after reading; explain that the private host question is already visible and opening reveals it to audience. P2,1–2 hours; verify copy matches actual staging/open flow.
+2. Show pending phone transfers and warn before deleting a source game. Setup.tsx already tells hosts to retain it; continued phones survive source deletion. Uncontinued-phone behavior was not completed in this review. P2,0.5–1 day; test both transferred and pending phones before changing cleanup.
+3. Offer a next-game shortcut from completed results using existing roster reuse. P2,0.5 day; one successor only, scores reset, old results retained.
+4. Add a compact display preview/preflight at common projector sizes. P2,0.5–1 day; host sees overflow warnings without altering game state.
+5. Provide a brief venue rehearsal checklist for two phones, audience sound and reconnect. P2,2–4 hours; reuse docs/game-night.md, no fabricated hardware pass.
+
+## Evidence and limitations
+
+Local ignored artifacts: .data/review-audience/{fast-1366,round-1366,results,fast-1920,round-1920,fast-390,round-390}.png and check.cjs; .data/review-player/{probe.cjs,phone.png}; .data/review-host/{run.cjs,explore.cjs,round.png,fast.png}. These are synthetic local captures, not portable committed evidence. Parent inspected fast-1366.png and results.png and corroborated Board/Player source. Host screenshots alone do not establish a completed host flow.
+
+No listeners remained on local review ports3111–3113 when checked at handoff. No deployment performed. Existing F2/F4 controlled restart/hardware checks remain open; owner-deferred screen-reader work remains deferred. Next concrete action: implement AP1 in the release checkout and run focused viewport regressions, then AP2/AP3. Complete the interrupted host review separately before claiming end-to-end validation.

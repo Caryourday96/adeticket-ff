@@ -45,6 +45,7 @@ export function Host({ id }: { id: string }) {
     [sound, setSound] = useState(false),
     [shortcuts, setShortcuts] = useState(true),
     [players, setPlayers] = useState<[number, number]>([0, 1]);
+  const [copyError, setCopyError] = useState("");
   const shareDialog = useModalFocus(share, () => setShare(false));
   const rosterDialog = useModalFocus(!!rosters, () => setRosters(null));
   const audio = useRef<AudioContext | null>(null),
@@ -568,13 +569,19 @@ export function Host({ id }: { id: string }) {
                 <button
                   className="button"
                   onClick={() => {
-                    void navigator.clipboard
-                      .writeText(url)
+                    setCopyError("");
+                    void Promise.resolve()
+                      .then(() => navigator.clipboard.writeText(url))
                       .then(() => {
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       })
-                      .catch(() => setCopied(false));
+                      .catch(() => {
+                        setCopied(false);
+                        setCopyError(
+                          "Could not copy. Select the audience link below and copy it manually.",
+                        );
+                      });
                   }}
                 >
                   <Copy size={15} />
@@ -585,6 +592,7 @@ export function Host({ id }: { id: string }) {
                   <ExternalLink size={15} />
                 </a>
               </div>
+              {copyError && <p role="alert">{copyError}</p>}
               <input
                 aria-label="Audience link"
                 readOnly

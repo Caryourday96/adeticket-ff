@@ -24,6 +24,7 @@ export function Player({ id }: { id: string }) {
     !!s &&
     s.turns[p.team] === p.member &&
     s.teams[p.team].members[p.member] === p.name;
+  const ended = s?.phase === "finished" || s?.phase === "champion";
   const ready =
     connected &&
     gameConnected &&
@@ -125,19 +126,21 @@ export function Player({ id }: { id: string }) {
             <p>{s.teams[p.team].name}</p>
           </div>
           <div className="phone-status" role="status" aria-live="polite" aria-atomic="true">
-            {!connected || !gameConnected
-              ? "Reconnecting — buzzer disabled"
-              : !p.approved
-                ? "Waiting for host approval"
-                : s.paused
-                  ? "Game paused"
-                  : b?.winner
-                    ? `${b.winner.name} · ${s.teams[b.winner.team].name} buzzed first`
-                    : !eligible
-                      ? "Waiting for the host to put you on stage"
-                      : ready
-                        ? "You're live. Get ready!"
-                        : "Wait for the host to open buzzers"}
+            {ended
+              ? "Game ended — thanks for playing!"
+              : !connected || !gameConnected
+                ? "Reconnecting — buzzer disabled"
+                : !p.approved
+                  ? "Waiting for host approval"
+                  : s.paused
+                    ? "Game paused"
+                    : b?.winner
+                      ? `${b.winner.name} · ${s.teams[b.winner.team].name} buzzed first`
+                      : !eligible
+                        ? "Waiting for the host to put you on stage"
+                        : ready
+                          ? "You're live. Get ready!"
+                          : "Wait for the host to open buzzers"}
           </div>
           <ul className="phone-readiness" aria-label="Buzzer readiness checklist">
             <li className={connected && gameConnected ? "done" : ""}>
@@ -160,16 +163,20 @@ export function Player({ id }: { id: string }) {
             }}
           >
             <span>
-              {b?.winner?.team === p.team && b.winner.name === p.name
-                ? "FIRST!"
-                : ready
-                  ? "BUZZ"
-                  : "WAIT"}
+              {ended
+                ? "DONE"
+                : b?.winner?.team === p.team && b.winner.name === p.name
+                  ? "FIRST!"
+                  : ready
+                    ? "BUZZ"
+                    : "WAIT"}
             </span>
-            <small>{ready ? "TAP TO ANSWER" : "LISTEN TO YOUR HOST"}</small>
+            <small>{ended ? "GAME ENDED" : ready ? "TAP TO ANSWER" : "LISTEN TO YOUR HOST"}</small>
           </button>
           <p className="muted">
-            Keep this screen open. The first buzz received by the server wins.
+            {ended
+              ? "You can keep this page open to continue when your host creates the next game."
+              : "Keep this screen open. The first buzz received by the server wins."}
           </p>
         </>
       )}

@@ -32,10 +32,14 @@ export function Board({ state, compact = false }: { state: PublicState; compact?
       </div>
       {["champion", "finished"].includes(state.phase) ? (
         <div className="winner-panel">
-          <Trophy size={64} />
-          <div className="section-eyebrow">YOUR CHAMPIONS</div>
-          <h2>{winner?.name}</h2>
-          <p>{state.winner !== null ? state.scores[state.winner] : 0} points · Well played!</p>
+          {winner && <Trophy size={64} />}
+          <div className="section-eyebrow">{winner ? "YOUR CHAMPIONS" : "GAME ENDED"}</div>
+          <h2>{winner?.name ?? "Thanks for playing"}</h2>
+          <p>
+            {state.winner !== null
+              ? `${state.scores[state.winner]} points · Well played!`
+              : "No champion declared. Final scores are shown below."}
+          </p>
           {state.fast && (
             <p>
               Fast Money: {state.fast.entries.flat().reduce((sum, e) => sum + (e?.points ?? 0), 0)}{" "}

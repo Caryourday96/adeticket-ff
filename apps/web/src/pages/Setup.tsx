@@ -62,7 +62,7 @@ export function Setup() {
     if (
       !chosen.length ||
       !window.confirm(
-        `Permanently delete these ${chosen.length} ended games?\n${chosen.map((g) => `${g.id}: ${g.teams.join(" vs ")}`).join("\n")}\nScores, history and phone registrations will be removed. This cannot be undone.`,
+        `Permanently delete these ${chosen.length} ended games?\n${chosen.map((g) => `${g.id}: ${g.teams.join(" vs ")}`).join("\n")}\nScores, history and phone registrations will be removed. This cannot be undone. Keep this game until all phones have continued to the next game; players who have not continued may need to join again.`,
       )
     )
       return;
@@ -114,7 +114,7 @@ export function Setup() {
     if (
       !window.confirm(
         action === "delete"
-          ? `Permanently delete ${name}? Saved scores, history and phone registrations will be removed. This cannot be undone.`
+          ? `Permanently delete ${name}? Saved scores, history and phone registrations will be removed. This cannot be undone. Keep this game until all phones have continued to the next game; players who have not continued may need to join again.`
           : `End ${name}? Scores will be saved and any running timer stopped. Unfinished round points will not be awarded.`,
       )
     )
@@ -233,9 +233,38 @@ export function Setup() {
         setUsageReady(true);
         setPacks(p);
         setGames(g);
+        const source = new URLSearchParams(location.search).get("reuse");
+        if (source) {
+          if (g.some((game) => game.id === source && game.phase === "finished" && !game.rehearsal))
+            void selectReuse(source);
+          else
+            setError(
+              "That saved game is unavailable for reuse. Choose another finished game or start with new players.",
+            );
+        }
       })
       .catch((e) => setError(e.message));
   }, []);
+  async function selectReuse(source: string) {
+    setReuseFrom(source);
+    if (!source) return;
+    setBusy(true);
+    setError("");
+    try {
+      const previous = await api<{ teams: [Team, Team]; phase: string; rehearsal: boolean }>(
+        `/games/${source}/host`,
+      );
+      if (previous.phase !== "finished" || previous.rehearsal)
+        throw new Error("Choose a finished game to reuse its teams.");
+      setTeams(previous.teams);
+      setSelfJoin(false);
+    } catch (e) {
+      setReuseFrom("");
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
   async function start() {
     setBusy(true);
     setError("");
@@ -353,23 +382,7 @@ export function Setup() {
           <select
             value={reuseFrom}
             disabled={busy}
-            onChange={async (e) => {
-              const source = e.target.value;
-              setReuseFrom(source);
-              if (!source) return;
-              setBusy(true);
-              setError("");
-              try {
-                const previous = await api<{ teams: [Team, Team] }>(`/games/${source}/host`);
-                setTeams(previous.teams);
-                setSelfJoin(false);
-              } catch (e) {
-                setReuseFrom("");
-                setError((e as Error).message);
-              } finally {
-                setBusy(false);
-              }
-            }}
+            onChange={(e) => void selectReuse(e.target.value)}
           >
             <option value="">Start with new players</option>
             {games

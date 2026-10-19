@@ -3323,3 +3323,133 @@ fieldset.team-editors {
   margin-inline: 0;
   min-width: 0;
 }
+
+/* Short projector windows need room for the timer as well as the board. */
+@media (min-width: 900px) and (max-height: 850px) {
+  .audience-page {
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+  .audience-page .audience-audio {
+    margin: 0 0 6px;
+    padding: 0;
+  }
+  .audience-page > .alpha-notice {
+    margin: 4px 0;
+    padding: 4px 12px;
+  }
+  .audience-page > header {
+    margin-bottom: 8px;
+  }
+  .audience-page > .stage {
+    padding: 8px 28px;
+  }
+  .audience-page .question-plaque {
+    margin: 8px 0;
+    padding: 8px;
+  }
+  .audience-page .question-plaque h2 {
+    font-size: 28px;
+  }
+  .audience-page .answer-tile {
+    min-height: 48px;
+  }
+  .audience-page .stage-team {
+    padding: 8px 12px;
+  }
+  .audience-page .stage-team > b {
+    font-size: 32px;
+  }
+  .audience-page .fast-board h2 {
+    margin: 6px 0 10px;
+  }
+  .audience-page .fast-public-row {
+    margin: 5px 0;
+    padding: 6px 9px;
+  }
+  .audience-page .fast-public-answers {
+    margin-top: 4px;
+  }
+  .audience-page .fast-total {
+    margin: 8px 0;
+  }
+  .audience-page .audience-timer {
+    font-size: 40px;
+    margin: 4px;
+  }
+  .audience-page .audience-message {
+    margin: 6px 0;
+  }
+}
+/* Keep the primary action above the fold on small phones, without hiding status. */
+@media (max-width: 480px) {
+  .phone-page {
+    padding: 16px 16px 24px;
+    gap: 10px;
+  }
+  .phone-page h1 {
+    font-size: 30px;
+    overflow-wrap: anywhere;
+  }
+  .phone-identity p {
+    overflow-wrap: anywhere;
+  }
+  .phone-page .alpha-notice {
+    margin: 0;
+    padding: 6px 10px;
+  }
+  .phone-page .phone-status {
+    min-height: 0;
+  }
+  .phone-page .phone-readiness {
+    margin: 0;
+    padding: 8px 12px;
+  }
+  .phone-page .phone-buzzer {
+    width: min(62vw, 250px);
+    flex-shrink: 0;
+  }
+}
+@media (min-width: 900px) and (max-height: 850px) {
+  .audience-page .stage-top {
+    min-height: 60px;
+  }
+  .audience-page .stage-top .brand {
+    height: 60px;
+    width: 105px;
+  }
+  .audience-page .stage-top .brand strong {
+    font-size: 19px;
+  }
+  .audience-page .audience-audio label {
+    flex-direction: row;
+    margin: 0;
+  }
+  .audience-page .fast-public-row {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  .audience-page .stage-scores {
+    margin-top: 10px;
+  }
+}
+
+@media (min-width: 900px) and (max-height: 850px) {
+  .audience-page .fast-public-row {
+    margin: 3px 0;
+  }
+  .audience-page .fast-board h2 {
+    margin: 4px 0 6px;
+  }
+  .audience-page > .alpha-notice {
+    font-size: 10px;
+  }
+}
+
+.phone-page .phone-readiness,
+.phone-page .phone-readiness li.done {
+  color: #cbd8eb;
+}
+.phone-page .phone-readiness li.done::before {
+  color: #5de3af;
+}

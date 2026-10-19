@@ -10,6 +10,7 @@ import { gameOrigin } from "../lib/links";
 export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
   const { state, connected, error, clockOffset } = useGame<PublicState>(id, "audience"),
     [now, setNow] = useState(Date.now());
+  const [fullscreenError, setFullscreenError] = useState("");
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 100);
     return () => clearInterval(t);
@@ -44,9 +45,18 @@ export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
         {!tv && (
           <button
             className="button small"
-            onClick={() => {
-              if (!document.fullscreenElement) void document.documentElement.requestFullscreen();
-              else void document.exitFullscreen();
+            onClick={async () => {
+              setFullscreenError("");
+              try {
+                if (!document.fullscreenElement) {
+                  if (!document.documentElement.requestFullscreen) throw new Error("unsupported");
+                  await document.documentElement.requestFullscreen();
+                } else await document.exitFullscreen();
+              } catch {
+                setFullscreenError(
+                  "Fullscreen is unavailable or blocked. Use your browser's fullscreen controls, or continue in this window.",
+                );
+              }
             }}
           >
             <Maximize size={15} />
@@ -54,6 +64,7 @@ export function Audience({ id, tv = false }: { id: string; tv?: boolean }) {
           </button>
         )}
       </header>
+      {fullscreenError && <p role="alert">{fullscreenError}</p>}
       {state ? (
         <>
           <Board state={state} />

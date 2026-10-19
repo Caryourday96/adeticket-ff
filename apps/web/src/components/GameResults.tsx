@@ -15,6 +15,11 @@ export function GameResults({ state }: { state: HostState }) {
           <strong>{team.name}</strong> · {state.scores[index]} points
         </p>
       ))}
+      {state.phase === "finished" && !state.rehearsal && (
+        <a className="button primary" href={`/?reuse=${encodeURIComponent(state.id)}`}>
+          Play again with these teams
+        </a>
+      )}
       <h3>Round breakdown</h3>
       {(state.roundResults ?? []).map((round) => (
         <p key={round.round}>

@@ -40,8 +40,8 @@ test("phone continues with approved identity and teams; audience QR remains on f
     expect(await audience.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );
-    await page.goto("/");
-    await page.getByLabel("Reuse teams and phones").selectOption(source);
+    await page.getByRole("link", { name: "Play again with these teams" }).click();
+    await expect(page.getByLabel("Reuse teams and phones")).toHaveValue(source);
     await expect(page.getByLabel("Team name", { exact: true }).nth(0)).toHaveValue("Party Stars");
     await expect(page.getByLabel("Team name", { exact: true }).nth(0)).toBeDisabled();
     await page.getByRole("button", { name: "Create game", exact: true }).click();

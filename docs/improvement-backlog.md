@@ -1,3 +1,31 @@
+## 18 October — Four quality-of-life quick wins implemented locally
+
+QL1: completed phone readiness labels use light text and mint checkmarks on dark backgrounds. QL2: finished non-rehearsal results offer Play again with these teams; setup validates query source against saved finished games, fetches roster and retains explicit Create game. Invalid/unavailable source explains fallback; existing continuation flow passes through new shortcut. QL3: single and bulk deletion confirmations warn to retain source until all phones transfer; no claim of pending-transfer tracking. QL6: clipboard rejection/unsupported API provides manual link instructions; trusted host fallback selectable; fullscreen rejection/unsupported API handled with clear guidance.
+
+Checks: build and typecheck pass. Five focused browser scenarios pass across final runs: existing continuation via shortcut, projector/phone layouts, ended-state behavior, invalid source/cancelled deletion, blocked clipboard/fullscreen. Test setup failures (collapsed diagnostics and too-early documentElement mock) were corrected and rerun successfully. Earlier108 Vitest+7 Node checks are from the preceding AP1–AP4 run, not rerun here. No application data/schema changes; synthetic test games only. Files: GameResults, Setup, Host, Audience, BuzzerControls, styles, continuation.spec.ts, quality-of-life.spec.ts. NOT DEPLOYED; all earlier AP1–AP4 edits preserved. Next: authorized release and live smoke/device check; QL4 drafts, QL5 presets, QL7 wake lock and QL8 undo preview remain unimplemented. Physical device and pending-transfer count verification remain open. No credits or paid resources used.
+
+## 18 October — Quality-of-life priorities (review only)
+
+See [evidence, effort and acceptance criteria](quality-of-life-2026-10-18.md). Historical review order (QL1/QL2/QL3 warning/QL6 now implemented locally): **QL1** readable completed-phone status; **QL2** Play again with these teams shortcut; **QL3** source-game deletion/handoff warning; **QL6** copy/fullscreen error feedback; **QL4** refresh-safe unsent Fast Money drafts; **QL5** saved setup presets; **QL7** optional keep-screen-awake; **QL8** precise Undo preview. All P2; physical-device checks/dependencies are documented. QL2/QL3 consolidate earlier duplicate ideas. Reveal/open wording already fixed locally. AP1–AP4 remain prepared but not deployed.
+
+## 18 October — Playtest fixes implemented locally
+
+AP1–AP4 have scoped fixes in the release checkout. Short desktop audience layout compacts secondary controls and board spacing; normal round/Fast Money scores, QR and timer fit1366x768 and1920x1080 without whole-page scrolling in focused browser checks. Early end with no winner now says Game ended/No champion declared and retains both team scores. Registered phone shows Game ended/DONE; next-game continuation remains available. Compact phone layout keeps the ready buzzer visible at320x700/390x844 with a long player name. Host copy explains that opening buzzers reveals the audience question.
+
+Validation: typecheck/build pass;108 Vitest+7 Node pass (initial sandbox socket failures resolved by rerun with local socket access); two new Playwright scenarios pass and existing continuation regression passes. Parent visually inspected projector and320px screenshots. Initial timer/whole-page overflow assertions caught remaining spacing and were fixed before the final pass. Remote main fetched and matches base1e524f1. Files: Board.tsx, BuzzerControls.tsx, Player.tsx, styles.css, e2e/playtest-fixes.spec.ts. Prior review/docs preserved. No server/data/schema or production changes. NOT DEPLOYED. Physical TV/Cast, unusual long custom boards and unfinished host exploratory review remain unverified. Next: publish this scoped change with deployment authorization, verify live assets, then owner projector/phone check. Usage at start4% five-hour used,1% weekly; no credits redeemed.
+
+## 15 October — Agent playtest follow-ups (implemented locally 18 October)
+
+Read [partial review and acceptance criteria](agent-playtest-2026-10-15.md). Three agents attempted isolated local flows; host report incomplete after agent usage-limit errors. No app changes or deployment in this review. Existing completed entries remain completed; owner-deferred items remain deferred.
+
+| Order | ID | Priority | Work | Acceptance / dependency |
+|---|---|---|---|---|
+| 1 | AP1 | P1 | Fit normal audience board, scores and Fast Money timer to1366x768 | All essential content visible without scrolling at1366x768/1920x1080; preserve readable prompt and QR. Separately verify Cast tv mode. |
+| 2 | AP2 | P2 | Truthful audience early-end result | Null winner shows game ended, no empty champion; actual scores preserved; real winner celebration unchanged. |
+| 3 | AP3 | P2 | Explicit finished phone state | No misleading wait/open instructions after end; Continue to next game still works. |
+| 4 | AP4 | P2 | Compact small-phone buzzer layout | Entire ready buzzer visible initially at320x700/390x844, including long names; no horizontal overflow. |
+
+Evidence, effort and files are in the review. New ideas pending prioritization: clearer reveal/open wording; pending phone-transfer warning before cleanup; next-game shortcut; projector preview; venue rehearsal. F2/F4 restart/device validation remains open. AP1–AP4 implemented locally on18 October; focused viewport, ended-state and continuation checks pass. Not deployed. Remaining validation: physical TV/Cast and unusually long custom boards; finish interrupted host review separately.
 ## 13 October — Reveal on Open buzzers deployed
 
 Released d6e52db to ff.adeticket.com. Azure38407199306, validation38407199112, browser38407199124 and Push on main38407199303 succeeded. Live index-y4ZRRQmC.js contains Players to the stage; production smoke passes.108 unit tests and28 browser scenarios pass locally. Completed: waiting regular-round audience prompt hidden, host Open buzzers persists reveal, subsequent lock/refresh/restart retains reveal, next round conceals again. Host private reference and Fast Money flow retained. Actual TV/iPad display check remains owner verification. No production game records edited for testing. Next: refresh host/audience, stage contestants, then Open buzzers; follow up on any event feedback. No credits or paid resources used.

@@ -17,6 +17,7 @@ export function BuzzerControls({
   const { data, error, connected, busy, act, lastUpdated } = useBuzzers<HostBuzzers>(s.id, true);
   const [invite, setInvite] = useState(false),
     [handoffCopied, setHandoffCopied] = useState(false);
+  const [handoffError, setHandoffError] = useState("");
   const [diagnostics, setDiagnostics] = useState<{
     revision: number;
     phase: string;
@@ -243,17 +244,34 @@ export function BuzzerControls({
         <button
           className="button small"
           onClick={() => {
-            void navigator.clipboard
-              .writeText(`${gameOrigin()}/host/${s.id}`)
+            setHandoffError("");
+            void Promise.resolve()
+              .then(() => navigator.clipboard.writeText(`${gameOrigin()}/host/${s.id}`))
               .then(() => {
                 setHandoffCopied(true);
                 setTimeout(() => setHandoffCopied(false), 2000);
               })
-              .catch(() => setHandoffCopied(false));
+              .catch(() => {
+                setHandoffCopied(false);
+                setHandoffError(
+                  "Could not copy. Select this trusted host link and copy it manually.",
+                );
+              });
           }}
         >
           {handoffCopied ? "Host link copied" : "Copy trusted host handoff link"}
         </button>
+        {handoffError && (
+          <div role="alert">
+            <p>{handoffError}</p>
+            <input
+              aria-label="Trusted host link"
+              readOnly
+              value={`${gameOrigin()}/host/${s.id}`}
+              onFocus={(e) => e.target.select()}
+            />
+          </div>
+        )}
         <p className="muted">
           After the second device signs in as host, wait for this connection count to rise. Avoid
           judging from both devices at once.
@@ -279,7 +297,8 @@ export function BuzzerControls({
             : "Buzzers locked"}
       </h3>
       <p>
-        Only the current face-off player on each team can buzz. Open after reading the question.
+        Only the current face-off player on each team can buzz. Bring players on stage, then open
+        buzzers to reveal the question on the audience screen.
       </p>
       <p>
         Players join at{" "}
