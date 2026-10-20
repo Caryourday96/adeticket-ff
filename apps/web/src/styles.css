@@ -3483,3 +3483,39 @@ fieldset.team-editors {
     max-width: 100%;
   }
 }
+/* Custom banks can contain long words, names and labels. Keep every answer readable. */
+.answer-grid,
+.stage-scores {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.answer-tile {
+  min-width: 0;
+}
+.answer-tile.revealed > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.answer-tile.revealed > strong {
+  flex-shrink: 0;
+}
+.question-plaque h2,
+.event-brand,
+.stage-contestant {
+  overflow-wrap: anywhere;
+}
+.stage-team {
+  min-width: 0;
+  gap: 10px;
+}
+.stage-team > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.stage-team > b {
+  flex-shrink: 0;
+}
+.audience-message {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}

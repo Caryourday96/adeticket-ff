@@ -1,3 +1,9 @@
+## 19 October — Long custom board wrapping fixed; release pending
+
+Resumed Friends Showdown after tax discussion; read root checkpoint and clean release checkout eaea3ef. Reproduced clipped long unbroken answer in a valid synthetic eight-answer custom bank:1366px tile client width505 versus scroll width1333. After answer wrapping fix, also reproduced mobile page width491 at390px from an unbroken team name in audience message. Added min-width-safe grid/flex text wrapping and preserved score widths; messages wrap within page. No clipping/sideways scroll at1366x768,1920x1080,390x844 in new regression; existing projector/timer and320px buzzer checks also pass (3 scenarios). Build/format/diff pass; parent visually inspected long-board1366 capture. Extreme long boards may scroll vertically to preserve readable full content; no all-content-on-one-screen claim. Initial fixture failures were invalid duplicate prompts/showAll timing and corrected before reproducing real layout issue.
+
+Files: apps/web/src/styles.css, e2e/long-board.spec.ts. No data/schema/server changes or production records modified. Deployment authorized by owner's deploy-and-continue request; publication pending. Next: push scoped fix, verify workflow/live assets and checkpoint; remaining F2/F4 physical/restart checks and optional transfer count unchanged. Usage at turn start19% five-hour used,31% weekly; no credits redeemed.
+
 ## 19 October — Quality-of-life releases deployed and verified
 
 Release6132f3ed36a0974e52e020126b4802a284609ccc is live at https://ff.adeticket.com. Azure39275540901, validation39275540948, browser39275541004 and Push39275540571 all succeeded. Public index-Dkxta_YC.js contains saved preset, wake control, Undo preview and draft recovery wording; production smoke passes health/config/Cast/ads/origin and Bible transport. No owner records modified to test production. Earlier6fa1b2b deployment also verified.
