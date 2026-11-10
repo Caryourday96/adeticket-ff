@@ -1,4 +1,5 @@
 import { KeepAwake } from "../components/KeepAwake";
+import { PlayerAnswer, PlayerBoard } from "../components/RemotePlay";
 import { useState } from "react";
 import type { PlayerView, PublicState, Side } from "@naija/contracts";
 import { Brand } from "../components/Brand";
@@ -33,6 +34,7 @@ export function Player({ id }: { id: string }) {
     eligible &&
     b?.armed &&
     !s?.paused &&
+    !s?.lobby &&
     s?.phase === "faceoff" &&
     s.face.first === null;
   return (
@@ -133,15 +135,17 @@ export function Player({ id }: { id: string }) {
                 ? "Reconnecting — buzzer disabled"
                 : !p.approved
                   ? "Waiting for host approval"
-                  : s.paused
-                    ? "Game paused"
-                    : b?.winner
-                      ? `${b.winner.name} · ${s.teams[b.winner.team].name} buzzed first`
-                      : !eligible
-                        ? "Waiting for the host to put you on stage"
-                        : ready
-                          ? "You're live. Get ready!"
-                          : "Wait for the host to open buzzers"}
+                  : s.lobby
+                    ? "Ready in the lobby — waiting for the host to start"
+                    : s.paused
+                      ? "Game paused"
+                      : b?.winner
+                        ? `${b.winner.name} · ${s.teams[b.winner.team].name} buzzed first`
+                        : !eligible
+                          ? "Waiting for the host to put you on stage"
+                          : ready
+                            ? "You're live. Get ready!"
+                            : "Wait for the host to open buzzers"}
           </div>
           <ul className="phone-readiness" aria-label="Buzzer readiness checklist">
             <li className={connected && gameConnected ? "done" : ""}>
@@ -179,6 +183,10 @@ export function Player({ id }: { id: string }) {
               ? "You can keep this page open to continue when your host creates the next game."
               : "Keep this screen open. The first buzz received by the server wins."}
           </p>
+          {p.approved && !ended && (
+            <PlayerAnswer state={s} connected={connected && gameConnected} />
+          )}
+          <PlayerBoard state={s} />
         </>
       )}
       <KeepAwake />

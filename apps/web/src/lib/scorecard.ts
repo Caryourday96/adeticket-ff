@@ -19,8 +19,20 @@ export function scorecard(state: GameState) {
         : new Date(round.settledAt).toISOString(),
     ]),
   ];
+  if (state.scoreAdjustments?.length)
+    rows.push(
+      [],
+      ["Score correction team", "Points", "Reason", "At (UTC)"],
+      ...state.scoreAdjustments.map((a) => [
+        state.teams[a.team].name,
+        a.delta,
+        a.reason,
+        new Date(a.at).toISOString(),
+      ]),
+    );
   if (
-    (state.roundResults ?? []).reduce((sum, round) => sum + round.points, 0) !==
+    (state.roundResults ?? []).reduce((sum, round) => sum + round.points, 0) +
+      (state.scoreAdjustments ?? []).reduce((sum, a) => sum + a.delta, 0) !==
     state.scores[0] + state.scores[1]
   )
     rows.push(["Round breakdown unavailable for awards recorded before this feature."]);

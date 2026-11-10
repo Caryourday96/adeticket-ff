@@ -23,6 +23,8 @@ import { Store } from "./store";
 import { Buzzers } from "./buzzers";
 import { z } from "zod";
 import { createRehearsal } from "./rehearsal";
+import { PlatformError, type Principal } from "./platform";
+import { createPlatformRouter } from "./platformRoutes";
 export function createApplication(options: {
   database: string;
   password?: string;
@@ -32,13 +34,17 @@ export function createApplication(options: {
   advertising?: AdvertisingConfig;
   castAppId?: string;
 }) {
-  if (options.production && !options.password)
-    throw new Error("HOST_PASSWORD is required in production.");
   if (options.production && !options.origin)
     throw new Error("APP_ORIGIN is required in production.");
   const store = new Store(options.database),
     app = express(),
     http = createServer(app);
+  if (options.production && !options.password && !store.platform.enabled()) {
+    store.close();
+    throw new Error(
+      "Provision an owner account or configure HOST_PASSWORD before starting production.",
+    );
+  }
   const buzzers = new Buzzers(store);
   const origins = new Set([
     ...(options.origin ?? "http://localhost:3000")
@@ -136,13 +142,131 @@ export function createApplication(options: {
       .map((c) => c.trim())
       .find((c) => c.startsWith("nf_host="))
       ?.slice(8);
+  const principal = (header: string | undefined): Principal | null => {
+    const token = cookie(header);
+    if (store.platform.enabled()) return store.platform.principal(token);
+    return store.authorized(token) ? { id: "legacy-host", email: "", superAdmin: true } : null;
+  };
+  const canHost = (header: string | undefined, id: string) => {
+    const user = principal(header);
+    return (
+      !!user &&
+      (!store.platform.enabled() ||
+        (store.platform.activeResource("game", id) &&
+          store.platform.canReadResource(user, "game", id)))
+    );
+  };
+  const forbidden = (res: express.Response) =>
+    res.status(403).json({ error: "You do not have access to this resource." });
   const auth: express.RequestHandler = (req, res, next) => {
-    if (!store.authorized(cookie(req.headers.cookie))) {
+    const user = principal(req.headers.cookie);
+    if (!user) {
       res.status(401).json({ error: "Sign in to the host desk." });
       return;
     }
+    res.locals.user = user;
+    if (store.platform.enabled() && req.params.id) {
+      const kind = req.path.startsWith("/api/surveys/") ? "survey" : "game";
+      if (
+        !store.platform.activeResource(kind, String(req.params.id)) ||
+        !store.platform.canReadResource(user, kind, String(req.params.id))
+      ) {
+        forbidden(res);
+        return;
+      }
+      if (
+        req.path.endsWith("/delete") &&
+        !store.platform.canManageGroup(
+          user,
+          store.platform.resourceGroup(kind, String(req.params.id)),
+        )
+      ) {
+        forbidden(res);
+        return;
+      }
+    }
     next();
   };
+  const selectedGroup = (req: express.Request, user: Principal) => {
+    if (!store.platform.enabled()) return "legacy";
+    const requested = req.get("X-Group-Id") ?? req.query.group;
+    if (typeof requested === "string" && requested.length <= 100) return requested;
+    if (user.superAdmin) return "legacy";
+    const groups = store.platform.groups(user).filter((group) => !group.suspended);
+    if (groups.length === 1) return groups[0].id;
+    throw new Error("Choose a group from your dashboard first.");
+  };
+  const groupAdmin: express.RequestHandler = (req, res, next) => {
+    const groupId = selectedGroup(req, res.locals.user);
+    if (store.platform.enabled()) {
+      if (groupId === "global") {
+        if (
+          !res.locals.user.superAdmin ||
+          !["/api/packs", "/api/question-usage"].includes(req.path)
+        )
+          return void forbidden(res);
+      } else {
+        store.platform.assertActiveGroup(groupId);
+        if (!store.platform.canManageGroup(res.locals.user, groupId)) return void forbidden(res);
+      }
+    }
+    res.locals.groupId = groupId;
+    next();
+  };
+  const resourceVisible = (
+    req: express.Request,
+    kind: "game" | "pack" | "survey",
+    id: string,
+    group?: string,
+  ) => {
+    if (!store.platform.enabled()) return true;
+    const user = principal(req.headers.cookie);
+    return (
+      !!user &&
+      store.platform.activeResource(kind, id) &&
+      (!group ||
+        store.platform.resourceGroup(kind, id) === group ||
+        (kind === "pack" && store.platform.resourceGroup(kind, id) === "global")) &&
+      store.platform.canReadResource(user, kind, id)
+    );
+  };
+  const accessiblePack = (req: express.Request, id: string) => {
+    if (!resourceVisible(req, "pack", id, selectedGroup(req, principal(req.headers.cookie)!)))
+      throw new Error("Question pack not found or not available to this group.");
+    return store.pack(id);
+  };
+  // Suspension also stops public participation and existing streams, without exposing membership.
+  const revokeStreams = () => {
+    for (const socket of io.sockets.sockets.values()) {
+      const room = socket.data.gameId as string | undefined;
+      if (
+        room &&
+        ((store.platform.enabled() && !store.platform.activeResource("game", room)) ||
+          (socket.data.role === "host" && !canHost(socket.request.headers.cookie, room)))
+      ) {
+        socket.emit("accessRevoked");
+        socket.disconnect(true);
+      }
+    }
+  };
+  app.use(
+    "/api/platform",
+    createPlatformRouter(store.platform, {
+      authenticate: (req) => (store.platform.enabled() ? principal(req.headers.cookie) : null),
+      onAuthorizationChanged: revokeStreams,
+      production: !!options.production,
+    }),
+  );
+  app.use(["/api/games/:id", "/api/surveys/:id"], (req, res, next) => {
+    if (store.platform.enabled()) {
+      const kind = req.originalUrl.startsWith("/api/surveys/") ? "survey" : "game";
+      if (!store.platform.activeResource(kind, String(req.params.id))) {
+        res.status(404).json({ error: "This room is unavailable." });
+        return;
+      }
+    }
+    next();
+  });
   app.get("/api/config", (_req, res) =>
     res.json({
       castAppId: /^[A-Fa-f0-9]{8}$/.test(options.castAppId?.trim() ?? "")
@@ -175,7 +299,12 @@ export function createApplication(options: {
   });
   app.post("/api/tv/poll", (req, res) => {
     const body = tvCredentials.parse(req.body);
-    res.json(store.tvPoll(body.deviceId, body.deviceSecret));
+    const result = store.tvPoll(body.deviceId, body.deviceSecret);
+    res.json(
+      result.room && store.platform.enabled() && !store.platform.activeResource("game", result.room)
+        ? { ...result, room: null }
+        : result,
+    );
   });
   app.post("/api/tv/pair", tvPairLimiter, (req, res) => {
     const body = z.object({ pairingCode: z.string().regex(/^[A-F0-9]{8}$/) }).parse(req.body);
@@ -189,7 +318,10 @@ export function createApplication(options: {
         room: z.string().regex(/^[A-F0-9]{6}$/),
       })
       .parse(req.body);
-    if (!store.has(body.room)) {
+    if (
+      !store.has(body.room) ||
+      (store.platform.enabled() && !store.platform.activeResource("game", body.room))
+    ) {
       res.status(404).json({ error: "Game not found." });
       return;
     }
@@ -203,10 +335,20 @@ export function createApplication(options: {
     }
     res.send(`google.com, ${ads.publisher.replace("ca-", "")}, DIRECT, f08c47fec0942fa0\n`);
   });
-  app.get("/api/surveys", auth, (_req, res) => res.json(store.surveys.list()));
-  app.post("/api/surveys", auth, (req, res) =>
-    res.status(201).json(store.surveys.create(req.body)),
+  app.get("/api/surveys", auth, groupAdmin, (req, res) =>
+    res.json(
+      store.surveys
+        .list()
+        .filter((survey) => resourceVisible(req, "survey", survey.id, res.locals.groupId)),
+    ),
   );
+  app.post("/api/surveys", auth, groupAdmin, (req, res) => {
+    const survey = store.withResource("survey", res.locals.groupId, () => {
+      const value = store.surveys.create(req.body);
+      return { id: value.id, value };
+    });
+    res.status(201).json(survey);
+  });
   app.get("/api/surveys/:id/manage", auth, (req, res) =>
     res.json(store.surveys.results(String(req.params.id))),
   );
@@ -261,19 +403,33 @@ export function createApplication(options: {
     res.json({ ok: true });
   });
   app.get("/api/clock", (_req, res) => res.json({ now: Date.now() }));
-  app.get("/api/session", (req, res) =>
+  app.get("/api/session", (req, res) => {
+    const user = principal(req.headers.cookie);
     res.json({
-      authenticated: store.authorized(cookie(req.headers.cookie)),
-      passwordRequired: !!options.password,
-    }),
-  );
+      authenticated: !!user,
+      passwordRequired: !!options.password || store.platform.enabled(),
+      multiTenant: store.platform.enabled(),
+      user: store.platform.enabled() ? user : null,
+      groups: user && store.platform.enabled() ? store.platform.groups(user) : [],
+    });
+  });
   const verifyPassword = passwordVerifier(options.password);
   app.post("/api/login", loginLimiter, async (req, res) => {
-    if (!(await verifyPassword(req.body?.password))) {
-      res.status(401).json({ error: "Incorrect host passphrase." });
+    const token = store.platform.enabled()
+      ? await store.platform.login(req.body?.email, req.body?.password)
+      : (await verifyPassword(req.body?.password))
+        ? store.session()
+        : null;
+    if (!token) {
+      res
+        .status(401)
+        .json({
+          error: store.platform.enabled()
+            ? "Email or password is incorrect, or access is unavailable."
+            : "Incorrect host passphrase.",
+        });
       return;
     }
-    const token = store.session();
     res.setHeader(
       "Set-Cookie",
       "nf_host=" +
@@ -283,26 +439,68 @@ export function createApplication(options: {
     );
     res.json({ ok: true });
   });
-  app.post("/api/logout", auth, (req, res) => {
-    store.revoke(cookie(req.headers.cookie)!);
-    res.setHeader("Set-Cookie", "nf_host=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0");
+  app.post("/api/logout", (req, res) => {
+    const token = cookie(req.headers.cookie);
+    if (token) {
+      store.revoke(token);
+      store.platform.logout(token);
+    }
+    revokeStreams();
+    res.setHeader(
+      "Set-Cookie",
+      `nf_host=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0${options.production ? "; Secure" : ""}`,
+    );
     res.json({ ok: true });
   });
-  app.get("/api/packs", auth, (_req, res) =>
+  app.get("/api/packs", auth, groupAdmin, (req, res) =>
     res.json([
       { id: "starter", bank: starterBank },
       { id: "fast-starter", bank: fastBank },
       { id: "ihechi-birthday", bank: birthdayBank },
-      ...store.packs(),
+      ...store.packs().filter((pack) => resourceVisible(req, "pack", pack.id, res.locals.groupId)),
     ]),
   );
-  app.post("/api/packs", auth, (req, res) => {
+  app.post("/api/packs", auth, groupAdmin, (req, res) => {
     const bank = bankSchema.parse(req.body);
-    res.status(201).json({ id: store.addPack(bank) });
+    const id = store.withResource("pack", res.locals.groupId, () => {
+      const id = store.addPack(bank);
+      return { id, value: id };
+    });
+    res.status(201).json({ id });
   });
-  app.get("/api/games", auth, (_req, res) => res.json(store.list()));
-  app.get("/api/question-usage", auth, (_req, res) => res.json(store.questionUsage()));
-  app.post("/api/rehearsals", auth, (req, res) => {
+  app.get("/api/games", auth, (req, res) => {
+    const groupId = store.platform.enabled() ? selectedGroup(req, res.locals.user) : undefined;
+    res.json(
+      store
+        .list()
+        .filter((game) => resourceVisible(req, "game", game.id, groupId))
+        .map((game) => {
+          const state = store.saved(game.id).state;
+          return {
+            ...game,
+            scores: state.scores,
+            winner: state.winner,
+            lobby: state.lobby ?? false,
+            groupId: store.platform.resourceGroup("game", game.id),
+          };
+        }),
+    );
+  });
+  app.get("/api/question-usage", auth, groupAdmin, (req, res) =>
+    res.json(
+      store
+        .questionUsage()
+        .filter((use) =>
+          resourceVisible(
+            req,
+            "game",
+            use.game,
+            res.locals.groupId === "global" ? undefined : res.locals.groupId,
+          ),
+        ),
+    ),
+  );
+  app.post("/api/rehearsals", auth, groupAdmin, (req, res) => {
     const { scenario, packId, questionIds } = z
       .object({
         scenario: z.enum(["round", "fast"]),
@@ -321,7 +519,7 @@ export function createApplication(options: {
             ? fastBank
             : packId === "ihechi-birthday"
               ? birthdayBank
-              : store.pack(packId);
+              : accessiblePack(req, packId);
       if (!bank) throw new Error("Question pack not found.");
       const found = questionIds.map((id) => bank.questions.find((q) => q.id === id));
       if (new Set(questionIds).size !== 5 || found.some((q) => !q))
@@ -333,10 +531,13 @@ export function createApplication(options: {
     }
     let id = randomBytes(3).toString("hex").toUpperCase();
     while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
-    store.add(createRehearsal(id, scenario, selected));
+    store.withResource("game", res.locals.groupId, () => {
+      store.add(createRehearsal(id, scenario, selected));
+      return { id, value: id };
+    });
     res.status(201).json({ id });
   });
-  app.post("/api/games", auth, (req, res) => {
+  app.post("/api/games", auth, groupAdmin, (req, res) => {
     const setup = setupSchema.parse(req.body);
     const reuseFrom = z
       .string()
@@ -344,18 +545,22 @@ export function createApplication(options: {
       .optional()
       .parse(req.body.reuseFrom);
     if (reuseFrom) {
+      if (!resourceVisible(req, "game", reuseFrom, res.locals.groupId)) return void forbidden(res);
       const previous = store.host(reuseFrom);
       if (previous.phase !== "finished" || previous.rehearsal)
         throw new Error("Finish the previous real game before reusing its teams and phones.");
       const existing = store.nextGame(reuseFrom);
-      if (existing) return void res.json({ id: existing });
+      if (existing) {
+        if (!resourceVisible(req, "game", existing, res.locals.groupId)) return void forbidden(res);
+        return void res.json({ id: existing });
+      }
       setup.teams = previous.teams;
     }
     const bank =
       setup.packId === "ihechi-birthday"
         ? birthdayBank
         : setup.packId && setup.packId !== "starter"
-          ? store.pack(setup.packId)
+          ? accessiblePack(req, setup.packId)
           : starterBank;
     if (!bank) throw new Error("Question pack not found.");
     if ((bank.roundType ?? "regular") !== "regular")
@@ -364,10 +569,12 @@ export function createApplication(options: {
       ? bank
       : !setup.fastPackId || setup.fastPackId === "fast-starter"
         ? fastBank
-        : store.pack(setup.fastPackId);
+        : accessiblePack(req, setup.fastPackId);
     if (!fastPack || (!setup.sharedQuestionBank && fastPack.roundType !== "fast-money"))
       throw new Error("Choose a Fast Money pack for Fast Money.");
-    const usage = store.questionUsage();
+    const usage = store
+      .questionUsage()
+      .filter((use) => resourceVisible(req, "game", use.game, res.locals.groupId));
     const availableRegular = eligibleQuestions(bank.questions, usage, setup.excludeAfterUses);
     const availableFast = eligibleQuestions(fastPack.questions, usage, setup.excludeAfterUses);
     const fastIds = setup.fastQuestionIds ?? fastPack.questions.slice(0, 5).map((q) => q.id);
@@ -389,8 +596,13 @@ export function createApplication(options: {
     let id = randomBytes(3).toString("hex").toUpperCase();
     while (store.has(id)) id = randomBytes(3).toString("hex").toUpperCase();
     const created = createGame(id, setup, questions, selectedFast, bank.notice);
-    if (reuseFrom) store.addWithPlayers(created, reuseFrom);
-    else store.add(created);
+    if (store.platform.enabled()) created.lobby = true;
+    if (reuseFrom) store.addWithPlayers(created, reuseFrom, res.locals.groupId);
+    else
+      store.withResource("game", res.locals.groupId, () => {
+        store.add(created);
+        return { id, value: id };
+      });
     res.status(201).json({ id });
   });
   app.get("/api/games/:id/host", auth, (req, res) => res.json(store.host(String(req.params.id))));
@@ -398,6 +610,10 @@ export function createApplication(options: {
     res.json(audience(store.saved(req.params.id).state)),
   );
   const broadcast = (id: string) => {
+    if (store.platform.enabled() && !store.platform.activeResource("game", id)) {
+      revokeStreams();
+      return;
+    }
     const state = store.host(id);
     const { canUndo: _canUndo, history: _history, ...game } = state;
     io.to(id + ":audience").emit("state", audience(game));
@@ -406,10 +622,13 @@ export function createApplication(options: {
     for (const socketId of io.sockets.adapter.rooms.get(id + ":host") ?? []) {
       const socket = io.sockets.sockets.get(socketId);
       if (socket) {
-        if (store.authorized(cookie(socket.request.headers.cookie))) {
+        if (canHost(socket.request.headers.cookie, id)) {
           socket.emit("state", state);
           socket.emit("buzzers", (hostBuzzers ??= buzzers.host(id)));
-        } else socket.disconnect(true);
+        } else {
+          socket.emit("accessRevoked");
+          socket.disconnect(true);
+        }
       }
     }
   };
@@ -489,7 +708,8 @@ export function createApplication(options: {
       !token ||
       !target ||
       !store.player(source, token)?.approved ||
-      !store.player(target, token)?.approved
+      !store.player(target, token)?.approved ||
+      (store.platform.enabled() && !store.platform.activeResource("game", target))
     )
       return void res.status(403).json({
         error:
@@ -532,8 +752,18 @@ export function createApplication(options: {
     buzzers.heartbeat(String(req.params.id), playerToken(req), visible);
     res.json({ ok: true });
   });
+  app.get("/api/games/:id/player/answer", (req, res) => {
+    res.json(store.remotePlay.playerView(String(req.params.id), playerToken(req)));
+  });
+  app.post("/api/games/:id/player/answer", (req, res) => {
+    res.json(store.remotePlay.submit(String(req.params.id), playerToken(req), req.body));
+  });
+  app.get("/api/games/:id/answers", auth, (req, res) => {
+    res.json(store.remotePlay.hostView(String(req.params.id)));
+  });
   const expireTimers = () => {
     for (const id of store.expiredFastGames()) {
+      if (store.platform.enabled() && !store.platform.activeResource("game", id)) continue;
       const s = store.host(id);
       store.apply(id, { id: randomUUID(), revision: s.revision, command: { type: "fastEndTurn" } });
       broadcast(id);
@@ -541,9 +771,16 @@ export function createApplication(options: {
   };
   const timerWorker = setInterval(expireTimers, 250);
   timerWorker.unref();
+  // Expired/recovered accounts must lose existing streams even when the room is idle.
+  const authorizationWorker = setInterval(revokeStreams, 1000);
+  authorizationWorker.unref();
   app.post("/api/games/:id/commands", auth, (req, res) => {
     try {
-      const state = store.apply(String(req.params.id), envelopeSchema.parse(req.body));
+      const state = store.apply(
+        String(req.params.id),
+        envelopeSchema.parse(req.body),
+        res.locals.user.id,
+      );
       broadcast(String(req.params.id));
       res.json(state);
     } catch (e) {
@@ -559,10 +796,12 @@ export function createApplication(options: {
           !["host", "audience"].includes(input.role ?? "")
         )
           throw new Error("Invalid room.");
+        if (store.platform.enabled() && !store.platform.activeResource("game", input.id))
+          throw new Error("This room is unavailable.");
         const state = store.saved(input.id).state;
         for (const room of socket.rooms) if (room !== socket.id) socket.leave(room);
         if (input.role === "host") {
-          if (!store.authorized(cookie(socket.request.headers.cookie)))
+          if (!canHost(socket.request.headers.cookie, input.id))
             throw new Error("Host access required.");
           socket.join(input.id + ":host");
           socket.emit("state", store.host(input.id));
@@ -572,6 +811,8 @@ export function createApplication(options: {
           socket.emit("state", audience(state));
           socket.emit("buzzer", buzzers.public(input.id));
         }
+        socket.data.gameId = input.id;
+        socket.data.role = input.role;
         ack?.({ ok: true });
       } catch (e) {
         ack?.({ error: e instanceof Error ? e.message : "Could not join." });
@@ -662,7 +903,9 @@ export function createApplication(options: {
   }
   app.use(
     (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-      res.status(400).json({ error: err.message || "Invalid request." });
+      res
+        .status(err instanceof PlatformError ? err.status : 400)
+        .json({ error: err.message || "Invalid request." });
     },
   );
   return {
@@ -675,6 +918,7 @@ export function createApplication(options: {
     close: () =>
       new Promise<void>((resolve) => {
         clearInterval(timerWorker);
+        clearInterval(authorizationWorker);
         bibleBlitz.dispose();
         io.close(() => {
           store.close();

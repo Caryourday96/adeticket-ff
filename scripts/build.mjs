@@ -53,6 +53,15 @@ await build({
   plugins: [nodeResolver],
 });
 await mkdir("dist", { recursive: true });
+await build({
+  entryPoints: ["apps/server/src/admin-cli.ts"],
+  bundle: true,
+  platform: "node",
+  target: "node22",
+  format: "cjs",
+  outfile: "dist/admin.cjs",
+  plugins: [nodeResolver],
+});
 await cp("sites", "dist/sites", { recursive: true });
 await writeFile("dist/server.js", 'require("./server.cjs");\n');
 await writeFile("dist/web.config", await readFile("deployment/web.config", "utf8"));

@@ -312,7 +312,12 @@ export function BuzzerControls({
         <button
           className="button primary"
           disabled={
-            busy || !connected || s.paused || s.phase !== "faceoff" || s.face.first !== null
+            busy ||
+            !connected ||
+            !!s.lobby ||
+            s.paused ||
+            s.phase !== "faceoff" ||
+            s.face.first !== null
           }
           onClick={() => act({ action: data?.armed ? "lock" : "arm" })}
         >

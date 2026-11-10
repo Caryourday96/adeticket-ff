@@ -121,6 +121,46 @@ function settleFace(s: GameState) {
 export function transition(input: GameState, cmd: Command, now = Date.now()): GameState {
   const s = structuredClone(input);
   requireThat(cmd.type !== "undo", "Undo is handled by the game store.");
+  if (
+    [
+      "startGame",
+      "buzz",
+      "answer",
+      "miss",
+      "choice",
+      "next",
+      "turn",
+      "faceoffPlayer",
+      "roster",
+      "endGame",
+      "fastStart",
+    ].includes(cmd.type)
+  )
+    s.answerTurnRevision = s.revision + 1;
+  if (cmd.type === "startGame") {
+    requireThat(s.lobby && s.phase === "faceoff", "This room has already started or ended.");
+    requireThat(!s.paused, "Resume the game first.");
+    requireThat(
+      s.teams.every((team) => !team.awaitingPlayers && team.members.length > 0),
+      "Approve at least one player for each team before starting.",
+    );
+    s.lobby = false;
+    s.message = "Game started. Bring contestants on stage, then open buzzers.";
+    return s;
+  }
+  if (s.lobby)
+    requireThat(
+      [
+        "roster",
+        "faceoffPlayer",
+        "pause",
+        "audienceTheme",
+        "audienceSound",
+        "setJoinLock",
+        "endGame",
+      ].includes(cmd.type),
+      "Start the game from the lobby first.",
+    );
   if (cmd.type === "audienceTheme") {
     s.audienceTheme = structuredClone(cmd.theme);
     return s;
@@ -133,6 +173,7 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
   if (cmd.type === "endGame") {
     requireThat(s.phase !== "finished", "This game has already ended.");
     s.phase = "finished";
+    s.lobby = false;
     s.paused = false;
     if (s.fast) {
       s.fast.deadline = null;
@@ -150,6 +191,44 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
       } else s.fast.deadline = now + s.fast.remaining;
     }
     s.message = s.paused ? "Game paused." : "Game resumed.";
+    return s;
+  }
+  if (cmd.type === "adjustScore") {
+    requireThat(
+      !s.fast && ["settled", "champion"].includes(s.phase),
+      "Correct scores between completed rounds, before Fast Money or ending the game.",
+    );
+    requireThat(
+      (cmd.team === 0 || cmd.team === 1) &&
+        Number.isInteger(cmd.delta) &&
+        cmd.delta !== 0 &&
+        Math.abs(cmd.delta) <= 1000,
+      "Use a whole-point correction from -1000 to 1000.",
+    );
+    requireThat(
+      typeof cmd.reason === "string" && cmd.reason.trim().length >= 3 && cmd.reason.length <= 200,
+      "Add a short reason for this correction.",
+    );
+    const total = s.scores[cmd.team] + cmd.delta;
+    requireThat(
+      Number.isSafeInteger(total) && total >= 0 && total <= 100000,
+      "A corrected team score must be between 0 and 100000 points.",
+    );
+    s.scores[cmd.team] = total;
+    s.scoreAdjustments = [
+      ...(s.scoreAdjustments ?? []),
+      { team: cmd.team, delta: cmd.delta, reason: cmd.reason.trim(), at: now },
+    ];
+    s.winner =
+      s.round + 1 >= (s.minimumRounds ?? 1) &&
+      Math.max(...s.scores) >= s.rules.target &&
+      s.scores[0] !== s.scores[1]
+        ? s.scores[0] > s.scores[1]
+          ? 0
+          : 1
+        : null;
+    if (s.phase === "champion" && s.winner === null) s.phase = "settled";
+    s.message = `${s.teams[cmd.team].name}'s total was corrected by ${cmd.delta > 0 ? "+" : ""}${cmd.delta} points. Round awards are unchanged.`;
     return s;
   }
   requireThat(!s.paused, "Resume the game first.");
@@ -422,19 +501,31 @@ export function audience(s: GameState): PublicState {
     revealed,
     fast,
     undoDescription: _undoDescription,
+    groupId: _groupId,
+    scoreAdjustments: _scoreAdjustments,
     ...safe
-  } = s as GameState & { undoDescription?: string };
+  } = s as GameState & { undoDescription?: string; groupId?: string };
   const q = currentQuestion(s);
-  const hidden = s.questionRevealed !== true && s.phase === "faceoff" && s.face.first === null;
+  const hidden =
+    s.lobby === true ||
+    (s.questionRevealed !== true && s.phase === "faceoff" && s.face.first === null);
   const out: PublicState = {
     ...safe,
     multiplier: multiplier(s),
     question: {
       id: hidden ? "waiting" : q.id,
-      prompt: hidden ? "Players to the stage" : q.prompt,
-      category: hidden ? "Question appears when buzzers open" : q.category,
+      prompt: s.lobby
+        ? "Waiting for the host to start"
+        : hidden
+          ? "Players to the stage"
+          : q.prompt,
+      category: s.lobby
+        ? "Join your team and get ready"
+        : hidden
+          ? "Question appears when buzzers open"
+          : q.category,
       answers: q.answers.map((a, i) => {
-        const visible = s.showAll || revealed.includes(a.id);
+        const visible = !s.lobby && (s.showAll || revealed.includes(a.id));
         return {
           id: hidden ? `waiting-${i}` : a.id,
           rank: i + 1,

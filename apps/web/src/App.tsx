@@ -1,6 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { ArrowRight, LockKeyhole } from "lucide-react";
-import { api } from "./lib/api";
+import { useState } from "react";
+import { ArrowRight } from "lucide-react";
+import { AccountGate as HostGate, InvitationAcceptance } from "./pages/Account";
+import { Platform } from "./pages/Platform";
+import { selectedGroup } from "./lib/api";
+import "./platform.css";
 import { Setup } from "./pages/Setup";
 import { Host } from "./pages/Host";
 import { CastReceiver } from "./pages/CastReceiver";
@@ -12,85 +15,6 @@ import { Player } from "./pages/Player";
 import { Surveys, SurveyForm } from "./pages/Surveys";
 import { Advertisement } from "./components/Advertisement";
 import { AlphaNotice } from "./components/AlphaNotice";
-function HostGate({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<{
-      authenticated: boolean;
-      passwordRequired: boolean;
-    } | null>(null),
-    [password, setPassword] = useState(""),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  useEffect(() => {
-    api<typeof session>("/session")
-      .then(setSession)
-      .catch((e) => setError(e.message));
-  }, []);
-  if (session?.authenticated) return <>{children}</>;
-  return (
-    <div className="entry-page">
-      <Brand large />
-      <AlphaNotice />
-      <section className="entry-card">
-        <LockKeyhole size={24} className="gold" />
-        <div className="eyebrow">HOST ACCESS</div>
-        <h1>
-          Your game night
-          <br />
-          starts here.
-        </h1>
-        <p>Sign in to set the teams, reveal the answers, and run the show.</p>
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setBusy(true);
-            try {
-              await api("/login", { password });
-              setSession({
-                authenticated: true,
-                passwordRequired: session?.passwordRequired ?? false,
-              });
-            } catch (e) {
-              setError((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          {session?.passwordRequired && (
-            <label>
-              Host passphrase
-              <input
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </label>
-          )}
-          {session && !session.passwordRequired && (
-            <p className="muted">Local preview · no passphrase configured</p>
-          )}
-          {error && (
-            <p className="error" role="alert">
-              {error}
-            </p>
-          )}
-          <button className="button primary wide" disabled={!session || busy}>
-            {busy ? "Opening…" : "Enter the host desk"}
-            <ArrowRight size={16} />
-          </button>
-        </form>
-        <a className="entry-link" href="/play">
-          Playing? Join with your game code
-        </a>
-        <a className="entry-link" href="/join">
-          Here to watch? Join the audience
-        </a>
-      </section>
-    </div>
-  );
-}
 function Join({ player = false }: { player?: boolean }) {
   const [code, setCode] = useState("");
   return (
@@ -264,6 +188,7 @@ function Catalogue() {
 }
 export function App() {
   const path = location.pathname.split("/").filter(Boolean);
+  if (path[0] === "invite") return <InvitationAcceptance />;
   if (path[0] === "catalogue" || location.hostname === "play.adeticket.com") return <Catalogue />;
   if (path[0] === "cast") return <CastReceiver />;
   if (path[0] === "privacy")
@@ -283,8 +208,16 @@ export function App() {
               <p>
                 The service stores game progress, team rosters, contestant names, and submitted
                 survey responses so hosts can run events. Game data is stored in persistent
-                application storage and can be deleted by the host through the dashboard cleanup
-                controls.
+                application storage and can be deleted by an authorized group administrator through
+                the dashboard cleanup controls. Players' typed guesses are private to their own
+                session and authorized game hosts until the host judges and reveals a board answer.
+              </p>
+              <p>
+                When individual administrator accounts are enabled, we also store email addresses,
+                password hashes, group memberships, expiring invitation records, and administrative
+                audit events. Group administrators can manage their assigned groups; the platform
+                owner can manage all groups. Administrator credentials and unrevealed answers are
+                not included on public player or audience boards.
               </p>
             </div>
           </section>
@@ -368,15 +301,38 @@ export function App() {
   if (path[0] === "rules") return <Rules />;
   return (
     <HostGate>
-      {path[0] === "host" && path[1] ? (
-        <Host id={path[1].toUpperCase()} />
-      ) : path[0] === "surveys" ? (
-        <Surveys />
-      ) : path[0] === "library" ? (
-        <Library />
-      ) : (
-        <Setup />
-      )}
+      {(session) => {
+        const group = session.groups?.find((item) => item.id === selectedGroup());
+        const canPrepare =
+          !session.multiTenant || (!!group && !group.suspended && group.role !== "host");
+        const canUseLibrary =
+          canPrepare || (!!session.user?.superAdmin && selectedGroup() === "global");
+        return path[0] === "host" && path[1] ? (
+          <Host id={path[1].toUpperCase()} />
+        ) : path[0] === "surveys" ? (
+          canPrepare ? (
+            <Surveys />
+          ) : (
+            <Platform />
+          )
+        ) : path[0] === "library" ? (
+          canUseLibrary ? (
+            <Library />
+          ) : (
+            <Platform />
+          )
+        ) : session.multiTenant &&
+          (["dashboard", "owner"].includes(path[0] ?? "") ||
+            (!path[0] &&
+              !new URLSearchParams(location.search).has("group") &&
+              !new URLSearchParams(location.search).has("setup"))) ? (
+          <Platform />
+        ) : canPrepare ? (
+          <Setup />
+        ) : (
+          <Platform />
+        );
+      }}
     </HostGate>
   );
 }

@@ -99,6 +99,18 @@ export const audienceThemes: Record<AudienceTheme["preset"], AudienceTheme> = {
   },
 };
 export const commandSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("adjustScore"),
+    team: teamIndex,
+    delta: z
+      .number()
+      .int()
+      .min(-1000)
+      .max(1000)
+      .refine((n) => n !== 0, "Choose a non-zero correction."),
+    reason: z.string().trim().min(3).max(200),
+  }),
+  z.object({ type: z.literal("startGame") }),
   z.object({ type: z.literal("openQuestion") }),
   z.object({ type: z.literal("audienceTheme"), theme: audienceThemeSchema }),
   z.object({ type: z.literal("audienceSound"), enabled: z.boolean() }),
@@ -160,6 +172,12 @@ export type FastState = {
   revealed: [number, number];
 };
 export type GameState = {
+  /** Host-only correction record; separate from the immutable round award breakdown. */
+  scoreAdjustments?: { team: Side; delta: number; reason: string; at: number }[];
+  /** New online rooms wait here until their host explicitly starts. Absent in older saves. */
+  lobby?: boolean;
+  /** Revision that opened this answer opportunity; pause/theme changes preserve it. */
+  answerTurnRevision?: number;
   questionRevealed?: boolean;
   audienceTheme?: AudienceTheme;
   audienceSoundEnabled?: boolean;
@@ -205,7 +223,10 @@ export type PublicAnswer = {
   text: string | null;
   points: number | null;
 };
-export type PublicState = Omit<GameState, "questions" | "fastQuestions" | "revealed" | "fast"> & {
+export type PublicState = Omit<
+  GameState,
+  "questions" | "fastQuestions" | "revealed" | "fast" | "scoreAdjustments"
+> & {
   question: { id: string; prompt: string; category: string; answers: PublicAnswer[] };
   fast:
     | null
@@ -216,6 +237,7 @@ export type PublicState = Omit<GameState, "questions" | "fastQuestions" | "revea
   multiplier: number;
 };
 export type HostState = GameState & {
+  groupId?: string;
   canUndo: boolean;
   undoDescription?: string;
   history: string[];
@@ -240,4 +262,20 @@ export type PlayerView = {
   player: BuzzerPlayer | null;
   buzzer: BuzzerState;
   nextGame?: string | null;
+};
+export type RemoteAnswer = {
+  id: string;
+  gameId: string;
+  revision: number;
+  playerId: string;
+  name: string;
+  team: Side;
+  text: string;
+  createdAt: number;
+};
+export type RemoteAnswerView = {
+  revision: number;
+  eligible: boolean;
+  reason: string;
+  submission: RemoteAnswer | null;
 };

@@ -1,3 +1,25 @@
+## Current ordered work — multi-group upgrade, 10 November 2026
+
+Owner requested a GitHub work-in-progress checkpoint before further implementation. Branch:
+`feature/multi-group-platform`. **Not deployed.** This section supersedes older pending/completed
+labels for this upgrade; earlier release notes below are historical. No owner-deferred items are
+restored.
+
+| Order | Priority | Item and status                                                         | Recommended model | Acceptance / next action                                                                                                                                                                                                                                        |
+| ----- | -------- | ----------------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1     | P1       | Approved phones after roster edits — confirmed bug, fix pending         | Astra             | Reorder or move a unique registered name and Undo; same phone retains its correct identity, can be approved/staged and answer; ambiguous/removed identities never take over another slot. Files: store.ts, buzzers.ts, BuzzerControls.tsx.                      |
+| 2     | P1       | Assigned-host replay — pending                                          | Astra             | Finished-game host can create a same-group fresh lobby using authorized saved configuration, preserve old scores/phones, retain only narrow host access; retries return the same successor; foreign access denied. Existing admin Play again remains supported. |
+| 3     | P1       | Score correction — implementation saved, behavior verification pending  | Sol, Astra review | Test positive/negative bounds, between-round restriction, winner recalculation, separate correction history, Undo, stale/duplicate requests and private reasons excluded from public state. Files: game/contracts, ScoreCorrection.tsx, scorecard.ts.           |
+| 4     | P1       | Finish multi-group verification and operator guide — in progress        | Astra             | Re-run final tests and both browser suites; finish secure bootstrap/recovery, additive migration, stopped-database backup and safe rollback instructions. Record exact results. No production bootstrap from browser/chat secrets.                              |
+| 5     | P1       | Production activation — pending operator credentials and agreed cutover | Astra             | Approved release on one persistent process; privately provision owner, confirm legacy records and revoked passphrase sessions, two isolated group admins, live player/reconnect/revoke flows. No deployment claimed from a branch push.                         |
+| 6     | P2       | Automatic invitation email — external sender not configured             | Sol               | Choose/configure an authorized sender, verify delivery and failure handling; never log tokens. Until then copy/Open email app clearly says no email was automatically sent.                                                                                     |
+
+Implemented and verified earlier in this branch: owner/group/member/invitation/session policies,
+HTTP/socket isolation, suspended-group blocking, private-cache removal and delayed-response
+revocation guards, group dashboard and mobile lobby/remote answer flows. Populated legacy migration
+regression passes separately. Current typecheck/build pass; final suite results remain pending.
+See [upgrade design and caveats](multi-group-platform.md) and `CODEX_PROGRESS.md`.
+
 ## 19 October — Long custom board fix deployed
 
 Release71bf74f5a9d8050d6a9220ce053344a75a4ce180 deployed at ff.adeticket.com. Azure39357029395, browser39357029393, validation39357029318 and Push39357029564 all succeeded. Live index-BzdWre18.css contains audience message wrapping; production smoke passes. Completed: long unbroken revealed answers wrap without clipping/losing points; long team names/messages do not cause horizontal overflow. Local regression covers eight-answer custom bank at1366/1920/390; standard projector/timer and320px phone checks still pass. CI validates the broader suite. Exceptionally long boards can scroll vertically to keep text legible. No production game records modified.

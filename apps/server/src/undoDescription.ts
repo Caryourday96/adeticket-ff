@@ -2,6 +2,10 @@ import type { Command, GameState } from "@naija/contracts";
 /** Host-only description; never includes hidden answer text. */
 export function undoDescription(state: GameState, command: Command): string {
   switch (command.type) {
+    case "adjustScore":
+      return `Correct ${state.teams[command.team].name}'s total by ${command.delta > 0 ? "+" : ""}${command.delta} points`;
+    case "startGame":
+      return "Start the game from its lobby";
     case "pause":
       return state.paused ? "Resume game" : "Pause game";
     case "buzz":

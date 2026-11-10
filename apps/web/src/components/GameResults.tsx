@@ -1,5 +1,5 @@
 import type { HostState } from "@naija/contracts";
-import { download } from "../lib/api";
+import { download, groupHref } from "../lib/api";
 import { scorecard } from "../lib/scorecard";
 export function GameResults({ state }: { state: HostState }) {
   return (
@@ -16,7 +16,10 @@ export function GameResults({ state }: { state: HostState }) {
         </p>
       ))}
       {state.phase === "finished" && !state.rehearsal && (
-        <a className="button primary" href={`/?reuse=${encodeURIComponent(state.id)}`}>
+        <a
+          className="button primary"
+          href={groupHref(`/?setup=yes&reuse=${encodeURIComponent(state.id)}`, state.groupId)}
+        >
           Play again with these teams
         </a>
       )}
@@ -45,11 +48,24 @@ export function GameResults({ state }: { state: HostState }) {
         </p>
       ))}
       {(state.roundResults ?? []).reduce((sum, round) => sum + round.points, 0) !==
-        state.scores[0] + state.scores[1] && (
+        state.scores[0] +
+          state.scores[1] -
+          (state.scoreAdjustments ?? []).reduce((sum, a) => sum + a.delta, 0) && (
         <p>
           This breakdown is incomplete for older games. Earlier awards remain included in the team
           totals.
         </p>
+      )}
+      {!!state.scoreAdjustments?.length && (
+        <div>
+          <h3>Host score corrections</h3>
+          {state.scoreAdjustments.map((a, i) => (
+            <p key={i}>
+              {state.teams[a.team].name}: {a.delta > 0 ? "+" : ""}
+              {a.delta} · {a.reason}
+            </p>
+          ))}
+        </div>
       )}
       <button
         className="button"

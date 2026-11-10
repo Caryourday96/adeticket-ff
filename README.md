@@ -2,6 +2,19 @@
 
 A host-led Nigerian-themed game with a private control desk and a synchronized audience board. Built with React, TypeScript, Express, Socket.IO, and SQLite.
 
+## Multi-group platform
+
+The multi-group upgrade adds explicitly provisioned owner accounts, separate group administrators,
+email-bound invitations, assigned game hosts, isolated question libraries and game history, and
+mobile player answers for host judgment. New group games start in a lobby; the host starts the game
+before opening buzzers. Existing questions, sounds, scoring rules and saved games are preserved.
+
+Read [setup, migration and verification](docs/multi-group-platform.md) before activating it.
+Until the operator bootstraps an owner, existing shared-passphrase mode remains available.
+After bootstrap, the shared passphrase is disabled and administrators sign in with their own
+email and password. There is no public administrator registration. Invitations provide a private
+link to copy or open in your email app; the server does not send email automatically.
+
 ## Player registration and stage controls
 
 In setup, leave **Players enter their own names** selected and enter the two team
@@ -58,7 +71,10 @@ pnpm start
 
 Open **http://localhost:3000**. In local development, the host can enter without a passphrase unless one is configured. Create a game, then click **Audience screen** to open its board or share the QR code.
 
-For configuration, copy `.env.example` to `.env`. Set `HOST_PASSWORD` to protect host access. Never commit `.env`. All users with this passphrase share the same trusted-host access; this is not a multi-tenant account system.
+For configuration, copy `.env.example` to `.env`. Never commit `.env`. Set `HOST_PASSWORD` to protect
+legacy host access, or explicitly provision the multi-group owner as described in the guide above.
+Legacy passphrase users share trusted-host access; individual group permissions apply only after
+owner bootstrap. Do not expose an unprotected development instance to the internet.
 
 For development with live reload, use two terminals:
 
@@ -135,6 +151,8 @@ pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm exec playwright test
+pnpm exec playwright test -c playwright.platform.config.ts
 ```
 
 Use `pnpm format` after edits. Keep business rules in `packages/game` and add a regression test when changing scoring or phase transitions.

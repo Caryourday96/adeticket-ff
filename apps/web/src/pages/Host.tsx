@@ -1,4 +1,6 @@
 import { KeepAwake } from "../components/KeepAwake";
+import { RemoteAnswerPanel } from "../components/RemotePlay";
+import { ScoreCorrection } from "../components/ScoreCorrection";
 import { useEffect, useRef, useState } from "react";
 import { CastControls } from "../components/CastControls";
 import { QRCodeSVG } from "qrcode.react";
@@ -86,6 +88,7 @@ export function Host({ id }: { id: string }) {
       if (share || rosters || !shortcuts) return;
       if (
         s &&
+        !s.lobby &&
         !s.paused &&
         !busy &&
         /^[1-8]$/.test(e.key) &&
@@ -100,7 +103,7 @@ export function Host({ id }: { id: string }) {
           void send({ type: "answer", answerId: answer.id });
         }
       }
-      if (e.key === "x" && s && ["play", "steal", "faceoff"].includes(s.phase))
+      if (e.key === "x" && s && !s.lobby && ["play", "steal", "faceoff"].includes(s.phase))
         void send({ type: "miss" });
       if (e.key === "u") void send({ type: "undo" });
     }
@@ -118,7 +121,7 @@ export function Host({ id }: { id: string }) {
     );
   const q = currentQuestion(s),
     url = gameOrigin() + "/audience/" + id;
-  const judging = ["faceoff", "play", "steal"].includes(s.phase);
+  const judging = !s.lobby && ["faceoff", "play", "steal"].includes(s.phase);
   const active: Side =
     s.phase === "steal"
       ? s.control === 0
@@ -135,7 +138,7 @@ export function Host({ id }: { id: string }) {
     setSound(!sound);
   };
   return (
-    <Layout>
+    <Layout groupId={s.groupId}>
       <main className="page host-page">
         <details>
           <summary>Keyboard shortcuts</summary>
@@ -165,6 +168,31 @@ export function Host({ id }: { id: string }) {
           </button>
         </div>
         <KeepAwake />
+        {s.lobby && (
+          <section className="control-card" aria-label="Game lobby">
+            <div className="section-eyebrow">LOBBY · ROOM {id}</div>
+            <h2>Gather your teams</h2>
+            <p>
+              Share the player link, approve your players in Phone buzzers, and check the team
+              lineup. The question stays hidden until you start and open buzzers.
+            </p>
+            <a className="button" href={`/play/${id}`} target="_blank" rel="noreferrer">
+              Open player invitation
+            </a>
+            <button
+              className="button primary"
+              disabled={
+                busy || !connected || s.paused || s.teams.some((team) => team.awaitingPlayers)
+              }
+              onClick={() => send({ type: "startGame" })}
+            >
+              Start game
+            </button>
+            {s.teams.some((team) => team.awaitingPlayers) && (
+              <p className="host-note">Approve at least one player on each team first.</p>
+            )}
+          </section>
+        )}
         {s.rehearsal && <RehearsalControls state={s} busy={busy} />}
         <AudienceThemeControls state={s} busy={busy} send={send} />
         <div className="game-toolbar">
@@ -173,7 +201,9 @@ export function Host({ id }: { id: string }) {
             {connected ? "Connected live" : "Reconnecting…"}
           </span>
           <span className="pill">{s.round >= 4 ? "Sudden death" : "Round " + (s.round + 1)}</span>
-          <span className="phase-label">{s.phase.replace("faceoff", "Face-off")}</span>
+          <span className="phase-label">
+            {s.lobby ? "Lobby" : s.phase.replace("faceoff", "Face-off")}
+          </span>
           <div className="host-score-strip">
             {s.teams.map((t, i) => (
               <span key={i}>
@@ -354,7 +384,7 @@ export function Host({ id }: { id: string }) {
                     <small>{s.phase === "steal" ? "TEAM CAPTAIN" : "AT THE MIC"}</small>
                   </div>
                 )}
-                {s.phase === "faceoff" && s.face.first === null && (
+                {!s.lobby && s.phase === "faceoff" && s.face.first === null && (
                   <>
                     <p>
                       Bring players on stage, then Open buzzers below to reveal the audience
@@ -503,6 +533,10 @@ export function Host({ id }: { id: string }) {
               </section>
             )}
             <BuzzerControls state={s} send={send} />
+            <ScoreCorrection state={s} busy={busy || !connected} send={send} />
+            {!s.lobby && !["fast", "finished", "champion"].includes(s.phase) && (
+              <RemoteAnswerPanel state={s} />
+            )}
             <details className="control-card roster-summary">
               <summary>Team lineup & roster changes</summary>
               <div className="section-title">
@@ -628,8 +662,10 @@ export function Host({ id }: { id: string }) {
             >
               <h2>Edit the lineup</h2>
               <p>
-                Removing an active member moves their turn to the nearest remaining slot. Previous
-                actions stay in history.
+                Keep a player's exact name when changing their order or moving them between teams.
+                Unique registered names keep their phone connection; removed or ambiguous names need
+                host approval again. Changes clear staging, so bring contestants back on stage.
+                Removing an active member moves their turn to the nearest remaining slot.
               </p>
               <div className="team-editors">
                 {rosters.map((t, i) => (

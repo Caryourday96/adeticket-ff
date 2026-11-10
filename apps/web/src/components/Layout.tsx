@@ -1,28 +1,74 @@
-import type { ReactNode } from "react";
-import { LayoutDashboard, Library, BookOpen, ArrowUpRight, Radio } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import {
+  LayoutDashboard,
+  Library,
+  BookOpen,
+  ArrowUpRight,
+  Radio,
+  LogOut,
+  Users,
+} from "lucide-react";
 import { Brand } from "./Brand";
 import { AlphaNotice } from "./AlphaNotice";
-export function Layout({ children, active = "desk" }: { children: ReactNode; active?: string }) {
+import { useAccount } from "../pages/Account";
+import { api, groupHref, selectedGroup } from "../lib/api";
+export function Layout({
+  children,
+  active = "desk",
+  groupId: gameGroup,
+}: {
+  children: ReactNode;
+  active?: string;
+  groupId?: string;
+}) {
+  const session = useAccount();
+  const multiTenant = !!session?.multiTenant;
+  const groupId = gameGroup ?? selectedGroup();
+  const scopedHref = (path: string) => groupHref(path, groupId);
+  const group = session?.groups?.find((item) => item.id === groupId);
+  const canPrepare = !multiTenant || (!!group && !group.suspended && group.role !== "host");
+  const globalLibrary = multiTenant && groupId === "global" && session?.user?.superAdmin;
+  const [signingOut, setSigningOut] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
   return (
-    <div className="app-shell">
+    <div className={`app-shell${multiTenant ? " multi-tenant" : ""}`}>
       <aside className="sidebar">
-        <a className="brand-link" href="/" aria-label="Friends Showdown home">
+        <a
+          className="brand-link"
+          href={multiTenant ? "/dashboard" : "/"}
+          aria-label="Friends Showdown home"
+        >
           <Brand />
         </a>
         <div className="nav-label">YOUR GAME NIGHT</div>
         <nav>
-          <a className={active === "desk" ? "selected" : ""} href="/">
-            <LayoutDashboard size={18} />
-            Host desk
-          </a>
-          <a className={active === "library" ? "selected" : ""} href="/library">
-            <Library size={18} />
-            Question library
-          </a>
-          <a className={active === "surveys" ? "selected" : ""} href="/surveys">
-            <BookOpen size={18} />
-            Surveys
-          </a>
+          {multiTenant && (
+            <a className={active === "platform" ? "selected" : ""} href={scopedHref("/dashboard")}>
+              <Users size={18} />
+              Groups and access
+            </a>
+          )}
+          {canPrepare && (
+            <a
+              className={active === "desk" ? "selected" : ""}
+              href={multiTenant ? scopedHref("/?setup=yes") : "/"}
+            >
+              <LayoutDashboard size={18} />
+              Host desk
+            </a>
+          )}
+          {(canPrepare || globalLibrary) && (
+            <a className={active === "library" ? "selected" : ""} href={scopedHref("/library")}>
+              <Library size={18} />
+              Question library
+            </a>
+          )}
+          {canPrepare && (
+            <a className={active === "surveys" ? "selected" : ""} href={scopedHref("/surveys")}>
+              <BookOpen size={18} />
+              Surveys
+            </a>
+          )}
           <a className={active === "rules" ? "selected" : ""} href="/rules">
             <BookOpen size={18} />
             How to play
@@ -58,7 +104,10 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
         <AlphaNotice />
         <header className="topbar">
           <span>
-            <Radio size={14} /> THE HOST'S CORNER
+            <Radio size={14} />{" "}
+            {multiTenant
+              ? (group?.name ?? (globalLibrary ? "SHARED QUESTION LIBRARY" : "YOUR GROUPS"))
+              : "THE HOST'S CORNER"}
           </span>
           <a href="/play">
             Join as a player <ArrowUpRight size={15} />
@@ -66,7 +115,44 @@ export function Layout({ children, active = "desk" }: { children: ReactNode; act
           <a href="/join">
             Join an audience screen <ArrowUpRight size={15} />
           </a>
+          {session?.authenticated && (
+            <button
+              className="button small account-signout"
+              disabled={signingOut}
+              onClick={async () => {
+                setSigningOut(true);
+                setLogoutError("");
+                try {
+                  await api("/logout", {});
+                  location.assign("/");
+                } catch (error) {
+                  setLogoutError((error as Error).message);
+                  setSigningOut(false);
+                }
+              }}
+            >
+              <LogOut size={15} />
+              {signingOut ? "Signing out…" : "Sign out"}
+            </button>
+          )}
         </header>
+        {multiTenant && (
+          <div className="account-context">
+            <span>{session.user?.email}</span>
+            <span>
+              {group
+                ? `${group.name} · ${group.role === "owner" ? "Super admin" : group.role === "admin" ? "Group admin" : "Game host"}`
+                : globalLibrary
+                  ? "Shared library · Super admin"
+                  : "Choose a group to manage its games"}
+            </span>
+          </div>
+        )}
+        {logoutError && (
+          <p className="error account-context" role="alert">
+            Sign-out was not confirmed. {logoutError}
+          </p>
+        )}
         {children}
         <footer className="footer">
           <a href="/privacy">Privacy and advertising</a>

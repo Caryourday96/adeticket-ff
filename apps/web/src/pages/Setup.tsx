@@ -9,7 +9,7 @@ import {
   type Team,
 } from "@naija/contracts";
 import { ArrowRight, Monitor, Users, Layers, Play, Shuffle } from "lucide-react";
-import { api } from "../lib/api";
+import { api, groupHref } from "../lib/api";
 import { Layout } from "../components/Layout";
 import { TeamEditor } from "../components/TeamEditor";
 import { commandId } from "../lib/commandId";
@@ -104,7 +104,7 @@ export function Setup() {
             }
           : {}),
       });
-      location.href = "/host/" + game.id;
+      location.href = groupHref("/host/" + game.id);
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);
@@ -298,7 +298,7 @@ export function Setup() {
         questionIds: ids,
         rules: { target, multipliers: [1, 1, 2, 3], includeStealAnswer: steal },
       });
-      location.href = "/host/" + result.id;
+      location.href = groupHref("/host/" + result.id);
     } catch (e) {
       setError((e as Error).message);
       setBusy(false);

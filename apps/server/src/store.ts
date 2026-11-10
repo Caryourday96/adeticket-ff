@@ -5,6 +5,8 @@ import { dirname } from "node:path";
 import { randomBytes, createHash, randomUUID } from "node:crypto";
 import { transition } from "@naija/game";
 import { Surveys } from "./surveys";
+import { Platform } from "./platform";
+import { RemotePlay } from "./remotePlay";
 import {
   bankSchema,
   type Bank,
@@ -23,6 +25,8 @@ type Saved = {
 export class Store {
   private db: DatabaseSync;
   readonly surveys: Surveys;
+  readonly platform: Platform;
+  readonly remotePlay: RemotePlay;
   constructor(path: string) {
     if (path !== ":memory:") mkdirSync(dirname(path), { recursive: true });
     this.db = new DatabaseSync(path);
@@ -48,6 +52,25 @@ export class Store {
         AND json_extract(body,'$.state.paused')=0;
       CREATE INDEX IF NOT EXISTS players_game_hash ON players(game,hash);
     `);
+    this.platform = new Platform(this.db);
+    this.remotePlay = new RemotePlay(this.db, this);
+  }
+  // Keep resource ownership and content creation atomic, including legacy snapshot writes.
+  withResource<T>(
+    kind: "game" | "pack" | "survey",
+    groupId: string,
+    create: () => { id: string; value: T },
+  ): T {
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      const result = create();
+      this.platform.assignResource(kind, result.id, groupId);
+      this.db.exec("COMMIT");
+      return result.value;
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
   }
   players(game: string): BuzzerPlayer[] {
     return (
@@ -71,7 +94,7 @@ export class Store {
       { target: string } | undefined;
     return row && this.has(row.target) ? row.target : null;
   }
-  addWithPlayers(state: GameState, source: string) {
+  addWithPlayers(state: GameState, source: string, groupId?: string) {
     this.db.exec("BEGIN IMMEDIATE");
     try {
       const previous = this.host(source);
@@ -81,6 +104,7 @@ export class Store {
       if (JSON.stringify(state.teams) !== JSON.stringify(previous.teams))
         throw new Error("Use the previous game's teams when carrying over phones.");
       this.add(state);
+      if (groupId) this.platform.assignResource("game", state.id, groupId);
       const rows = this.db.prepare("SELECT hash,body FROM players WHERE game=?").all(source) as {
         hash: string;
         body: string;
@@ -133,6 +157,8 @@ export class Store {
       if (saved.state.revision !== revision)
         throw new Error("The game changed. Refresh before deleting.");
       this.db.prepare("DELETE FROM players WHERE game=?").run(id);
+      this.remotePlay.forget(id);
+      this.platform.removeResource("game", id);
       this.db.prepare("DELETE FROM games WHERE id=?").run(id);
       this.db.exec("COMMIT");
     } catch (error) {
@@ -144,6 +170,7 @@ export class Store {
     const r = this.saved(id);
     return {
       ...r.state,
+      ...(this.platform.enabled() ? { groupId: this.platform.resourceGroup("game", id) } : {}),
       canUndo: r.undo.length > 0,
       undoDescription: r.undo.length
         ? (r.undoDescriptions?.at(-1) ?? "Previous game action (older save)")
@@ -204,7 +231,7 @@ export class Store {
       )
       .all() as { prompt: string; game: string; roundType: "regular" | "fast-money" }[];
   }
-  apply(id: string, envelope: Envelope) {
+  apply(id: string, envelope: Envelope, actorId?: string) {
     this.db.exec("BEGIN IMMEDIATE");
     try {
       const r = this.saved(id);
@@ -257,6 +284,13 @@ export class Store {
           " UTC",
       );
       this.db.prepare("UPDATE games SET body=? WHERE id=?").run(JSON.stringify(r), id);
+      if (actorId && this.platform.enabled())
+        this.platform.audit(
+          actorId,
+          "game." + envelope.command.type,
+          this.platform.resourceGroup("game", id),
+          id,
+        );
       this.db.exec("COMMIT");
       return this.host(id);
     } catch (e) {

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 import type { Command, HostState, PublicState } from "@naija/contracts";
-import { api } from "../lib/api";
+import { api, ApiError, clearPrivateCaches } from "../lib/api";
 import { commandId } from "../lib/commandId";
 export function useGame<T extends HostState | PublicState>(id: string, role: "host" | "audience") {
   const cacheKey = `friends-showdown:${role}:${id}`;
   const cached = (): T | null => {
+    if (role === "host") return null;
     try {
       const raw = localStorage.getItem(cacheKey);
       return raw ? (JSON.parse(raw) as T) : null;
@@ -14,6 +15,8 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
     }
   };
   const sending = useRef(false);
+  const generation = useRef(0);
+  const revoked = useRef(false);
   const [clockOffset, setClockOffset] = useState(0);
   useEffect(() => {
     let alive = true;
@@ -36,31 +39,60 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const refresh = useCallback(async () => {
+    const requestGeneration = generation.current;
     try {
       const latest = await api<T>("/games/" + id + "/" + role);
+      if (revoked.current || requestGeneration !== generation.current) return false;
       setState((old) => (!old || latest.revision >= old.revision ? latest : old));
       setError("");
       return true;
     } catch (e) {
+      if (e instanceof ApiError && [401, 403, 404].includes(e.status)) {
+        generation.current++;
+        revoked.current = true;
+        setState(null);
+        setConnected(false);
+      }
       setError((e as Error).message);
       return false;
     }
   }, [id, role]);
   useEffect(() => {
+    if (role === "host") {
+      // Previous builds persisted full hidden boards. Never restore or retain that material.
+      try {
+        for (const key of Object.keys(localStorage))
+          if (key.startsWith("friends-showdown:host:")) localStorage.removeItem(key);
+      } catch {}
+      return;
+    }
     if (!state) return;
     try {
       localStorage.setItem(cacheKey, JSON.stringify(state));
     } catch {
       // Storage can be disabled or full; the live socket remains authoritative.
     }
-  }, [cacheKey, state]);
+  }, [cacheKey, state, role]);
   useEffect(() => {
     let alive = true;
+    generation.current++;
+    revoked.current = false;
     void refresh().then(() => {
       if (!alive) setState(null);
     });
     const socket = io({ autoConnect: false });
+    socket.on("accessRevoked", () => {
+      generation.current++;
+      revoked.current = true;
+      clearPrivateCaches();
+      setState(null);
+      setConnected(false);
+      setError("Access has ended. Sign in again or contact your group administrator.");
+      socket.disconnect();
+    });
     socket.on("gameDeleted", () => {
+      generation.current++;
+      revoked.current = true;
       alive = false;
       setState(null);
       try {
@@ -73,18 +105,25 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
     socket.on("connect", () =>
       socket.emit("join", { id, role }, (result: { error?: string }) => {
         setConnected(!result.error);
-        if (result.error) setError(result.error);
+        if (result.error) {
+          generation.current++;
+          revoked.current = true;
+          setState(null);
+          setError(result.error);
+        }
       }),
     );
     socket.on("disconnect", () => setConnected(false));
     socket.on("connect_error", () => setConnected(false));
     socket.on("state", (s: T) => {
+      if (!alive || revoked.current) return;
       setState((previous) => (!previous || s.revision >= previous.revision ? s : previous));
       setError("");
     });
     socket.connect();
     return () => {
       alive = false;
+      generation.current++;
       socket.disconnect();
     };
   }, [id, role, refresh]);
@@ -98,6 +137,7 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
         return false;
       }
       sending.current = true;
+      const requestGeneration = generation.current;
       setBusy(true);
       setError("");
       try {
@@ -106,6 +146,7 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
           revision: state.revision,
           command,
         });
+        if (revoked.current || requestGeneration !== generation.current) return false;
         setState((old) => (!old || next.revision >= old.revision ? next : old));
         return true;
       } catch (e) {
@@ -113,9 +154,17 @@ export function useGame<T extends HostState | PublicState>(id: string, role: "ho
         let refreshed = false;
         try {
           const latest = await api<T>("/games/" + id + "/" + role);
+          if (revoked.current || requestGeneration !== generation.current) return false;
           setState((old) => (!old || latest.revision >= old.revision ? latest : old));
           refreshed = true;
-        } catch {}
+        } catch (refreshError) {
+          if (refreshError instanceof ApiError && [401, 403, 404].includes(refreshError.status)) {
+            generation.current++;
+            revoked.current = true;
+            setState(null);
+            setConnected(false);
+          }
+        }
         setError(
           message.startsWith("The game changed.")
             ? refreshed

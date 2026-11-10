@@ -23,6 +23,7 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm build
       - run: pnpm test:e2e
+      - run: pnpm exec playwright test -c playwright.platform.config.ts
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
@@ -30,4 +31,5 @@ jobs:
           path: |
             playwright-report/
             test-results/
+            test-results-platform/
           retention-days: 7
