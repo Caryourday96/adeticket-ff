@@ -83,12 +83,24 @@ it("unapproves removed identities and does not silently restore approval on Undo
   expect(store.player("ABC123", token)).toMatchObject({ name: "Tobi", member: 1, approved: true });
 });
 
-it("preserves unchanged duplicate-name places but requires review for an ambiguous move", () => {
+it("does not bench the first team when approving a new player on the other team", () => {
+  const { store, buzzers, token, id } = fixture();
+  buzzers.control("ABC123", "stage", id);
+  const second = buzzers.register("ABC123", 1, "New player");
+  buzzers.control("ABC123", "approve", store.player("ABC123", second)!.id);
+  expect(store.player("ABC123", token)).toMatchObject({ approved: true, onStage: true, member: 1 });
+  buzzers.control("ABC123", "arm");
+  expect(() => buzzers.buzz("ABC123", token, buzzers.public("ABC123").epoch)).not.toThrow();
+});
+
+it("keeps staging after a team rename but requires review for an ambiguous move", () => {
   const { store, buzzers, token, id, act } = fixture(true);
+  buzzers.control("ABC123", "stage", id);
   const teams = structuredClone(store.host("ABC123").teams);
   teams[0].name = "Renamed team";
   act({ type: "roster", teams });
   expect(store.player("ABC123", token)?.approved).toBe(true);
+  expect(store.player("ABC123", token)?.onStage).toBe(true);
   teams[0].members = ["Tobi", "Ada"];
   act({ type: "roster", teams });
   expect(store.player("ABC123", token)).toMatchObject({

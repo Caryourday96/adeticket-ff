@@ -31,7 +31,10 @@ import { RehearsalControls } from "../components/RehearsalControls";
 import { GameResults } from "../components/GameResults";
 import { AudienceThemeControls } from "../components/AudienceThemeControls";
 import { gameOrigin } from "../lib/links";
+import { useAccount } from "./Account";
+import { groupHref } from "../lib/api";
 export function Host({ id }: { id: string }) {
+  const account = useAccount();
   const {
     state: s,
     connected,
@@ -526,8 +529,11 @@ export function Host({ id }: { id: string }) {
                   </>
                 )}
                 {s.phase === "finished" && (
-                  <a className="button primary wide" href="/">
-                    Set up another game
+                  <a
+                    className="button wide"
+                    href={account?.multiTenant ? groupHref("/dashboard", s.groupId) : "/"}
+                  >
+                    {account?.multiTenant ? "Back to group games" : "Set up another game"}
                   </a>
                 )}
               </section>

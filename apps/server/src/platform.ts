@@ -538,6 +538,20 @@ export class Platform {
       return this.session(id);
     });
   }
+  /** Only inside the Store successor transaction. Does not grant group management. */
+  carryReplayHost(p: Principal, source: string, target: string) {
+    const group = this.resourceGroup("game", source);
+    if (
+      source === target ||
+      !this.canReadResource(p, "game", source) ||
+      !this.activeResource("game", target) ||
+      this.resourceGroup("game", target) !== group
+    )
+      throw new PlatformError("You cannot replay this game.");
+    if (this.role(p, group) === "host")
+      this.db.prepare("INSERT OR IGNORE INTO platform_game_hosts VALUES (?,?)").run(target, p.id);
+    this.audit(p.id, "game.replay", group, target);
+  }
   assignHost(p: Principal, gameId: string, userId: string, remove = false) {
     const group = this.resourceGroup("game", gameId);
     this.requireManager(p, group);

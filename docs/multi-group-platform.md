@@ -2,23 +2,19 @@
 
 Reviewed 2026-11-09. Branch: `feature/multi-group-platform`, starting at `ec1ab77`.
 
-## 10 November checkpoint — work in progress
+## 10 November — implemented and locally verified
 
-Owner requested saving the current work to GitHub before continuing. This branch is **not ready
-for production activation**. Individual accounts, tenant permissions, dashboards, invitations,
-lobbies and private typed answers are implemented locally. Current typecheck and build pass.
-Earlier security/browser checks are recorded in `CODEX_PROGRESS.md`; the latest score-correction
-implementation has not received focused behavior tests yet. No production deployment or owner
-bootstrap has occurred.
+Individual accounts, group permissions, owner/admin dashboards, manual email-bound invitations,
+lobbies, private typed player answers, roster/phone recovery, score corrections and assigned-host
+replay are implemented. Replay preserves the old game and uses the exact saved questions/rules;
+it grants only the initiating host access to the successor game. Removed successor grants are not
+restored by retries. Administrators retain the existing configurable Play again flow.
 
-Roster reconciliation and Undo now pass focused tests. Finish before release: assigned-host
-replay (current shortcut requires group-admin setup permission); final score-correction browser verification;
-final migration/owner bootstrap/recovery/rollback instructions and a final regression run. The
-roster dialog's phone-recovery guidance describes the intended fix, not completed behavior.
-Invitations currently create email-bound private links with manual copy/email-app delivery;
-automatic email sending is not implemented. Existing legacy records pass a populated migration
-and restart regression. Do not run an old single-group binary against a database already used by
-multiple groups: it lacks their authorization boundary.
+Latest verification:147 Vitest tests,7 Node checks,typecheck,build and3 platform browser scenarios
+pass. The mobile scenario covers roster reorder/Undo, correction, replay and continued phone
+registration. All37 legacy browser scenarios also pass. Targeted dependency
+patches and Zod v4 migration clear the fresh vulnerability audit. Production remains unchanged.
+Automatic invitation delivery needs a sender; private link/copy/email-app delivery is available.
 
 ## Verified starting point
 
@@ -47,14 +43,14 @@ Email delivery requires a configured sender/provider; invitation links can be is
 
 ## Status
 
-Investigation complete; implementation in progress. Git fetch initially failed due sandbox DNS restrictions; local tracked remote matched the starting commit but is not proof of current remote state. No production changes performed.
+Implementation complete for the scoped multi-group release; final local regression results are recorded in CODEX_PROGRESS.md. Production activation and an automatic email sender remain pending. No production changes performed.
 
 ## Operator bootstrap, recovery and activation
 
-The current tested batch is pushed as `a23cbeb` on `feature/multi-group-platform`.
-It has not been merged or deployed. Roster recovery and score corrections pass focused tests;
-assigned-host replay and final browser/release verification remain open. Older progress notes
-above describe earlier checkpoints, not the current completion state.
+The release is prepared on `feature/multi-group-platform`; see CODEX_PROGRESS.md for the latest
+push and verification status. It has not been merged or deployed. Roster recovery, score corrections
+and assigned-host replay are implemented. Activate only after agreeing the cutover and privately
+provisioning owner credentials; a branch push does not change production authentication.
 
 Build with Node 24 and the pinned pnpm version. `pnpm build` produces `dist/admin.cjs` beside the
 server bundle. The CLI supports `bootstrap` (first owner only) and `recover` (existing account).

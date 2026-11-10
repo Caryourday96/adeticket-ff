@@ -1,3 +1,21 @@
+## 10 November — Final multi-group regression complete; feature push prepared
+
+Completed assigned-host replay with atomic same-group successor, exact saved configuration, phone continuity and narrow initiating-host access. Retries cannot restore revoked access. Corrected roster reconciliation to retain staging for unchanged lineups, cosmetic team renames and unrelated-team edits; actual moves/reorders still clear staging and ambiguous identities require review. Added five replay tests and a390px end-to-end roster/Undo, score-correction, replay and phone-continuation scenario.
+
+Final evidence:147 Vitest tests across35 files,7 Node checks,37 legacy browser scenarios and3 platform browser scenarios pass. Typecheck and production build pass. Fresh dependency audit reported no known vulnerabilities after scoped patches and Zod v4 migration. Mobile replay screenshot visually inspected: controls and cards fit390px, no horizontal overflow. Initial full browser run found team-rename staging regression, fixed and rerun successfully. An intervening local test attempt was blocked by loopback EACCES; rerun with local-network permission passed. Browser startup port conflict was cleared by stopping the stale test runner. No production data used.
+
+Files: replay helper/API/platform/store, GameResults/Host, roster and replay tests, platform browser test, contracts/surveys Zod compatibility, package/lock/override files, backlog and operator guide. Main bundle560.75kB advisory and upstream annotation warnings remain nonblocking. Physical iPhone/TV checks, automatic email delivery and production activation remain unverified/pending. Usage visible35% five-hour used and22% weekly used during this pass; no reset credits used.
+
+Deployment: not merged or deployed. Preparing verified feature/multi-group-platform commit and push; production authentication remains unchanged. Exact next action: confirm feature push, then agree production cutover and privately provision owner credentials using docs/multi-group-platform.md; retain a stopped-database backup and rollback bundle, verify live legacy data and group isolation after activation. Do not bootstrap from chat credentials or provision paid resources.
+
+## 10 November — Replay completed and dependency gate cleared locally
+
+Assigned-host replay implemented with atomic source-preserving successor, same-group ownership/phone copy and narrow host grant, existing-successor permission checks. Five focused replay tests pass. Three platform browser scenarios passed before dependency update, including390px roster reorder/Undo, score correction, assigned-host replay and continued phone registration. Browser regression caught unrelated-team approval clearing earlier staging; fixed to retain unchanged-team seats, added regression.
+
+Dependency install initially blocked by usage auto-review, retry succeeded after usage became available. Patched body-parser2.4.0,ip-address10.7.4,qs6.16.1,Next16.4.1,nestedZod4.6.6; rootZod4.6.7,Vite6.4.6,Vitest4.1.12. Root Zod v4 uses prefault rules and explicit record keys, preserving defaults. Fresh audit reports no known vulnerabilities. Current147 Vitest+7 Node tests, typecheck and build pass. Bundle advisory560.75kB and upstream comment-annotation warnings remain nonblocking. Platform browser rerun after dependencies is running; full legacy browser suite remains to rerun. No production changes; local edits not committed yet. Last pushed3c5beee.
+
+Next: collect platform browser rerun, run full legacy browser suite, add explicit oversized-array/compressed-request regressions if needed, format/reconcile docs/backlog (current earlier pending labels stale), commit/push feature branch. Do not deploy or bootstrap production without approved cutover/private operator credentials. No reset credits redeemed by agent.
+
 ## 10 November — Weekly limit checkpoint; operator notes completed
 
 Usage tool reports83% five-hour used and100% weekly used. No reset credits redeemed. No new application edits started. Feature branch remains based on the tested a23cbeb batch. Added concrete operator bootstrap/recovery, activation, stopped-database backup and safe rollback notes to docs/multi-group-platform.md; these are instructions, not claims of production execution. Preparing documentation-only feature-branch push. Current production remains unchanged.

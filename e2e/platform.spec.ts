@@ -8,6 +8,155 @@ async function login(page: Page, email: string, password: string) {
   await expect(page.getByRole("heading", { name: /groups.*(together|ready)/i })).toBeVisible();
 }
 
+test("assigned host reorders phones, corrects a score and replays into a private group lobby on mobile", async ({
+  page,
+  browser,
+}, testInfo) => {
+  await login(page, "owner@example.test", "synthetic-owner-password");
+  const group = await page.request
+    .post("/api/platform/groups", { data: { name: "Replay club" } })
+    .then((r) => r.json());
+  const headers = { "X-Group-Id": group.id };
+  const packs = await page.request.get("/api/packs", { headers }).then((r) => r.json());
+  const created = await page.request
+    .post("/api/games", {
+      headers,
+      data: {
+        teams: [
+          { name: "Lagos", members: ["Ada", "Tobi"], captain: 0 },
+          { name: "Abuja", members: ["Bola", "Chidi"], captain: 0 },
+        ],
+        questionIds: packs[0].bank.questions.map((q: any) => q.id),
+      },
+    })
+    .then((r) => r.json());
+  const root = `/api/games/${created.id}`;
+  const invite = await page.request
+    .post(`/api/platform/groups/${group.id}/invitations`, {
+      data: { email: "replay-host@example.test", role: "host" },
+    })
+    .then((r) => r.json());
+  const hostCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  expect(
+    (
+      await hostCtx.request.post("/api/platform/invitations/accept", {
+        data: { token: invite.token, email: invite.email, password: "synthetic-replay-password" },
+      })
+    ).ok(),
+  ).toBe(true);
+  const session = await hostCtx.request.get("/api/session").then((r) => r.json());
+  await page.request.post(`/api/platform/games/${created.id}/hosts`, {
+    data: { userId: session.user.id },
+  });
+  const phoneCtx = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  const phoneRegistration = await phoneCtx.request
+    .post(root + "/player", { data: { team: 0, name: "Tobi" } })
+    .then((r) => r.json());
+  expect(
+    (
+      await page.request.post(root + "/buzzers", {
+        data: { action: "approve", playerId: phoneRegistration.player.id },
+      })
+    ).ok(),
+  ).toBe(true);
+  const host = await hostCtx.newPage();
+  await host.goto(`/host/${created.id}`); // Direct links must recover authoritative group context.
+  await expect(host.getByRole("region", { name: "Game lobby" })).toBeVisible();
+  await host.getByText("Team lineup & roster changes", { exact: true }).click();
+  await host.getByRole("button", { name: "Edit team rosters" }).click();
+  const editor = host.getByRole("dialog", { name: "Edit rosters" });
+  await editor
+    .locator(".team-editor")
+    .first()
+    .getByRole("button", { name: "Move member up" })
+    .nth(1)
+    .click();
+  await editor.getByRole("button", { name: "Save lineup" }).click();
+  await expect(editor).toHaveCount(0);
+  expect(
+    await phoneCtx.request
+      .get(root + "/player")
+      .then((r) => r.json())
+      .then((v) => v.player),
+  ).toMatchObject({ name: "Tobi", member: 0, approved: true, onStage: false });
+  await host.getByRole("button", { name: "Undo", exact: true }).click();
+  await expect
+    .poll(() =>
+      phoneCtx.request
+        .get(root + "/player")
+        .then((r) => r.json())
+        .then((v) => v.player.member),
+    )
+    .toBe(1);
+  await host
+    .locator("summary")
+    .filter({ hasText: /1 phones/ })
+    .click();
+  await host.getByRole("button", { name: "Put Tobi on stage", exact: true }).click();
+  await host.getByRole("button", { name: "Start game", exact: true }).click();
+  const command = async (value: any) => {
+    const state = await hostCtx.request.get(root + "/host").then((r) => r.json());
+    const response = await hostCtx.request.post(root + "/commands", {
+      data: { id: crypto.randomUUID(), revision: state.revision, command: value },
+    });
+    expect(response.ok()).toBe(true);
+  };
+  await command({ type: "buzz", team: 0 });
+  let state = await hostCtx.request.get(root + "/host").then((r) => r.json());
+  await command({ type: "answer", answerId: state.questions[0].answers[0].id });
+  await command({ type: "choice", pass: false });
+  for (const answer of state.questions[0].answers.slice(1))
+    await command({ type: "answer", answerId: answer.id });
+  state = await hostCtx.request.get(root + "/host").then((r) => r.json());
+  await host.getByText("Correct a team score", { exact: true }).click();
+  await host.getByLabel("Points to correct").fill("10");
+  await host.getByLabel("Reason for correction").fill("Synthetic host correction");
+  host.once("dialog", (dialog) => dialog.accept());
+  await host.getByRole("button", { name: "Apply score correction", exact: true }).click();
+  await expect
+    .poll(() =>
+      hostCtx.request
+        .get(root + "/host")
+        .then((r) => r.json())
+        .then((s) => s.scores[0]),
+    )
+    .toBe(state.scores[0] + 10);
+  expect(
+    JSON.stringify(await phoneCtx.request.get(root + "/audience").then((r) => r.json())),
+  ).not.toContain("Synthetic host correction");
+  await command({ type: "endGame" });
+  const previous = await hostCtx.request.get(root + "/host").then((r) => r.json());
+  host.once("dialog", (dialog) => dialog.accept());
+  await host.getByRole("button", { name: "Replay with these teams", exact: true }).click();
+  await expect(host.getByRole("region", { name: "Game lobby" })).toBeVisible();
+  const next = new URL(host.url()).pathname.split("/").at(-1)!;
+  expect(next).not.toBe(created.id);
+  const nextState = await hostCtx.request.get(`/api/games/${next}/host`).then((r) => r.json());
+  expect(nextState).toMatchObject({ scores: [0, 0], lobby: true, groupId: group.id });
+  expect(nextState.questions).toEqual(previous.questions);
+  expect((await hostCtx.request.get(root + "/host").then((r) => r.json())).scores).toEqual(
+    previous.scores,
+  );
+  expect((await hostCtx.request.post("/api/games", { headers, data: {} })).status()).toBe(403);
+  expect(await host.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await host.screenshot({
+    path: testInfo.outputPath("assigned-host-replay-mobile.png"),
+    fullPage: true,
+  });
+  const phone = await phoneCtx.newPage();
+  await phone.goto(`/play/${created.id}`);
+  await phone.getByRole("button", { name: "Continue to next game" }).click();
+  await expect(phone).toHaveURL(new RegExp(`/play/${next}$`));
+  expect(
+    await phoneCtx.request
+      .get(`/api/games/${next}/player`)
+      .then((r) => r.json())
+      .then((v) => v.player),
+  ).toMatchObject({ name: "Tobi", approved: true, onStage: false });
+  await hostCtx.close();
+  await phoneCtx.close();
+});
+
 test("owner invites separate admins, mobile player joins a lobby and plays remotely", async ({
   page,
   browser,

@@ -5,7 +5,7 @@ import { dirname } from "node:path";
 import { randomBytes, createHash, randomUUID } from "node:crypto";
 import { transition } from "@naija/game";
 import { Surveys } from "./surveys";
-import { Platform } from "./platform";
+import { Platform, type Principal } from "./platform";
 import { RemotePlay } from "./remotePlay";
 import {
   bankSchema,
@@ -94,7 +94,7 @@ export class Store {
       { target: string } | undefined;
     return row && this.has(row.target) ? row.target : null;
   }
-  addWithPlayers(state: GameState, source: string, groupId?: string) {
+  addWithPlayers(state: GameState, source: string, groupId?: string, replayBy?: Principal) {
     this.db.exec("BEGIN IMMEDIATE");
     try {
       const previous = this.host(source);
@@ -105,6 +105,8 @@ export class Store {
         throw new Error("Use the previous game's teams when carrying over phones.");
       this.add(state);
       if (groupId) this.platform.assignResource("game", state.id, groupId);
+      if (replayBy && this.platform.enabled())
+        this.platform.carryReplayHost(replayBy, source, state.id);
       const rows = this.db.prepare("SELECT hash,body FROM players WHERE game=?").all(source) as {
         hash: string;
         body: string;
@@ -148,7 +150,18 @@ export class Store {
       const unchangedPlaces = JSON.stringify(oldPlaces) === JSON.stringify(nextPlaces);
       if (wasPaired && (unique || unchangedPlaces)) {
         const target = unique ? nextPlaces[0] : { team: player.team, member: player.member };
-        this.updatePlayer(game, { ...player, ...target, onStage: false });
+        const sameTeamLineup =
+          target.team === player.team &&
+          target.member === player.member &&
+          before[player.team].captain === after[player.team].captain &&
+          before[player.team].awaitingPlayers === after[player.team].awaitingPlayers &&
+          JSON.stringify(before[player.team].members) ===
+            JSON.stringify(after[player.team].members);
+        this.updatePlayer(game, {
+          ...player,
+          ...target,
+          onStage: sameTeamLineup ? player.onStage : false,
+        });
       } else {
         // Keep the same cookie/name for review; removed/ambiguous names lose permission.
         this.updatePlayer(game, { ...player, member: -1, approved: false, onStage: false });

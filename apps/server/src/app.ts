@@ -25,6 +25,7 @@ import { z } from "zod";
 import { createRehearsal } from "./rehearsal";
 import { PlatformError, type Principal } from "./platform";
 import { createPlatformRouter } from "./platformRoutes";
+import { replayFinishedGame } from "./gameReplay";
 export function createApplication(options: {
   database: string;
   password?: string;
@@ -421,13 +422,11 @@ export function createApplication(options: {
         ? store.session()
         : null;
     if (!token) {
-      res
-        .status(401)
-        .json({
-          error: store.platform.enabled()
-            ? "Email or password is incorrect, or access is unavailable."
-            : "Incorrect host passphrase.",
-        });
+      res.status(401).json({
+        error: store.platform.enabled()
+          ? "Email or password is incorrect, or access is unavailable."
+          : "Incorrect host passphrase.",
+      });
       return;
     }
     res.setHeader(
@@ -604,6 +603,11 @@ export function createApplication(options: {
         return { id, value: id };
       });
     res.status(201).json({ id });
+  });
+  app.post("/api/games/:id/replay", auth, (req, res) => {
+    z.object({}).strict().parse(req.body);
+    const result = replayFinishedGame(store, String(req.params.id), res.locals.user);
+    res.json(result);
   });
   app.get("/api/games/:id/host", auth, (req, res) => res.json(store.host(String(req.params.id))));
   app.get("/api/games/:id/audience", (req, res) =>

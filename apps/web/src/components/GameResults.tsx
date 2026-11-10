@@ -1,7 +1,14 @@
 import type { HostState } from "@naija/contracts";
-import { download, groupHref } from "../lib/api";
+import { useState } from "react";
+import { api, download, groupHref } from "../lib/api";
+import { useAccount } from "../pages/Account";
 import { scorecard } from "../lib/scorecard";
 export function GameResults({ state }: { state: HostState }) {
+  const session = useAccount();
+  const assignedHost =
+    session?.multiTenant && session.groups?.find((g) => g.id === state.groupId)?.role === "host";
+  const [replaying, setReplaying] = useState(false),
+    [replayError, setReplayError] = useState("");
   return (
     <section className="control-card" aria-label="Game-night results">
       <h2>Game-night results</h2>
@@ -15,14 +22,51 @@ export function GameResults({ state }: { state: HostState }) {
           <strong>{team.name}</strong> · {state.scores[index]} points
         </p>
       ))}
-      {state.phase === "finished" && !state.rehearsal && (
-        <a
-          className="button primary"
-          href={groupHref(`/?setup=yes&reuse=${encodeURIComponent(state.id)}`, state.groupId)}
-        >
-          Play again with these teams
-        </a>
-      )}
+      {state.phase === "finished" &&
+        !state.rehearsal &&
+        (assignedHost ? (
+          <div>
+            <p>
+              Replay uses the same questions, rules and teams in a fresh lobby. This game's scores
+              stay saved.
+            </p>
+            <button
+              className="button primary"
+              disabled={replaying}
+              onClick={async () => {
+                if (
+                  !window.confirm(
+                    "Start a new lobby with the same questions and teams? Previous results stay saved.",
+                  )
+                )
+                  return;
+                setReplaying(true);
+                setReplayError("");
+                try {
+                  const result = await api<{ id: string }>(`/games/${state.id}/replay`, {});
+                  location.assign(groupHref(`/host/${result.id}`, state.groupId));
+                } catch (error) {
+                  setReplayError((error as Error).message);
+                  setReplaying(false);
+                }
+              }}
+            >
+              {replaying ? "Opening next game…" : "Replay with these teams"}
+            </button>
+            {replayError && (
+              <p role="alert" className="error">
+                {replayError}
+              </p>
+            )}
+          </div>
+        ) : (
+          <a
+            className="button primary"
+            href={groupHref(`/?setup=yes&reuse=${encodeURIComponent(state.id)}`, state.groupId)}
+          >
+            Play again with these teams
+          </a>
+        ))}
       <h3>Round breakdown</h3>
       {(state.roundResults ?? []).map((round) => (
         <p key={round.round}>

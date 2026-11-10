@@ -8,25 +8,22 @@ restored.
 | Order | Priority | Item and status                                                         | Recommended model | Acceptance / next action                                                                                                                                                                                                                                        |
 | ----- | -------- | ----------------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1     | P1       | Approved phones after roster edits — implemented; focused tests pass    | Astra             | Reorder or move a unique registered name and Undo; same phone retains its correct identity, can be approved/staged and answer; ambiguous/removed identities never take over another slot. Files: store.ts, buzzers.ts, BuzzerControls.tsx.                      |
-| 2     | P1       | Assigned-host replay — pending                                          | Astra             | Finished-game host can create a same-group fresh lobby using authorized saved configuration, preserve old scores/phones, retain only narrow host access; retries return the same successor; foreign access denied. Existing admin Play again remains supported. |
+| 2     | P1       | Assigned-host replay — implemented; unit/mobile browser checks pass     | Astra             | Finished-game host can create a same-group fresh lobby using authorized saved configuration, preserve old scores/phones, retain only narrow host access; retries return the same successor; foreign access denied. Existing admin Play again remains supported. |
 | 3     | P1       | Score correction — implemented; six focused tests pass                  | Sol, Astra review | Test positive/negative bounds, between-round restriction, winner recalculation, separate correction history, Undo, stale/duplicate requests and private reasons excluded from public state. Files: game/contracts, ScoreCorrection.tsx, scorecard.ts.           |
-| 4     | P1       | Finish multi-group verification and operator guide — in progress        | Astra             | Re-run final tests and both browser suites; finish secure bootstrap/recovery, additive migration, stopped-database backup and safe rollback instructions. Record exact results. No production bootstrap from browser/chat secrets.                              |
+| 4     | P1       | Multi-group verification and operator guide — complete locally          | Astra             | Secure bootstrap/recovery, additive migration, stopped-database backup and safe rollback documented. All37 legacy and3 platform browser scenarios pass. No production bootstrap from browser/chat secrets.                                                      |
 | 5     | P1       | Production activation — pending operator credentials and agreed cutover | Astra             | Approved release on one persistent process; privately provision owner, confirm legacy records and revoked passphrase sessions, two isolated group admins, live player/reconnect/revoke flows. No deployment claimed from a branch push.                         |
 | 6     | P2       | Automatic invitation email — external sender not configured             | Sol               | Choose/configure an authorized sender, verify delivery and failure handling; never log tokens. Until then copy/Open email app clearly says no email was automatically sent.                                                                                     |
 
 Implemented and verified earlier in this branch: owner/group/member/invitation/session policies,
 HTTP/socket isolation, suspended-group blocking, private-cache removal and delayed-response
 revocation guards, group dashboard and mobile lobby/remote answer flows. Populated legacy migration
-regression passes separately. Current typecheck/build pass; final suite results remain pending. Latest focused batch: 24/24 checks pass, including roster edits/Undo, legacy buzzers, migration, remote answers and score corrections. New browser regression for roster editing remains to add.
+regression passes separately. Current147 Vitest and7 Node checks, typecheck/build and3 platform browser scenarios pass. New390px browser coverage verifies roster reorder/Undo, score correction, narrow replay permissions and phone continuation. All37 legacy browser scenarios pass after fixing cosmetic team renames unnecessarily clearing staging. Real iPhone/TV hardware remains an owner check.
 See [upgrade design and caveats](multi-group-platform.md) and `CODEX_PROGRESS.md`.
 
-### Release gate: dependency alerts to verify
+### Dependency release gate — patched and verified locally
 
 The 10 November feature-branch push reported 11 default-branch dependency alerts (2 critical,
-4 high,5 moderate). **Provider-reported, not yet investigated.** Astra/Sol: identify affected
-packages and actual runtime/build exposure, make scoped safe updates, and run relevant regressions
-before production release. Do not infer exploitability from the count alone or mark this complete
-from a successful build.
+4 high,5 moderate). **Investigated and patched locally on10 November.** Fresh audit found14 advisories; targeted package updates plus a root Zod v4 migration now produce no known vulnerabilities.147 Vitest+7 Node checks, typecheck/build and3 platform browser checks pass on patched dependencies. Patched body-parser, qs, ip-address, Vite, Vitest and Zod; Next is a transitive Bible Blitz dependency rather than part of the Friends Showdown server bundle. No ignored advisories. Keep the lockfile and rerun the audit before production cutover; a clean audit is not a guarantee against unknown vulnerabilities.
 
 ## 19 October — Long custom board fix deployed
 

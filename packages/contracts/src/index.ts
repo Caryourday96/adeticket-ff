@@ -58,7 +58,7 @@ export const setupSchema = z
   .object({
     teams: z.tuple([teamSchema, teamSchema]),
     questionIds: z.array(label).min(5).max(100),
-    rules: rulesSchema.default({}),
+    rules: rulesSchema.prefault({}),
     packId: z.string().optional(),
     fastPackId: z.string().optional(),
     sharedQuestionBank: z.boolean().default(false),

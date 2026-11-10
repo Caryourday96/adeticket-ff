@@ -7,7 +7,7 @@ const normalize = (value: string) =>
   value.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase();
 const reviewSchema = z.object({
   revision: z.number().int(),
-  grouping: z.record(z.record(z.string().trim().min(1).max(100))),
+  grouping: z.record(z.string(), z.record(z.string(), z.string().trim().min(1).max(100))),
   reviewed: z.array(z.string()).max(30),
 });
 
@@ -69,7 +69,9 @@ export class Surveys {
     this.db.prepare("UPDATE surveys SET body=? WHERE id=?").run(JSON.stringify(s), s.id);
   }
   submit(id: string, token: string, input: unknown) {
-    const body = z.object({ answers: z.record(z.string().trim().max(100)) }).parse(input);
+    const body = z
+      .object({ answers: z.record(z.string(), z.string().trim().max(100)) })
+      .parse(input);
     const s = this.get(id);
     if (!s.open) throw new Error("This survey is closed.");
     if (this.submitted(id, token)) return;
