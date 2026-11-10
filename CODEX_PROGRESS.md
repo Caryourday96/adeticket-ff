@@ -1,3 +1,9 @@
+## 10 November — WIP feature checkpoint pushed
+
+Confirmed GitHub push of 18cbf4a (WIP: checkpoint multi-group multiplayer platform) to origin/feature/multi-group-platform; upstream tracking set. Typecheck, production build, changed-file formatting and diff checks passed before commit. Main and production unchanged; do not merge this unfinished snapshot. No new feature implementation in this push-only step. Next: roster/phone reconciliation and safe Undo, assigned-host replay, score-correction tests, final rollout guide and regression run; see current ordered backlog.
+
+GitHub's push response reported 11 dependency alerts on the default branch (2 critical,4 high,5 moderate). These are provider-reported alerts, not independently reproduced vulnerabilities; investigate affected packages and reachability before release. No dependency changes made here. No private runtime records or real credentials committed; no reset credits used.
+
 ## 10 November — Requested GitHub checkpoint prepared
 
 Owner requested pushing existing work before further implementation. Prepared WIP feature/multi-group-platform only; do not merge/deploy this snapshot yet. Current source passes TypeScript and production build (520.49 kB JS bundle advisory). Read-only pre-push review found only related source/docs/config/test files, no private runtime data or real credentials; synthetic test passwords only. Azure workflow is still main-only. This checkpoint commit is being pushed; remote publication must be confirmed by Git before claiming success.

@@ -20,6 +20,14 @@ revocation guards, group dashboard and mobile lobby/remote answer flows. Populat
 regression passes separately. Current typecheck/build pass; final suite results remain pending.
 See [upgrade design and caveats](multi-group-platform.md) and `CODEX_PROGRESS.md`.
 
+### Release gate: dependency alerts to verify
+
+The 10 November feature-branch push reported 11 default-branch dependency alerts (2 critical,
+4 high,5 moderate). **Provider-reported, not yet investigated.** Astra/Sol: identify affected
+packages and actual runtime/build exposure, make scoped safe updates, and run relevant regressions
+before production release. Do not infer exploitability from the count alone or mark this complete
+from a successful build.
+
 ## 19 October — Long custom board fix deployed
 
 Release71bf74f5a9d8050d6a9220ce053344a75a4ce180 deployed at ff.adeticket.com. Azure39357029395, browser39357029393, validation39357029318 and Push39357029564 all succeeded. Live index-BzdWre18.css contains audience message wrapping; production smoke passes. Completed: long unbroken revealed answers wrap without clipping/losing points; long team names/messages do not cause horizontal overflow. Local regression covers eight-answer custom bank at1366/1920/390; standard projector/timer and320px phone checks still pass. CI validates the broader suite. Exceptionally long boards can scroll vertically to keep text legible. No production game records modified.
