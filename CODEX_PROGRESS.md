@@ -1,3 +1,9 @@
+## 10 November — Weekly limit checkpoint; operator notes completed
+
+Usage tool reports83% five-hour used and100% weekly used. No reset credits redeemed. No new application edits started. Feature branch remains based on the tested a23cbeb batch. Added concrete operator bootstrap/recovery, activation, stopped-database backup and safe rollback notes to docs/multi-group-platform.md; these are instructions, not claims of production execution. Preparing documentation-only feature-branch push. Current production remains unchanged.
+
+Next action after usage is available: implement narrowly authorized assigned-host replay (source must be finished, same active group, exact saved configuration, atomic new game/phone copy/host grant, idempotent existing successor with access recheck), then final roster/replay mobile browser regression and full checks. Review GitHub dependency alerts before any main merge. Roster/score focused24 tests, typecheck and build passed in prior batch; no additional behavior tests this documentation-only step.
+
 ## 10 November — Tested batch saved at usage reserve
 
 Usage tool now reports74% five-hour used,99% weekly used (1% weekly remaining). Stopping new implementation before the unfinished replay work. Roster/phone reconciliation and guarded reapproval implemented; score correction now covered by6 focused tests. Final focused run:24/24 across6 files pass; typecheck passes. Initial sandbox loopback rejection was environmental; first unrestricted run found a legacy staging regression, fixed before the passing rerun. No full browser rerun this batch and no production deployment.

@@ -48,3 +48,70 @@ Email delivery requires a configured sender/provider; invitation links can be is
 ## Status
 
 Investigation complete; implementation in progress. Git fetch initially failed due sandbox DNS restrictions; local tracked remote matched the starting commit but is not proof of current remote state. No production changes performed.
+
+## Operator bootstrap, recovery and activation
+
+The current tested batch is pushed as `a23cbeb` on `feature/multi-group-platform`.
+It has not been merged or deployed. Roster recovery and score corrections pass focused tests;
+assigned-host replay and final browser/release verification remain open. Older progress notes
+above describe earlier checkpoints, not the current completion state.
+
+Build with Node 24 and the pinned pnpm version. `pnpm build` produces `dist/admin.cjs` beside the
+server bundle. The CLI supports `bootstrap` (first owner only) and `recover` (existing account).
+Both require temporary `FF_ADMIN_EMAIL` and `FF_ADMIN_PASSWORD` environment variables. Set
+`DATA_DIR` explicitly to the intended persistent database directory before either operation.
+`NODE_ENV=production` requires it; a mistaken directory would operate on a different database.
+
+Use a trusted operator terminal and a password manager. Do not send credentials through chat,
+put them in command arguments, commit them, or leave them in permanent Azure app settings.
+PowerShell can prompt without putting a literal password in shell history:
+
+```powershell
+$env:FF_ADMIN_EMAIL = Read-Host 'Administrator email'
+$privatePassword = Read-Host 'Password (12-128 characters)' -AsSecureString
+$passwordPointer = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($privatePassword)
+try {
+  $env:FF_ADMIN_PASSWORD = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($passwordPointer)
+  node dist/admin.cjs bootstrap
+  if ($LASTEXITCODE -ne 0) { throw 'Account operation did not succeed.' }
+} finally {
+  Remove-Item Env:FF_ADMIN_PASSWORD, Env:FF_ADMIN_EMAIL -ErrorAction SilentlyContinue
+  [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($passwordPointer)
+  $privatePassword.Dispose()
+}
+```
+
+This example assumes the intended `DATA_DIR` is already set in the terminal environment. At the
+deployed release root, use `node admin.cjs bootstrap` without `dist/`. For recovery, substitute
+`recover`, using the existing account email. Recovery resets that account's password, removes its
+suspension and revokes previous sessions. The service does not have a public password-reset form.
+The temporary environment is visible to the local/hosting operator; this is not end-to-end encryption.
+
+Bootstrap refuses a second owner and invalidates old shared host sessions. After bootstrap,
+`HOST_PASSWORD` no longer signs anyone in. Before bootstrap, existing passphrase mode continues;
+deploying the bundle alone does not create accounts or activate multi-group access. Existing games,
+packs and surveys are assigned to **Original Friends Showdown** (`legacy`); do not invite admins to
+that group unless they should access those records. Built-in banks remain shared.
+
+Plan activation outside an event: confirm a single app process and the existing persistent
+`DATA_DIR`; stop all app processes; take a private copy of the database and any journal files;
+retain the matching previous release artifact. Confirm the backup is recoverable before any
+production cutover. Deploy only with authorization, stop processes for bootstrap against the
+confirmed production path, remove temporary credential variables, then restart. Verify owner
+login, preserved legacy content, old-passphrase denial, separate groups, invitation acceptance,
+assigned-host access, player joins, hidden answers, reveal, revoke and reconnect. Only then remove
+the obsolete `HOST_PASSWORD` application setting. No new DNS or paid service is required.
+
+**Rollback after activation is not an old-binary-only redeploy.** An older single-group binary
+does not enforce tenant permissions against the new database. Prefer a forward fix or keep the
+service offline. Restoring the pre-activation database plus its matching old binary must occur
+while stopped, preserve a separate private copy of the new database, and have explicit approval
+because it discards changes since the backup. Never delete identity/ownership tables to bypass login.
+Restarting this shared server also interrupts Bible Blitz's in-memory rooms.
+
+Invitations are bound to an email, expire after 48 hours and can be revoked. Creating another
+pending invite for the same group/email replaces the old one. Use Copy link or Open email app
+for private delivery; **no mail is automatically sent**. Tokens are stored hashed and carried in
+the link fragment. Existing-account acceptance requires that account's password. Possession of a
+privately delivered link is not an independent mailbox-verification service. Automatic email
+delivery still needs an approved sender configuration.
