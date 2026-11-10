@@ -1,3 +1,7 @@
+## 10 November — Verified feature release pushed
+
+Confirmed commit bfa6f89 pushed to origin/feature/multi-group-platform.147 Vitest+7 Node+40 browser checks pass; typecheck/build/repository formatting pass. No merge, production deployment or owner bootstrap. GitHub still reports11 alerts on default main; the patched feature branch's local audit reports no known vulnerabilities. This is a branch distinction, not a claim that main is patched. Backlog and operator guide reconciled and mirrored. Exact next action: agree the production account cutover, privately bootstrap owner with the documented backup/rollback procedure, then verify deployed isolation and existing records. Automatic invitation sending still requires an authorized sender; manual links work. Physical device validation remains outstanding. No reset credits used.
+
 ## 10 November — Final multi-group regression complete; feature push prepared
 
 Completed assigned-host replay with atomic same-group successor, exact saved configuration, phone continuity and narrow initiating-host access. Retries cannot restore revoked access. Corrected roster reconciliation to retain staging for unchanged lineups, cosmetic team renames and unrelated-team edits; actual moves/reorders still clear staging and ambiguous identities require review. Added five replay tests and a390px end-to-end roster/Undo, score-correction, replay and phone-continuation scenario.
