@@ -121,7 +121,7 @@ export class Buzzers {
   control(id: string, action: string, playerId?: string) {
     const s = this.store.host(id);
     if (action === "arm") {
-      if (s.paused || s.phase !== "faceoff" || s.face.first !== null)
+      if (s.lobby || s.paused || s.phase !== "faceoff" || s.face.first !== null)
         throw new Error("Buzzers can only open for a waiting face-off.");
       if (s.questionRevealed !== true)
         this.store.apply(id, {
@@ -151,18 +151,36 @@ export class Buzzers {
         for (const other of this.store.players(id).filter((other) => other.team === p.team))
           this.store.updatePlayer(id, { ...other, onStage: other.id === p.id });
       } else {
-        if (p.member < 0) {
-          const teams = structuredClone(s.teams);
-          const t = teams[p.team];
+        const teams = structuredClone(s.teams);
+        const t = teams[p.team];
+        const matches = t.awaitingPlayers
+          ? []
+          : t.members.flatMap((name, index) =>
+              name.toLocaleLowerCase() === p.name.toLocaleLowerCase() ? [index] : [],
+            );
+        if (matches.length > 1)
+          throw new Error(
+            "Give duplicate roster names distinct initials before approving this phone.",
+          );
+        if (matches.length === 1) {
+          p.member = matches[0];
+          p.name = t.members[p.member];
+          if (
+            this.store
+              .players(id)
+              .some(
+                (other) => other.id !== p.id && other.team === p.team && other.member === p.member,
+              )
+          )
+            throw new Error(
+              "This roster place already has a phone. Remove the other registration first.",
+            );
+        } else {
           if (t.awaitingPlayers) {
             t.members = [];
             t.awaitingPlayers = false;
           }
           if (t.members.length >= 12) throw new Error("This team's roster is full.");
-          if (t.members.some((name) => name.toLocaleLowerCase() === p.name.toLocaleLowerCase()))
-            throw new Error(
-              "This name is already on the roster. Remove this registration and join using the roster name.",
-            );
           p.member = t.members.length;
           t.members.push(p.name);
           this.store.apply(id, {
@@ -173,6 +191,7 @@ export class Buzzers {
         }
         if (this.store.host(id).teams[p.team].members[p.member] !== p.name)
           throw new Error("The roster changed. Remove this phone and join again.");
+        // Preserve legacy roster-phone staging; roster reconciliation already clears changed seats.
         this.store.updatePlayer(id, { ...p, approved: true });
       }
       this.lock(id);

@@ -130,6 +130,31 @@ export class Store {
       .prepare("UPDATE players SET body=? WHERE game=? AND id=?")
       .run(JSON.stringify(player), game, player.id);
   }
+  /** Called inside the game command transaction, including Undo. Never infer a rename. */
+  private reconcilePlayers(game: string, before: GameState["teams"], after: GameState["teams"]) {
+    const places = (teams: GameState["teams"], name: string) =>
+      teams.flatMap((team, side) =>
+        team.awaitingPlayers
+          ? []
+          : team.members.flatMap((member, index) =>
+              member === name ? [{ team: side as 0 | 1, member: index }] : [],
+            ),
+      );
+    for (const player of this.players(game)) {
+      const oldPlaces = places(before, player.name),
+        nextPlaces = places(after, player.name);
+      const wasPaired = oldPlaces.some((p) => p.team === player.team && p.member === player.member);
+      const unique = oldPlaces.length === 1 && nextPlaces.length === 1;
+      const unchangedPlaces = JSON.stringify(oldPlaces) === JSON.stringify(nextPlaces);
+      if (wasPaired && (unique || unchangedPlaces)) {
+        const target = unique ? nextPlaces[0] : { team: player.team, member: player.member };
+        this.updatePlayer(game, { ...player, ...target, onStage: false });
+      } else {
+        // Keep the same cookie/name for review; removed/ambiguous names lose permission.
+        this.updatePlayer(game, { ...player, member: -1, approved: false, onStage: false });
+      }
+    }
+  }
   removePlayer(game: string, id: string) {
     this.db.prepare("DELETE FROM players WHERE game=? AND id=?").run(game, id);
   }
@@ -244,6 +269,7 @@ export class Store {
           "The game changed. Your action was not applied. Refresh and review the latest state before trying again.",
         );
       r.undoDescriptions ??= r.undo.map(() => "Previous game action (older save)");
+      const previousTeams = structuredClone(r.state.teams);
       const revision = r.state.revision + 1;
       if (envelope.command.type === "undo") {
         const previous = r.undo.pop();
@@ -275,6 +301,8 @@ export class Store {
         r.state.fast.draftScope = randomUUID();
       }
       r.state.revision = revision;
+      if (JSON.stringify(previousTeams) !== JSON.stringify(r.state.teams))
+        this.reconcilePlayers(id, previousTeams, r.state.teams);
       r.state.lastCommand = envelope.command.type;
       r.commands.push(envelope.id);
       r.history.push(

@@ -11,8 +11,8 @@ Earlier security/browser checks are recorded in `CODEX_PROGRESS.md`; the latest 
 implementation has not received focused behavior tests yet. No production deployment or owner
 bootstrap has occurred.
 
-Finish before release: approved-phone roster reconciliation and its Undo behavior; assigned-host
-replay (current shortcut requires group-admin setup permission); score-correction behavior tests;
+Roster reconciliation and Undo now pass focused tests. Finish before release: assigned-host
+replay (current shortcut requires group-admin setup permission); final score-correction browser verification;
 final migration/owner bootstrap/recovery/rollback instructions and a final regression run. The
 roster dialog's phone-recovery guidance describes the intended fix, not completed behavior.
 Invitations currently create email-bound private links with manual copy/email-app delivery;

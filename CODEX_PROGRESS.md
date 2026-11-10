@@ -1,3 +1,19 @@
+## 10 November — Tested batch saved at usage reserve
+
+Usage tool now reports74% five-hour used,99% weekly used (1% weekly remaining). Stopping new implementation before the unfinished replay work. Roster/phone reconciliation and guarded reapproval implemented; score correction now covered by6 focused tests. Final focused run:24/24 across6 files pass; typecheck passes. Initial sandbox loopback rejection was environmental; first unrestricted run found a legacy staging regression, fixed before the passing rerun. No full browser rerun this batch and no production deployment.
+
+Files: apps/server/src/store.ts, apps/server/src/buzzers.ts, tests/roster-registration.test.ts, tests/score-correction.test.ts; backlog/guide/checkpoints updated. Preparing commit and push to the existing feature/multi-group-platform branch, never main. No paid resources or reset credits used. Exact next action after reset: implement narrowly authorized same-group assigned-host replay with atomic successor/phone/assignment preservation, then final operator bootstrap/backup/rollback docs and final regression/browser verification; investigate GitHub dependency alerts before release. Public activation remains pending and no owner credentials have been created.
+
+## 10 November — Roster recovery and score correction verified locally
+
+Implemented transactional phone identity reconciliation on roster edits and Undo in store.ts; unchanged unique names follow reordered/moved slots with cookies preserved, changed staging cleared, removed/ambiguous identities become unapproved pending review. Guarded approval reattaches an unambiguous unoccupied name rather than forcing re-scan. Explicit lobby buzzer guard added. Focused regression caught legacy roster-phone staging regression; preserved prior implicit staging behavior before rerun.
+
+24 focused tests across6 files now pass: new roster3, new score-correction6, buzzers4, player registration1, migration1 and remote-play9. Typecheck passes. Score tests verify phases/bounds/winner recalculation/minimum rounds/Undo/retries/stale writes/public privacy/private CSV escaping. Files: store.ts, buzzers.ts, tests/roster-registration.test.ts, tests/score-correction.test.ts. No deployment. Exact next action: finish assigned-host replay then final build/browser checks and docs, or commit this tested batch before a usage stop. Feature base a41df52 remains on GitHub; these latest edits are local.
+
+## 10 November — Resumed from pushed checkpoint
+
+Feature branch is clean at a41df52 before continuation; WIP is confirmed on GitHub, not deployed. Visible usage: 35% five-hour used,92% weekly used (8% weekly remains). No credits redeemed. Keep this pass bounded and checkpoint each completed change. Root fixing the confirmed roster/registered-phone inconsistency; independent agent owns only focused score-correction tests. Assigned-host replay and final operator docs remain pending until these are safely finished. Exact next action: transactionally remap unambiguous roster identities on edit/Undo, preserve phone cookies, reject unsafe ambiguity and verify with focused tests.
+
 ## 10 November — WIP feature checkpoint pushed
 
 Confirmed GitHub push of 18cbf4a (WIP: checkpoint multi-group multiplayer platform) to origin/feature/multi-group-platform; upstream tracking set. Typecheck, production build, changed-file formatting and diff checks passed before commit. Main and production unchanged; do not merge this unfinished snapshot. No new feature implementation in this push-only step. Next: roster/phone reconciliation and safe Undo, assigned-host replay, score-correction tests, final rollout guide and regression run; see current ordered backlog.
