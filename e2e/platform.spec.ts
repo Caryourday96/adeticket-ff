@@ -60,6 +60,15 @@ test("assigned host reorders phones, corrects a score and replays into a private
     ).ok(),
   ).toBe(true);
   const host = await hostCtx.newPage();
+  await host.goto("/dashboard");
+  await host.getByRole("link", { name: "Open group", exact: true }).click();
+  const assignedDesk = host.getByRole("link", { name: "Open host desk" });
+  await expect(host.getByRole("heading", { name: "Your assigned games" })).toBeFocused();
+  await expect(assignedDesk).toBeInViewport({ ratio: 1 });
+  await expect(assignedDesk).toHaveAttribute("href", `/host/${created.id}?group=${group.id}`);
+  await expect(host.getByRole("link", { name: "Create game", exact: true })).toHaveCount(0);
+  await assignedDesk.click();
+  await expect(host.getByRole("region", { name: "Game lobby" })).toBeVisible();
   await host.goto(`/host/${created.id}`); // Direct links must recover authoritative group context.
   await expect(host.getByRole("region", { name: "Game lobby" })).toBeVisible();
   await host.getByText("Team lineup & roster changes", { exact: true }).click();

@@ -73,6 +73,7 @@ export function Platform() {
   const [existingRole, setExistingRole] = useState<"admin" | "host">("admin");
   const groupId = selectedGroup();
   const owner = !!session?.user?.superAdmin;
+  const group = detail?.group;
   const manage = detail && detail.group.role !== "host";
 
   async function refresh() {
@@ -104,6 +105,13 @@ export function Platform() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
+  useEffect(() => {
+    // The group data loads after navigation, so the fragment target is not present on arrival.
+    if (group?.role !== "host" || location.hash !== "#group-games") return;
+    const heading = document.getElementById("group-games");
+    heading?.focus({ preventScroll: true });
+    heading?.scrollIntoView({ block: "start" });
+  }, [group?.id, group?.role]);
   async function change(action: () => Promise<unknown>, success: string) {
     if (busy) return;
     setBusy(true);
@@ -127,7 +135,6 @@ export function Platform() {
   const inviteUrl = invite
     ? `${location.origin}/invite#token=${encodeURIComponent(invite.token)}`
     : "";
-  const group = detail?.group;
   const canInvite = manage && !group?.suspended;
   const availableHosts = detail?.members.filter((m) => m.role === "host" && !m.suspended) ?? [];
   const adminPrefix = group ? `/platform/groups/${encodeURIComponent(group.id)}` : "";
@@ -232,7 +239,7 @@ export function Platform() {
                 <h3>{g.name}</h3>
                 <a
                   className="button"
-                  href={groupHref("/dashboard", g.id)}
+                  href={`${groupHref("/dashboard", g.id)}${g.role === "host" ? "#group-games" : ""}`}
                   onClick={() => chooseGroup(g.id)}
                 >
                   Open group <ArrowRight size={16} />
@@ -275,7 +282,9 @@ export function Platform() {
               </nav>
             )}
             <section className="platform-panel">
-              <h3>{manage ? "Games and results" : "Your assigned games"}</h3>
+              <h3 id="group-games" tabIndex={-1}>
+                {manage ? "Games and results" : "Your assigned games"}
+              </h3>
               <p className="muted">
                 {manage
                   ? "Open the host desk to manage a live room, or review the scores from a previous game."
