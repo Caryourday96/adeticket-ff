@@ -155,6 +155,100 @@ test("survey collects phone answers and exports a reviewed question bank", async
   );
 });
 
+test("survey assistant proposes edits, asks about uncertain answers and exports a 100-point board", async ({
+  page,
+  playwright,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page);
+  const prompt = "Name something the birthday girl can't leave the house without.";
+  const created = await page.request.post("/api/surveys", {
+    data: {
+      title: "Assisted review test",
+      roundType: "regular",
+      questions: [prompt, "Name a fruit.", "Name a colour.", "Name a drink.", "Name a snack."].map(
+        (prompt) => ({ prompt }),
+      ),
+    },
+  });
+  expect(created.ok()).toBe(true);
+  const { id } = await created.json();
+  const route = `/api/surveys/${id}`;
+  const baseURL = new URL(page.url()).origin;
+  for (const [index, answer] of [
+    "Phone",
+    "Phone",
+    "Phone",
+    "Her phone",
+    "Wallet",
+    "Wallet",
+    "Leather wallet",
+    "Perfume",
+    "Perfume",
+    "Rose perfume",
+    "Headphones",
+    "Sunglasses",
+    "Lip balm",
+    "Hand sanitizer",
+    "Keys",
+    "Water bottle",
+    "Umbrella",
+  ].entries()) {
+    const respondent = await playwright.request.newContext({ baseURL });
+    try {
+      const survey = await (await respondent.get(route)).json();
+      const result = await respondent.post(`${route}/responses`, {
+        data: {
+          answers: Object.fromEntries(
+            survey.questions.map((question: { id: string }, questionIndex: number) => [
+              question.id,
+              questionIndex === 0 ? answer : index % 2 === 0 ? "Option A" : "Second choice",
+            ]),
+          ),
+        },
+      });
+      expect(result.ok()).toBe(true);
+    } finally {
+      await respondent.dispose();
+    }
+  }
+  await page.getByRole("link", { name: "Surveys", exact: true }).click();
+  await page.getByRole("button", { name: "Manage Assisted review test" }).click();
+  await expect(page.getByRole("button", { name: "Auto review answers" })).toHaveCount(0);
+  await page.getByRole("button", { name: "Close survey for review" }).click();
+  await page.getByRole("button", { name: "Auto review answers" }).click();
+  const assistant = page.getByRole("region", { name: "Answer review assistant" });
+  await expect(assistant.getByText(/“Her phone” \(1\).*\(4 combined\)/)).toBeVisible();
+  await expect(assistant.getByText("Decision 1 of 2")).toBeVisible();
+  await expect(assistant.getByText(/“Rose perfume”/)).toBeVisible();
+  await assistant.getByRole("button", { name: "Keep separate" }).click();
+  await expect(assistant.getByText("Decision 2 of 2")).toBeVisible();
+  await expect(assistant.getByText(/“Leather wallet”/)).toBeVisible();
+  await assistant.getByRole("button", { name: "Merge answers" }).click();
+  await assistant.getByRole("button", { name: "Apply suggestions to draft" }).click();
+  await expect(page.getByLabel(/Group .* Her phone/)).toHaveValue("Phone");
+  await expect(page.getByLabel(/Group .* Leather wallet/)).toHaveValue("Wallet");
+  await expect(page.getByLabel(/Group .* Rose perfume/)).toHaveValue("Rose perfume");
+  const reviews = page.getByRole("checkbox", { name: "I reviewed this question’s answer groups" });
+  await expect(reviews.first()).not.toBeChecked();
+  const unsaved = await (await page.request.get(`${route}/manage`)).json();
+  expect(unsaved.grouping).toEqual({});
+  for (const review of await reviews.all()) await review.check();
+  await page.getByRole("button", { name: "Save grouping and review", exact: true }).click();
+  await expect(page.getByText(/Phone: 4 responses/)).toBeVisible();
+  await expect(page.getByText("Saved total: 100 points")).toHaveCount(5);
+  const response = await page.request.get(`${route}/export`);
+  expect(response.ok()).toBe(true);
+  const bank = await response.json();
+  expect(bank.questions[0].answers).toHaveLength(8);
+  expect(
+    bank.questions[0].answers.reduce(
+      (total: number, answer: { points: number }) => total + answer.points,
+      0,
+    ),
+  ).toBe(100);
+});
+
 test("players enter their names and only buzz on stage with saved team names", async ({
   page,
   browser,

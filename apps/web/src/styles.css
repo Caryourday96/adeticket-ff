@@ -2878,6 +2878,37 @@ small {
 .survey-host .survey-choice input[type="checkbox"] {
   flex: 0 0 18px;
 }
+.survey-host .survey-assistant {
+  border-color: #695237;
+  overflow-wrap: anywhere;
+}
+.survey-assistant > button {
+  justify-self: start;
+}
+.survey-assistant .survey-assistant-options,
+.survey-assistant .survey-assistant-question {
+  grid-column: 1 / -1;
+}
+.survey-assistant .survey-assistant-options .survey-choice {
+  justify-content: flex-start;
+}
+.survey-assistant .survey-assistant-prompt {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.survey-assistant .survey-assistant-question {
+  border: 1px solid #695237;
+  border-radius: 10px;
+  padding: 14px;
+}
+.survey-assistant .survey-assistant-question p,
+.survey-assistant .survey-assistant-options label {
+  font-size: 14px;
+}
+.survey-assistant .survey-assistant-question .button-row {
+  margin-top: 12px;
+}
 .survey-host svg {
   flex-shrink: 0;
 }

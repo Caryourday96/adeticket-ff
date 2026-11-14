@@ -7,6 +7,8 @@ import { QRCodeSVG } from "qrcode.react";
 import { parseCustomQuestions, surveyDraftError } from "../lib/surveyDraft";
 import { AlphaNotice } from "../components/AlphaNotice";
 import { gameOrigin } from "../lib/links";
+import { SurveyReviewAssistant } from "../components/SurveyReviewAssistant";
+import type { SurveyGroupSuggestion } from "../lib/surveyReview";
 
 export function SurveyForm({ id }: { id: string }) {
   const [survey, setSurvey] = useState<PublicSurvey | null>(null),
@@ -169,6 +171,20 @@ export function Surveys() {
       await api("/packs", pack);
       setMessage("Question bank saved in the question library.");
     } else download(`survey-${active.id}-${active.roundType}.json`, JSON.stringify(pack, null, 2));
+  }
+  function applySuggestedGroups(suggestions: SurveyGroupSuggestion[]) {
+    if (!active || active.open || busy) return;
+    const grouping = { ...active.grouping };
+    const changed = new Set<string>();
+    for (const { questionId, sources, target } of suggestions) {
+      grouping[questionId] = {
+        ...grouping[questionId],
+        ...Object.fromEntries(sources.map(({ key }) => [key, target.text])),
+      };
+      changed.add(questionId);
+    }
+    setMessage("");
+    setActive({ ...active, grouping, reviewed: active.reviewed.filter((id) => !changed.has(id)) });
   }
   return (
     <Layout active="surveys">
@@ -370,16 +386,23 @@ export function Surveys() {
                 </button>
               </div>
             </section>
+            {active.open ? (
+              <p>
+                Close the survey when you’re ready to use the answer review assistant or edit
+                groups.
+              </p>
+            ) : (
+              <SurveyReviewAssistant
+                key={active.id}
+                survey={active}
+                busy={busy}
+                onApply={applySuggestedGroups}
+              />
+            )}
             <p>
-              Close collection before grouping. Give equivalent answers the same group label;
-              different answers stay separate. Only case and whitespace are grouped automatically.
-              Reopening clears review approvals.
-            </p>
-            <p>
-              Points are percentages of nonblank answers for each question, rounded across all
-              groups to total 100. Export includes up to eight positive-point groups. Small samples
-              are labelled honestly; aim for 100 respondents. One-browser submission protection is
-              not proof of unique people.
+              Give equivalent answers the same Group label. Reopening the survey clears review
+              approvals. Saving recalculates points across all nonblank answers. The playable board
+              uses up to eight answer groups and totals 100 points per question.
             </p>
             {active.results.map((q) => (
               <section className="settings-card" key={q.id}>
@@ -416,6 +439,12 @@ export function Surveys() {
                     .map((g) => `${g.text}: ${g.count} responses / ${g.points} points`)
                     .join(" · ") || "No answers yet"}
                 </p>
+                {!!q.answered && (
+                  <p>
+                    <strong>Saved total:</strong>{" "}
+                    {q.groups.reduce((total, group) => total + group.points, 0)} points
+                  </p>
+                )}
                 <label>
                   <input
                     type="checkbox"

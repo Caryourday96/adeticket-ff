@@ -11,6 +11,42 @@ const reviewSchema = z.object({
   reviewed: z.array(z.string()).max(30),
 });
 
+// Groups are ordered by descending count, then by label for ties.
+function scoreGroups<T extends { text: string; count: number }>(
+  groups: T[],
+  pointsAvailable = 100,
+  requirePositive = false,
+): (T & { points: number })[] {
+  const total = groups.reduce((sum, group) => sum + group.count, 0);
+  const scored = groups.map((group) => ({
+    ...group,
+    points: total > 0 ? Math.floor((group.count * pointsAvailable) / total) : 0,
+  }));
+  if (total === 0) return scored;
+
+  // Award the remaining points by largest remainder with stable count and label tie breaks.
+  const remainder = pointsAvailable - scored.reduce((sum, group) => sum + group.points, 0);
+  const ranked = [...scored].sort(
+    (a, b) =>
+      ((b.count * pointsAvailable) % total) - ((a.count * pointsAvailable) % total) ||
+      b.count - a.count ||
+      a.text.localeCompare(b.text),
+  );
+  for (const group of ranked.slice(0, remainder)) group.points++;
+
+  if (!requirePositive) return scored;
+  const firstZero = scored.findIndex((group) => group.points === 0);
+  if (firstZero === -1) return scored;
+
+  // The game requires at least one point per answer. Retain the chosen groups even when
+  // redistributing the omitted groups' points rounds one of the smallest shares to zero.
+  const smallest = scored.slice(firstZero);
+  return [
+    ...scoreGroups(groups.slice(0, firstZero), pointsAvailable - smallest.length, true),
+    ...smallest.map((group) => ({ ...group, points: 1 })),
+  ];
+}
+
 export class Surveys {
   constructor(private db: DatabaseSync) {
     db.exec(`CREATE TABLE IF NOT EXISTS surveys(id TEXT PRIMARY KEY, body TEXT NOT NULL);
@@ -123,15 +159,12 @@ export class Surveys {
           if (existing) existing.count++;
           else variants.set(key, { key, text, count: 1 });
         }
-        const grouped = new Map<
-          string,
-          { text: string; count: number; points: number; alternatives: string[] }
-        >();
+        const grouped = new Map<string, { text: string; count: number; alternatives: string[] }>();
         for (const v of variants.values()) {
           const mapped = s.grouping[q.id]?.[v.key];
           const text = typeof mapped === "string" ? mapped : v.text,
             key = normalize(text);
-          const g = grouped.get(key) ?? { text, count: 0, points: 0, alternatives: [] };
+          const g = grouped.get(key) ?? { text, count: 0, alternatives: [] };
           g.count += v.count;
           g.alternatives.push(v.text);
           grouped.set(key, g);
@@ -140,24 +173,12 @@ export class Surveys {
         const groups = [...grouped.values()].sort(
           (a, b) => b.count - a.count || a.text.localeCompare(b.text),
         );
-        // Largest remainder rounding across ALL answers, before selecting the top eight.
-        if (answered) {
-          for (const g of groups) g.points = Math.floor((g.count * 100) / answered);
-          const remainder = 100 - groups.reduce((n, g) => n + g.points, 0);
-          const ranked = [...groups].sort(
-            (a, b) =>
-              ((b.count * 100) % answered) - ((a.count * 100) % answered) ||
-              b.count - a.count ||
-              a.text.localeCompare(b.text),
-          );
-          for (const g of ranked.slice(0, remainder)) g.points++;
-        }
         return {
           id: q.id,
           prompt: q.prompt,
           answered,
           variants: [...variants.values()].sort((a, b) => b.count - a.count),
-          groups,
+          groups: scoreGroups(groups),
         };
       }),
     };
@@ -189,13 +210,14 @@ export class Surveys {
     if (s.open || s.questions.some((q) => !s.reviewed.includes(q.id)))
       throw new Error("Close the survey and review every question before exporting.");
     const questions = s.results.map((q) => {
-      const top = q.groups.filter((g) => g.points > 0).slice(0, 8);
+      const top = scoreGroups(q.groups.filter((g) => g.points > 0).slice(0, 8), 100, true);
       if (top.length < 2) throw new Error(`At least two answer groups are required: ${q.prompt}`);
+      const shown = top.reduce((sum, group) => sum + group.count, 0);
       return {
         id: `survey-${s.id}-${q.id}`,
         category: "survey",
         prompt: q.prompt,
-        hostNotes: `Survey ${s.id}. ${q.answered} nonblank responses; ${s.responseCount - q.answered} skipped. Points are percentages rounded to total 100 across all groups; only the top eight positive groups are included. Counts: ${top.map((g) => `${g.text}: ${g.count}`).join("; ")}`,
+        hostNotes: `Survey ${s.id}. ${q.answered} nonblank responses. ${s.responseCount - q.answered} skipped. Shown answer groups cover ${shown} of ${q.answered} nonblank responses. Points are rounded shares of responses in the shown groups, with at least one point per group and 100 points total. Counts: ${top.map((g) => `${g.text}: ${g.count}`).join("; ")}`,
         answers: top.map((g, i) => ({
           id: `a${i + 1}`,
           text: g.text,
@@ -211,7 +233,7 @@ export class Surveys {
       title: s.title,
       roundType: s.roundType,
       scoringSource: "collected-survey",
-      notice: `Collected survey: ${s.responseCount} submissions, not verified unique people. Duplicate protection is browser-cookie based; clearing cookies or using another browser can allow another submission. Convenience sample; not population-representative. Scores are percentages of nonblank answers per question, not raw respondent counts.`,
+      notice: `Collected survey: ${s.responseCount} submissions, not verified unique people. Duplicate protection is browser-cookie based; clearing cookies or using another browser can allow another submission. Convenience sample; not population-representative. Each question shows up to eight answer groups. Points total 100 and are based on the response counts of the groups shown. See each question's notes for coverage and original counts.`,
       questions,
     });
   }
