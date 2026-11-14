@@ -1,3 +1,4 @@
+import { scoreGroups, playableSurveyGroups, groupSurveyVariants } from "@naija/contracts";
 import type { DatabaseSync } from "node:sqlite";
 import { randomBytes, createHash } from "node:crypto";
 import { bankSchema, surveyCreateSchema, type Survey, type SurveyResults } from "@naija/contracts";
@@ -10,42 +11,6 @@ const reviewSchema = z.object({
   grouping: z.record(z.string(), z.record(z.string(), z.string().trim().min(1).max(100))),
   reviewed: z.array(z.string()).max(30),
 });
-
-// Groups are ordered by descending count, then by label for ties.
-function scoreGroups<T extends { text: string; count: number }>(
-  groups: T[],
-  pointsAvailable = 100,
-  requirePositive = false,
-): (T & { points: number })[] {
-  const total = groups.reduce((sum, group) => sum + group.count, 0);
-  const scored = groups.map((group) => ({
-    ...group,
-    points: total > 0 ? Math.floor((group.count * pointsAvailable) / total) : 0,
-  }));
-  if (total === 0) return scored;
-
-  // Award the remaining points by largest remainder with stable count and label tie breaks.
-  const remainder = pointsAvailable - scored.reduce((sum, group) => sum + group.points, 0);
-  const ranked = [...scored].sort(
-    (a, b) =>
-      ((b.count * pointsAvailable) % total) - ((a.count * pointsAvailable) % total) ||
-      b.count - a.count ||
-      a.text.localeCompare(b.text),
-  );
-  for (const group of ranked.slice(0, remainder)) group.points++;
-
-  if (!requirePositive) return scored;
-  const firstZero = scored.findIndex((group) => group.points === 0);
-  if (firstZero === -1) return scored;
-
-  // The game requires at least one point per answer. Retain the chosen groups even when
-  // redistributing the omitted groups' points rounds one of the smallest shares to zero.
-  const smallest = scored.slice(firstZero);
-  return [
-    ...scoreGroups(groups.slice(0, firstZero), pointsAvailable - smallest.length, true),
-    ...smallest.map((group) => ({ ...group, points: 1 })),
-  ];
-}
 
 export class Surveys {
   constructor(private db: DatabaseSync) {
@@ -159,20 +124,8 @@ export class Surveys {
           if (existing) existing.count++;
           else variants.set(key, { key, text, count: 1 });
         }
-        const grouped = new Map<string, { text: string; count: number; alternatives: string[] }>();
-        for (const v of variants.values()) {
-          const mapped = s.grouping[q.id]?.[v.key];
-          const text = typeof mapped === "string" ? mapped : v.text,
-            key = normalize(text);
-          const g = grouped.get(key) ?? { text, count: 0, alternatives: [] };
-          g.count += v.count;
-          g.alternatives.push(v.text);
-          grouped.set(key, g);
-        }
         const answered = [...variants.values()].reduce((n, v) => n + v.count, 0);
-        const groups = [...grouped.values()].sort(
-          (a, b) => b.count - a.count || a.text.localeCompare(b.text),
-        );
+        const groups = groupSurveyVariants([...variants.values()], s.grouping[q.id] ?? {});
         return {
           id: q.id,
           prompt: q.prompt,
@@ -210,7 +163,7 @@ export class Surveys {
     if (s.open || s.questions.some((q) => !s.reviewed.includes(q.id)))
       throw new Error("Close the survey and review every question before exporting.");
     const questions = s.results.map((q) => {
-      const top = scoreGroups(q.groups.filter((g) => g.points > 0).slice(0, 8), 100, true);
+      const top = playableSurveyGroups(q.groups);
       if (top.length < 2) throw new Error(`At least two answer groups are required: ${q.prompt}`);
       const shown = top.reduce((sum, group) => sum + group.count, 0);
       return {

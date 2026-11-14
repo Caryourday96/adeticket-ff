@@ -1,8 +1,14 @@
 import { DatabaseSync } from "node:sqlite";
 import { expect, it } from "vitest";
 import { Surveys } from "../apps/server/src/surveys";
+import { groupSurveyVariants, playableSurveyGroups } from "@naija/contracts";
 
 it.each([
+  {
+    name: "retains a rare answer that rounds to zero before export",
+    counts: [200, 1],
+    expected: [99, 1],
+  },
   {
     name: "keeps the original rounding when all answers fit",
     counts: [3, 2, 1],
@@ -51,7 +57,14 @@ it.each([
       expect(result.groups.map((group) => group.count)).toEqual(counts);
       expect(result.groups.reduce((sum, group) => sum + group.points, 0)).toBe(100);
     }
-    for (const question of surveys.export(survey.id).questions) {
+    for (const [index, question] of surveys.export(survey.id).questions.entries()) {
+      const result = reviewed.results[index];
+      const preview = playableSurveyGroups(
+        groupSurveyVariants(result.variants, reviewed.grouping[result.id] ?? {}),
+      );
+      expect(question.answers.map(({ text, points }) => ({ text, points }))).toEqual(
+        preview.map(({ text, points }) => ({ text, points })),
+      );
       expect(question.answers.map((answer) => answer.text)).toEqual(
         expected.map((_, index) => `Answer ${index + 1}`),
       );

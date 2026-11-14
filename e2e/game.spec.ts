@@ -219,24 +219,34 @@ test("survey assistant proposes edits, asks about uncertain answers and exports 
   await page.getByRole("button", { name: "Auto review answers" }).click();
   const assistant = page.getByRole("region", { name: "Answer review assistant" });
   await expect(assistant.getByText(/“Her phone” \(1\).*\(4 combined\)/)).toBeVisible();
-  await expect(assistant.getByText("Decision 1 of 2")).toBeVisible();
-  await expect(assistant.getByText(/“Rose perfume”/)).toBeVisible();
-  await assistant.getByRole("button", { name: "Keep separate" }).click();
-  await expect(assistant.getByText("Decision 2 of 2")).toBeVisible();
-  await expect(assistant.getByText(/“Leather wallet”/)).toBeVisible();
-  await assistant.getByRole("button", { name: "Merge answers" }).click();
+  for (let decision = 1; decision <= 2; decision++) {
+    await expect(assistant.getByText(`Decision ${decision} of 2`)).toBeVisible();
+    const current = assistant.locator(".survey-assistant-question");
+    const text = await current.innerText();
+    expect(/Rose perfume|Leather wallet/.test(text)).toBe(true);
+    await current
+      .getByRole("button", {
+        name: text.includes("Rose perfume") ? "Keep separate" : "Merge answers",
+        exact: true,
+      })
+      .click();
+  }
   await assistant.getByRole("button", { name: "Apply suggestions to draft" }).click();
   await expect(page.getByLabel(/Group .* Her phone/)).toHaveValue("Phone");
   await expect(page.getByLabel(/Group .* Leather wallet/)).toHaveValue("Wallet");
   await expect(page.getByLabel(/Group .* Rose perfume/)).toHaveValue("Rose perfume");
   const reviews = page.getByRole("checkbox", { name: "I reviewed this question’s answer groups" });
   await expect(reviews.first()).not.toBeChecked();
+  await expect(page.getByText(/Unsaved group changes/)).toBeVisible();
+  await expect(page.getByText("Phone: 4 responses", { exact: false }).first()).toBeVisible();
   const unsaved = await (await page.request.get(`${route}/manage`)).json();
   expect(unsaved.grouping).toEqual({});
   for (const review of await reviews.all()) await review.check();
   await page.getByRole("button", { name: "Save grouping and review", exact: true }).click();
-  await expect(page.getByText(/Phone: 4 responses/)).toBeVisible();
-  await expect(page.getByText("Saved total: 100 points")).toHaveCount(5);
+  await expect(page.getByText(/Phone: 4 responses/).first()).toBeVisible();
+  await expect(page.getByText(/Unsaved group changes/)).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(page.getByText("Board total: 100 points")).toHaveCount(5);
   const response = await page.request.get(`${route}/export`);
   expect(response.ok()).toBe(true);
   const bank = await response.json();
@@ -247,6 +257,128 @@ test("survey assistant proposes edits, asks about uncertain answers and exports 
       0,
     ),
   ).toBe(100);
+});
+
+test("contextual survey review preserves decisions and draft previews through a failed save", async ({
+  page,
+  playwright,
+}, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await signIn(page);
+  const created = await page.request.post("/api/surveys", {
+    data: {
+      title: "Context review fixture",
+      roundType: "regular",
+      questions: [
+        "What habit is she known for?",
+        "Name something she takes with her.",
+        "Name a fruit.",
+        "Name a drink.",
+        "Name a colour.",
+      ].map((prompt) => ({ prompt })),
+    },
+  });
+  expect(created.ok()).toBe(true);
+  const { id } = await created.json();
+  const route = `/api/surveys/${id}`;
+  const habits = [
+    "Always late",
+    "Always late",
+    "Always late",
+    "Lateness",
+    "Lateness",
+    "Arriving late",
+  ];
+  const items = ["Phone", "Phone", "Phone", "Her phone", "Mobile", "Keys"];
+  for (let index = 0; index < 6; index++) {
+    const respondent = await playwright.request.newContext({ baseURL: new URL(page.url()).origin });
+    try {
+      const survey = await (await respondent.get(route)).json();
+      expect(
+        (
+          await respondent.post(`${route}/responses`, {
+            data: {
+              answers: Object.fromEntries(
+                survey.questions.map((q: { id: string }, i: number) => [
+                  q.id,
+                  i === 0
+                    ? habits[index]
+                    : i === 1
+                      ? items[index]
+                      : index % 2
+                        ? "Second choice"
+                        : "Option A",
+                ]),
+              ),
+            },
+          })
+        ).ok(),
+      ).toBe(true);
+    } finally {
+      await respondent.dispose();
+    }
+  }
+  await page.getByRole("link", { name: "Surveys", exact: true }).click();
+  await page.getByRole("button", { name: "Manage Context review fixture" }).click();
+  await page.getByRole("button", { name: "Close survey for review" }).click();
+  await page.getByRole("button", { name: "Auto review answers" }).click();
+  const assistant = page.getByRole("region", { name: "Answer review assistant" });
+  for (let step = 1; step <= 3; step++) {
+    const decision = assistant.locator(".survey-assistant-question");
+    await expect(decision.getByText(`Decision ${step} of 3`)).toBeVisible();
+    await expect(decision.getByText(/This question is about/)).toBeVisible();
+    const text = await decision.innerText();
+    await decision
+      .getByRole("button", {
+        name: text.includes("Arriving late") ? "Keep separate" : "Merge answers",
+        exact: true,
+      })
+      .click();
+  }
+  await assistant.getByRole("button", { name: "Apply suggestions to draft" }).click();
+  const preview = page.getByRole("region", {
+    name: "Combined preview: Name something she takes with her.",
+  });
+  await expect(preview.getByText(/Phone: 5 responses/).first()).toBeVisible();
+  await expect(preview.getByText(/Unsaved group changes/)).toBeVisible();
+  await expect(page.getByLabel("Group q1 Arriving late")).toHaveValue("Arriving late");
+  const unsaved = await (await page.request.get(`${route}/manage`)).json();
+  expect(unsaved.grouping).toEqual({});
+  for (const checkbox of await page
+    .getByRole("checkbox", { name: "I reviewed this question’s answer groups" })
+    .all())
+    await checkbox.check();
+  await page.route(`**${route}/review`, (r) =>
+    r.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "Synthetic save conflict: please retry." }),
+    }),
+  );
+  await page.getByRole("button", { name: "Save grouping and review", exact: true }).click();
+  await expect(page.getByText("Synthetic save conflict: please retry.")).toBeVisible();
+  await expect(preview.getByText(/Unsaved group changes/)).toBeVisible();
+  await expect(page.getByLabel("Group q2 Her phone")).toHaveValue("Phone");
+  await page.unroute(`**${route}/review`);
+  await preview.scrollIntoViewIfNeeded();
+  await page.getByRole("button", { name: "Save grouping and review", exact: true }).click();
+  await expect(page.getByText(/Unsaved group changes/)).toHaveCount(0);
+  const saved = await (await page.request.get(`${route}/manage`)).json();
+  expect(saved.grouping.q1["arriving late"]).toBe("Arriving late");
+  await preview.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: testInfo.outputPath("contextual-survey-mobile.png") });
+  const bank = await (await page.request.get(`${route}/export`)).json();
+  expect(bank.questions[1].answers.map((a: { points: number }) => a.points)).toEqual([83, 17]);
+  await page.reload();
+  await page.getByRole("button", { name: "Manage Context review fixture" }).click();
+  await page
+    .getByRole("checkbox", { name: "I reviewed this question’s answer groups" })
+    .first()
+    .uncheck();
+  await page.getByRole("button", { name: "Auto review answers" }).click();
+  await expect(assistant.getByText(/No likely duplicates found/)).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 740 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test("players enter their names and only buzz on stage with saved team names", async ({

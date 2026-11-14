@@ -9,6 +9,7 @@ export type SurveyGroupSuggestion = {
   target: Variant;
   sources: Variant[];
   confidence: "clear" | "uncertain";
+  reason: string;
 };
 
 const aliases = new Map([
@@ -29,6 +30,7 @@ function normalize(label: string) {
 
 function canonical(label: string) {
   const normalized = normalize(label)
+    .replace(/[’‘]/g, "'")
     .replace(/[.!?]+$/, "")
     .trim();
   return aliases.get(normalized) ?? normalized;
@@ -54,89 +56,191 @@ function plausibleWording(a: string, b: string) {
   );
 }
 
-// Survey results and decisions stay in the browser. The caller stages proposals for review.
+// Deliberately bounded local vocabulary. These are questions for the host, not automatic merges.
+const contexts = [
+  {
+    name: "items someone carries or wears",
+    prompt:
+      /\b(leave|leaves|bring|brings|carry|carries|take|takes|pack|packs|use|uses|need|needs|wear|wears|bag|handbag|without)\b/i,
+    families: [
+      ["phone", "mobile", "mobile phone", "cell phone", "smartphone"],
+      ["headphones", "earphones", "earbuds", "airpods"],
+      ["hand sanitizer", "sanitizer"],
+      ["lip balm", "chapstick"],
+      ["perfume", "fragrance"],
+      ["handbag", "purse"],
+    ],
+  },
+  {
+    name: "food or drink",
+    prompt:
+      /\b(food|eat|eats|eating|meal|dish|cook|cooks|cooking|snack|drink|drinks|crave|craves|craving)\b/i,
+    families: [
+      ["chips", "fries", "french fries"],
+      ["soft drink", "soda", "pop", "fizzy drink"],
+      ["barbecue", "bbq"],
+    ],
+  },
+  {
+    name: "habits or personality",
+    prompt:
+      /\b(habit|habits|personality|trait|traits|describe|describes|behaviour|behavior|known|late|lateness|annoy|annoys)\b/i,
+    families: [
+      [
+        "late",
+        "being late",
+        "always late",
+        "lateness",
+        "arriving late",
+        "coming late",
+        "she is always late",
+        "she's always late",
+      ],
+      [
+        "funny",
+        "humour",
+        "humor",
+        "sense of humour",
+        "sense of humor",
+        "making people laugh",
+        "makes people laugh",
+      ],
+      ["kind", "kindness", "kind heart", "kind hearted", "kind-hearted"],
+      ["generous", "generosity", "giving", "helping others"],
+      ["talkative", "talking a lot", "talks a lot", "always talking"],
+    ],
+  },
+  {
+    name: "activities or free time",
+    prompt:
+      /\b(hobby|hobbies|activity|activities|relax|relaxes|weekend|free time|spare time|for fun)\b/i,
+    families: [
+      ["sleep", "sleeping", "nap", "napping", "taking naps"],
+      ["gym", "going to the gym", "working out", "exercise", "exercising"],
+      ["watching movies", "watch movies", "watching films", "watch films"],
+      ["shopping", "going shopping", "shop"],
+    ],
+  },
+];
+
+const possessive = (name: string) => /^(her|his|their) (.+)$/.exec(name);
+const negation = /\b(no|not|never|without|neither|nor|isn't|isnt|doesn't|doesnt|don't|dont)\b/;
+type Anchor = { target: Variant; members: Variant[]; locked: boolean; name: string };
+
+// Answers never leave the browser. Existing labels are stable targets, never automatic sources.
 export function suggestSurveyGroups(survey: ReviewableSurvey): SurveyGroupSuggestion[] {
   if (survey.open) return [];
   const suggestions: SurveyGroupSuggestion[] = [];
-  const reviewed = new Set(survey.reviewed);
-
   for (const question of survey.results) {
-    if (reviewed.has(question.id)) continue;
+    if (survey.reviewed.includes(question.id)) continue;
     const mapping = survey.grouping[question.id] ?? {};
-    const mappedLabels = new Set(Object.values(mapping).map(normalize));
-    const candidates = question.variants
-      .filter((v) => !Object.hasOwn(mapping, v.key) && !mappedLabels.has(normalize(v.text)))
-      .map((v) => {
-        const name = canonical(v.text);
-        const possessive = /^(her|his|their) (.+)$/.exec(name);
-        return { variant: v, name, possessive };
-      })
-      .filter(({ name }) => name.length > 0)
-      .sort(
-        (a, b) => b.variant.count - a.variant.count || a.variant.key.localeCompare(b.variant.key),
-      );
-
-    const plainNames = new Set(candidates.filter((v) => !v.possessive).map((v) => v.name));
+    const groups = new Map<string, Anchor>();
+    for (const variant of question.variants) {
+      const mapped = Object.hasOwn(mapping, variant.key) ? mapping[variant.key] : undefined;
+      const text = (typeof mapped === "string" ? mapped : variant.text).trim();
+      if (!text) continue;
+      const key = normalize(text);
+      const group = groups.get(key) ?? {
+        target: { key, text, count: 0 },
+        members: [],
+        locked: false,
+        name: canonical(text),
+      };
+      group.target.count += variant.count;
+      group.members.push(variant);
+      group.locked ||= Object.hasOwn(mapping, variant.key);
+      groups.set(key, group);
+    }
+    const candidates = [...groups.values()].sort(
+      (a, b) =>
+        Number(b.locked) - Number(a.locked) ||
+        Number(normalize(b.target.text) === b.name && !possessive(b.name)) -
+          Number(normalize(a.target.text) === a.name && !possessive(a.name)) ||
+        b.target.count - a.target.count ||
+        a.target.key.localeCompare(b.target.key),
+    );
     const owners = new Map<string, Set<string>>();
-    for (const { possessive } of candidates) {
-      if (!possessive) continue;
-      const base = canonical(possessive[2]);
-      const terms = owners.get(base) ?? new Set<string>();
-      terms.add(possessive[1]);
-      owners.set(base, terms);
-    }
-
-    // A possessive is incidental in many item questions. Do not strip it in questions about ownership.
-    const itemPrompt =
-      /\b(?:name|what|which)\b.*\b(?:leave|leaves|bring|brings|carry|carries|take|takes|pack|packs|use|uses|need|needs|wear|wears)\b/i.test(
-        question.prompt,
-      ) && !/\b(?:whose|owns?|owner|belongs?|ownership)\b/i.test(question.prompt);
-    const buckets = new Map<string, typeof candidates>();
     for (const candidate of candidates) {
-      const base = candidate.possessive && canonical(candidate.possessive[2]);
-      const key =
-        itemPrompt && base && plainNames.has(base) && owners.get(base)?.size === 1
-          ? base
-          : candidate.name;
-      const bucket = buckets.get(key) ?? [];
-      bucket.push(candidate);
-      buckets.set(key, bucket);
+      const match = possessive(candidate.name);
+      if (match) {
+        const base = canonical(match[2]);
+        const terms = owners.get(base) ?? new Set<string>();
+        terms.add(match[1]);
+        owners.set(base, terms);
+      }
     }
-
-    const used = new Set<string>();
-    const propose = (target: Variant, sources: Variant[], confidence: "clear" | "uncertain") => {
-      used.add(target.key);
-      for (const source of sources) used.add(source.key);
+    const ownershipQuestion = /\b(whose|owns?|owner|belongs?|ownership)\b/i.test(question.prompt);
+    const itemPrompt = contexts[0].prompt.test(question.prompt) && !ownershipQuestion;
+    function match(
+      a: Anchor,
+      b: Anchor,
+    ): Pick<SurveyGroupSuggestion, "confidence" | "reason"> | null {
+      if (a.name === b.name)
+        return {
+          confidence: "clear",
+          reason: "Same wording after spelling and punctuation normalization.",
+        };
+      // Do not treat an opposite or an explicitly negated answer as a similar answer.
+      if (negation.test(a.name) || negation.test(b.name)) return null;
+      const aOwner = possessive(a.name),
+        bOwner = possessive(b.name);
+      if (aOwner && bOwner && aOwner[1] !== bOwner[1]) return null;
+      const aBase = canonical(aOwner?.[2] ?? a.name),
+        bBase = canonical(bOwner?.[2] ?? b.name);
+      if (itemPrompt && aBase === bBase && owners.get(aBase)?.size === 1) {
+        return {
+          confidence: "clear",
+          reason: "In this item question, the possessive refers to the same named item.",
+        };
+      }
+      if (!ownershipQuestion)
+        for (const context of contexts) {
+          if (
+            context.prompt.test(question.prompt) &&
+            context.families.some((family) => family.includes(aBase) && family.includes(bBase))
+          ) {
+            return {
+              confidence: "uncertain",
+              reason: `This question is about ${context.name}. These phrases may mean the same thing here, but details can differ. Please confirm.`,
+            };
+          }
+        }
+      if (plausibleWording(a.name, b.name))
+        return {
+          confidence: "uncertain",
+          reason:
+            "Similar wording or a more specific answer. Check the question before combining them.",
+        };
+      return null;
+    }
+    const anchors: Anchor[] = [];
+    for (const candidate of candidates) {
+      if (candidate.locked) {
+        anchors.push(candidate);
+        continue;
+      }
+      // Bound fuzzy comparisons on unusually large surveys; exact matches still use all anchors.
+      const exact = anchors.find((anchor) => anchor.name === candidate.name);
+      const possibilities = (exact ? [exact] : anchors.slice(0, 100))
+        .map((anchor) => ({ anchor, result: match(anchor, candidate) }))
+        .filter((entry) => entry.result !== null)
+        .sort(
+          (a, b) =>
+            Number(b.result!.confidence === "clear") - Number(a.result!.confidence === "clear"),
+        );
+      const found = possibilities[0];
+      if (!found) {
+        anchors.push(candidate);
+        continue;
+      }
       suggestions.push({
         questionId: question.id,
         prompt: question.prompt,
-        target,
-        sources,
-        confidence,
+        target: { ...found.anchor.target },
+        sources: candidate.members,
+        ...found.result!,
       });
-    };
-    for (const [name, bucket] of buckets) {
-      if (bucket.length < 2) continue;
-      const preferred = bucket.find((v) => normalize(v.variant.text) === name);
-      const target = (preferred ?? bucket.find((v) => v.name === name) ?? bucket[0]).variant;
-      propose(
-        target,
-        bucket.map(({ variant }) => variant).filter((v) => v.key !== target.key),
-        "clear",
-      );
-    }
-
-    // Limit pairwise typo checks to the most common unmatched variants of each question.
-    const remaining = candidates.filter(({ variant }) => !used.has(variant.key)).slice(0, 100);
-    for (const [index, candidate] of remaining.entries()) {
-      if (used.has(candidate.variant.key)) continue;
-      const matchIndex = remaining.findIndex(
-        (other, otherIndex) =>
-          otherIndex > index &&
-          !used.has(other.variant.key) &&
-          plausibleWording(candidate.name, other.name),
-      );
-      if (matchIndex >= 0) propose(candidate.variant, [remaining[matchIndex].variant], "uncertain");
+      // Keep the original target as an anchor so third/fourth variants are not lost or chained.
     }
   }
   return suggestions;

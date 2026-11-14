@@ -2091,6 +2091,8 @@ small {
   }
   .sidebar nav {
     flex-direction: row;
+    flex-wrap: wrap;
+    min-width: 0;
     gap: 3px;
   }
   .sidebar nav a {
@@ -2911,6 +2913,17 @@ small {
 }
 .survey-host svg {
   flex-shrink: 0;
+}
+.survey-board-preview {
+  grid-column: 1 / -1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px;
+  overflow-wrap: anywhere;
+}
+.survey-board-preview li {
+  margin-block: 6px;
 }
 
 .advertisement {

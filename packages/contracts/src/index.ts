@@ -1,3 +1,4 @@
+export * from "./surveyScoring";
 import { z } from "zod";
 export * from "./surveys";
 export * from "./questionSelection";

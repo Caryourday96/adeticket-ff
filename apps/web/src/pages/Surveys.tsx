@@ -1,3 +1,4 @@
+import { SurveyBoardPreview } from "../components/SurveyBoardPreview";
 import { useEffect, useState } from "react";
 import type { Bank, PublicSurvey, SurveyResults } from "@naija/contracts";
 import { Layout } from "../components/Layout";
@@ -110,6 +111,11 @@ export function Surveys() {
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
+  const [savedSurvey, setSavedSurvey] = useState<SurveyResults | null>(null);
+  function acceptSavedSurvey(survey: SurveyResults) {
+    setSavedSurvey(survey);
+    setActive(survey);
+  }
   const bank = packs.find((p) => p.id === packId)?.bank;
   const ids = selected ?? bank?.questions.slice(0, 5).map((q) => q.id) ?? [];
   const customQuestions = parseCustomQuestions(custom);
@@ -141,7 +147,7 @@ export function Surveys() {
     }
   }
   async function open(id: string) {
-    setActive(await api<SurveyResults>(`/surveys/${id}/manage`));
+    acceptSavedSurvey(await api<SurveyResults>(`/surveys/${id}/manage`));
   }
   async function create() {
     if (draftError) throw new Error(draftError);
@@ -165,14 +171,17 @@ export function Surveys() {
       grouping: active.grouping,
       reviewed: active.reviewed,
     });
-    setActive(saved);
+    acceptSavedSurvey(saved);
     const pack = await api<Bank>(`/surveys/${active.id}/export`);
     if (importIt) {
       await api("/packs", pack);
       setMessage("Question bank saved in the question library.");
     } else download(`survey-${active.id}-${active.roundType}.json`, JSON.stringify(pack, null, 2));
   }
-  function applySuggestedGroups(suggestions: SurveyGroupSuggestion[]) {
+  function applySuggestedGroups(
+    suggestions: SurveyGroupSuggestion[],
+    separate: SurveyGroupSuggestion[],
+  ) {
     if (!active || active.open || busy) return;
     const grouping = { ...active.grouping };
     const changed = new Set<string>();
@@ -180,6 +189,14 @@ export function Surveys() {
       grouping[questionId] = {
         ...grouping[questionId],
         ...Object.fromEntries(sources.map(({ key }) => [key, target.text])),
+      };
+      changed.add(questionId);
+    }
+    // An explicit self-label preserves the host's keep-separate choice on later reviews.
+    for (const { questionId, sources } of separate) {
+      grouping[questionId] = {
+        ...grouping[questionId],
+        ...Object.fromEntries(sources.map(({ key, text }) => [key, text])),
       };
       changed.add(questionId);
     }
@@ -344,6 +361,12 @@ export function Surveys() {
               Back to surveys
             </button>
             <h2>{active.title}</h2>
+            {(JSON.stringify(active.grouping) !== JSON.stringify(savedSurvey?.grouping) ||
+              JSON.stringify(active.reviewed) !== JSON.stringify(savedSurvey?.reviewed)) && (
+              <p role="status">
+                Unsaved review changes. Save grouping and review below before leaving or refreshing.
+              </p>
+            )}
             <section className="settings-card">
               <p>
                 {active.responseCount} submissions ·{" "}
@@ -372,7 +395,7 @@ export function Surveys() {
                   disabled={busy}
                   onClick={() =>
                     void run(async () => {
-                      setActive(
+                      acceptSavedSurvey(
                         await api<SurveyResults>(`/surveys/${active.id}/status`, {
                           open: !active.open,
                           revision: active.revision,
@@ -401,8 +424,8 @@ export function Surveys() {
             )}
             <p>
               Give equivalent answers the same Group label. Reopening the survey clears review
-              approvals. Saving recalculates points across all nonblank answers. The playable board
-              uses up to eight answer groups and totals 100 points per question.
+              approvals. The combined preview updates immediately; save to keep your changes. The
+              playable board uses up to eight answer groups and totals 100 points per question.
             </p>
             {active.results.map((q) => (
               <section className="settings-card" key={q.id}>
@@ -410,6 +433,11 @@ export function Surveys() {
                 <p>
                   {q.answered} answered · {active.responseCount - q.answered} skipped
                 </p>
+                <SurveyBoardPreview
+                  question={q}
+                  mapping={active.grouping[q.id] ?? {}}
+                  savedMapping={savedSurvey?.grouping[q.id] ?? {}}
+                />
                 {q.variants.map((v) => (
                   <label key={v.key} className="survey-choice">
                     <span>
@@ -419,7 +447,11 @@ export function Surveys() {
                       aria-label={`Group ${q.id} ${v.text}`}
                       disabled={active.open || busy}
                       maxLength={100}
-                      value={active.grouping[q.id]?.[v.key] ?? v.text}
+                      value={
+                        Object.hasOwn(active.grouping[q.id] ?? {}, v.key)
+                          ? active.grouping[q.id][v.key]
+                          : v.text
+                      }
                       onChange={(e) =>
                         setActive({
                           ...active,
@@ -433,18 +465,6 @@ export function Surveys() {
                     />
                   </label>
                 ))}
-                <p>
-                  Saved groups:{" "}
-                  {q.groups
-                    .map((g) => `${g.text}: ${g.count} responses / ${g.points} points`)
-                    .join(" · ") || "No answers yet"}
-                </p>
-                {!!q.answered && (
-                  <p>
-                    <strong>Saved total:</strong>{" "}
-                    {q.groups.reduce((total, group) => total + group.points, 0)} points
-                  </p>
-                )}
                 <label>
                   <input
                     type="checkbox"
@@ -469,7 +489,7 @@ export function Surveys() {
                 disabled={busy || active.open}
                 onClick={() =>
                   void run(async () => {
-                    setActive(
+                    acceptSavedSurvey(
                       await api<SurveyResults>(`/surveys/${active.id}/review`, {
                         revision: active.revision,
                         grouping: active.grouping,

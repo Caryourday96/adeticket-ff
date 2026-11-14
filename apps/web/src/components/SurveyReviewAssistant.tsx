@@ -26,7 +26,7 @@ export function SurveyReviewAssistant({
 }: {
   survey: SurveyResults;
   busy: boolean;
-  onApply: (suggestions: SurveyGroupSuggestion[]) => void;
+  onApply: (suggestions: SurveyGroupSuggestion[], separate: SurveyGroupSuggestion[]) => void;
 }) {
   const [review, setReview] = useState<Review | null>(null);
   const [excluded, setExcluded] = useState<number[]>([]);
@@ -34,6 +34,28 @@ export function SurveyReviewAssistant({
   const [message, setMessage] = useState("");
   const current = review?.uncertain[choices.length];
   const stale = !!review && review.source !== survey;
+  function withEarlierMerges(suggestion: SurveyGroupSuggestion, uncertainIndex: number) {
+    if (!review) return suggestion;
+    const earlier = [
+      ...review.clear.filter((_, index) => !excluded.includes(index)),
+      ...review.uncertain.slice(0, uncertainIndex).filter((_, index) => choices[index]),
+    ];
+    const extra = earlier
+      .filter(
+        (item) =>
+          item !== suggestion &&
+          item.questionId === suggestion.questionId &&
+          item.target.key === suggestion.target.key,
+      )
+      .reduce(
+        (total, item) => total + item.sources.reduce((sum, source) => sum + source.count, 0),
+        0,
+      );
+    return {
+      ...suggestion,
+      target: { ...suggestion.target, count: suggestion.target.count + extra },
+    };
+  }
 
   function start() {
     const suggestions = suggestSurveyGroups(survey);
@@ -53,19 +75,31 @@ export function SurveyReviewAssistant({
       ...review.clear.filter((_, index) => !excluded.includes(index)),
       ...review.uncertain.filter((_, index) => choices[index]),
     ];
-    if (selected.length) onApply(selected);
+    const separate = [
+      ...review.clear.filter((_, index) => excluded.includes(index)),
+      ...review.uncertain.filter((_, index) => !choices[index]),
+    ];
+    if (selected.length || separate.length) onApply(selected, separate);
     setReview(null);
     setMessage(
       selected.length
         ? `Added ${selected.length} ${selected.length === 1 ? "merge" : "merges"} to the draft. Check the Group fields below, mark each question you reviewed, then save.`
-        : "No merges applied.",
+        : "Keep-separate decisions added to the draft. Save grouping and review below to keep them.",
     );
   }
 
   return (
     <section className="settings-card survey-assistant" aria-labelledby="survey-assistant-heading">
       <h3 id="survey-assistant-heading">Answer review assistant</h3>
-      <p>Find likely duplicates across the survey and decide which answers belong together.</p>
+      <p>
+        Use the question and common phrases to find related answers, then decide what belongs
+        together.
+      </p>
+      <p>
+        Suggestions use local rules, not an external AI. They can miss jokes and unfamiliar wording.
+        Existing labels and reviewed questions are preserved. Keep-separate choices are kept when
+        you apply and save the draft.
+      </p>
       {!review && (
         <button className="button primary" disabled={busy} onClick={start}>
           Auto review answers
@@ -96,7 +130,7 @@ export function SurveyReviewAssistant({
                 {review.clear.map((suggestion, index) => (
                   <label
                     className="survey-choice"
-                    key={`${suggestion.questionId}:${suggestion.target.key}`}
+                    key={`${suggestion.questionId}:${suggestion.sources[0].key}`}
                   >
                     <input
                       type="checkbox"
@@ -113,6 +147,7 @@ export function SurveyReviewAssistant({
                     <span>
                       <span className="survey-assistant-prompt">{suggestion.prompt}</span>
                       <MergeSummary suggestion={suggestion} />
+                      <span className="survey-assistant-prompt">{suggestion.reason}</span>
                     </span>
                   </label>
                 ))}
@@ -126,8 +161,9 @@ export function SurveyReviewAssistant({
                 <h4>Should these answers count together?</h4>
                 <p>{current.prompt}</p>
                 <p>
-                  <MergeSummary suggestion={current} />
+                  <MergeSummary suggestion={withEarlierMerges(current, choices.length)} />
                 </p>
+                <p>{current.reason}</p>
                 <div className="button-row">
                   <button
                     className="button primary"
@@ -165,7 +201,7 @@ export function SurveyReviewAssistant({
               )
             )}
             <div className="button-row">
-              {!current && !!(review.clear.length || choices.some(Boolean)) && (
+              {!current && !!(review.clear.length || review.uncertain.length) && (
                 <button className="button primary" disabled={busy} onClick={apply}>
                   Apply suggestions to draft
                 </button>
