@@ -62,3 +62,17 @@ export function playableSurveyGroups<T extends { text: string; count: number }>(
     true,
   );
 }
+
+export function savedSurveyBoard<T extends { text: string; count: number }>(
+  groups: T[],
+  board?: { text: string; points: number }[],
+) {
+  if (!board) return playableSurveyGroups(groups);
+  const normalize = (s: string) =>
+    s.normalize("NFKC").trim().replace(/\s+/g, " ").toLocaleLowerCase();
+  return board.map((answer) => {
+    const group = groups.find((g) => normalize(g.text) === normalize(answer.text));
+    if (!group) throw new Error("Saved board no longer matches answer groups.");
+    return { ...group, points: answer.points };
+  });
+}

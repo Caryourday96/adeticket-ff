@@ -1,4 +1,4 @@
-import { playableSurveyGroups, groupSurveyVariants, type SurveyResults } from "@naija/contracts";
+import { savedSurveyBoard, groupSurveyVariants, type SurveyResults } from "@naija/contracts";
 
 type Question = SurveyResults["results"][number];
 const normalize = (value: string) =>
@@ -15,17 +15,19 @@ export function SurveyBoardPreview({
   question,
   mapping,
   savedMapping,
+  savedBoard,
 }: {
   question: Question;
   mapping: Record<string, string>;
   savedMapping: Record<string, string>;
+  savedBoard?: { text: string; points: number }[];
 }) {
   const groups = surveyDraftGroups(question, mapping);
   const dirty = [...new Set([...Object.keys(mapping), ...Object.keys(savedMapping)])].some(
     (key) => mapping[key] !== savedMapping[key],
   );
   const invalid = groups.some((group) => !group.text);
-  const board = playableSurveyGroups(groups);
+  const board = savedSurveyBoard(groups, dirty ? undefined : savedBoard);
   const shown = board.reduce((sum, group) => sum + group.count, 0);
   return (
     <section className="survey-board-preview" aria-label={`Combined preview: ${question.prompt}`}>

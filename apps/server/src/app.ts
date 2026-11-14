@@ -360,6 +360,9 @@ export function createApplication(options: {
   app.post("/api/surveys/:id/review", auth, (req, res) =>
     res.json(store.surveys.review(String(req.params.id), req.body)),
   );
+  app.post("/api/surveys/:id/merge", auth, (req, res) =>
+    res.json(store.surveys.merge(String(req.params.id), req.body)),
+  );
   app.get("/api/surveys/:id/export", auth, (req, res) =>
     res.json(store.surveys.export(String(req.params.id))),
   );

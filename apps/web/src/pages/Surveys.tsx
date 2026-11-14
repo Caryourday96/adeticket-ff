@@ -1,3 +1,4 @@
+import { SurveyQuestionReview } from "../components/SurveyQuestionReview";
 import { SurveyBoardPreview } from "../components/SurveyBoardPreview";
 import { useEffect, useState } from "react";
 import type { Bank, PublicSurvey, SurveyResults } from "@naija/contracts";
@@ -111,6 +112,7 @@ export function Surveys() {
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
     [busy, setBusy] = useState(false);
+  const [guided, setGuided] = useState(false);
   const [savedSurvey, setSavedSurvey] = useState<SurveyResults | null>(null);
   function acceptSavedSurvey(survey: SurveyResults) {
     setSavedSurvey(survey);
@@ -427,62 +429,89 @@ export function Surveys() {
               approvals. The combined preview updates immediately; save to keep your changes. The
               playable board uses up to eight answer groups and totals 100 points per question.
             </p>
-            {active.results.map((q) => (
-              <section className="settings-card" key={q.id}>
-                <h3>{q.prompt}</h3>
-                <p>
-                  {q.answered} answered · {active.responseCount - q.answered} skipped
-                </p>
-                <SurveyBoardPreview
-                  question={q}
-                  mapping={active.grouping[q.id] ?? {}}
-                  savedMapping={savedSurvey?.grouping[q.id] ?? {}}
-                />
-                {q.variants.map((v) => (
-                  <label key={v.key} className="survey-choice">
-                    <span>
-                      {v.text} ({v.count}) → Group
-                    </span>
+            {!active.open && (
+              <button className="button" disabled={busy} onClick={() => setGuided(!guided)}>
+                {guided ? "Show all questions" : "Review one question at a time"}
+              </button>
+            )}
+            {guided && !active.open ? (
+              <SurveyQuestionReview
+                key={active.id}
+                survey={active}
+                savedGrouping={savedSurvey?.grouping ?? {}}
+                busy={busy}
+                onAction={(action) =>
+                  void run(async () => {
+                    const saved = await api<SurveyResults>(`/surveys/${active.id}/review`, {
+                      revision: active.revision,
+                      grouping: active.grouping,
+                      reviewed: active.reviewed,
+                    });
+                    acceptSavedSurvey(saved);
+                    const updated = await action(saved);
+                    acceptSavedSurvey(updated);
+                  })
+                }
+              />
+            ) : (
+              active.results.map((q) => (
+                <section className="settings-card" key={q.id}>
+                  <h3>{q.prompt}</h3>
+                  <p>
+                    {q.answered} answered · {active.responseCount - q.answered} skipped
+                  </p>
+                  <SurveyBoardPreview
+                    question={q}
+                    mapping={active.grouping[q.id] ?? {}}
+                    savedMapping={savedSurvey?.grouping[q.id] ?? {}}
+                    savedBoard={active.boards?.[q.id]}
+                  />
+                  {q.variants.map((v) => (
+                    <label key={v.key} className="survey-choice">
+                      <span>
+                        {v.text} ({v.count}) → Group
+                      </span>
+                      <input
+                        aria-label={`Group ${q.id} ${v.text}`}
+                        disabled={active.open || busy}
+                        maxLength={100}
+                        value={
+                          Object.hasOwn(active.grouping[q.id] ?? {}, v.key)
+                            ? active.grouping[q.id][v.key]
+                            : v.text
+                        }
+                        onChange={(e) =>
+                          setActive({
+                            ...active,
+                            reviewed: active.reviewed.filter((id) => id !== q.id),
+                            grouping: {
+                              ...active.grouping,
+                              [q.id]: { ...active.grouping[q.id], [v.key]: e.target.value },
+                            },
+                          })
+                        }
+                      />
+                    </label>
+                  ))}
+                  <label>
                     <input
-                      aria-label={`Group ${q.id} ${v.text}`}
-                      disabled={active.open || busy}
-                      maxLength={100}
-                      value={
-                        Object.hasOwn(active.grouping[q.id] ?? {}, v.key)
-                          ? active.grouping[q.id][v.key]
-                          : v.text
-                      }
+                      type="checkbox"
+                      disabled={active.open || busy || !q.answered}
+                      checked={active.reviewed.includes(q.id)}
                       onChange={(e) =>
                         setActive({
                           ...active,
-                          reviewed: active.reviewed.filter((id) => id !== q.id),
-                          grouping: {
-                            ...active.grouping,
-                            [q.id]: { ...active.grouping[q.id], [v.key]: e.target.value },
-                          },
+                          reviewed: e.target.checked
+                            ? [...active.reviewed, q.id]
+                            : active.reviewed.filter((id) => id !== q.id),
                         })
                       }
-                    />
+                    />{" "}
+                    I reviewed this question’s answer groups
                   </label>
-                ))}
-                <label>
-                  <input
-                    type="checkbox"
-                    disabled={active.open || busy || !q.answered}
-                    checked={active.reviewed.includes(q.id)}
-                    onChange={(e) =>
-                      setActive({
-                        ...active,
-                        reviewed: e.target.checked
-                          ? [...active.reviewed, q.id]
-                          : active.reviewed.filter((id) => id !== q.id),
-                      })
-                    }
-                  />{" "}
-                  I reviewed this question’s answer groups
-                </label>
-              </section>
-            ))}
+                </section>
+              ))
+            )}
             <div className="button-row">
               <button
                 className="button primary"

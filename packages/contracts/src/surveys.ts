@@ -23,6 +23,15 @@ export type Survey = {
   revision: number;
   grouping: Record<string, Record<string, string>>;
   reviewed: string[];
+  boards?: Record<string, { text: string; points: number }[]>;
+  mergeUndo?: Record<
+    string,
+    {
+      grouping: Record<string, string>;
+      board?: { text: string; points: number }[];
+      reviewed: boolean;
+    }
+  >;
 };
 export type SurveyResults = Survey & {
   responseCount: number;

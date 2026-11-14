@@ -1,4 +1,9 @@
-import { scoreGroups, playableSurveyGroups, groupSurveyVariants } from "@naija/contracts";
+import {
+  scoreGroups,
+  playableSurveyGroups,
+  groupSurveyVariants,
+  savedSurveyBoard,
+} from "@naija/contracts";
 import type { DatabaseSync } from "node:sqlite";
 import { randomBytes, createHash } from "node:crypto";
 import { bankSchema, surveyCreateSchema, type Survey, type SurveyResults } from "@naija/contracts";
@@ -99,6 +104,10 @@ export class Surveys {
     const s = this.get(id);
     if (s.revision !== revision) throw new Error("Responses changed. Refresh the survey first.");
     s.open = open;
+    if (open) {
+      s.boards = {};
+      s.mergeUndo = {};
+    }
     s.revision++;
     s.reviewed = [];
     this.save(s);
@@ -152,10 +161,95 @@ export class Surveys {
     }
     if (body.reviewed.some((id) => !s.questions.some((q) => q.id === id)))
       throw new Error("Unknown reviewed question.");
+    for (const q of s.questions) {
+      const signature = (m: Record<string, string>) =>
+        JSON.stringify(Object.entries(m).sort(([a], [b]) => a.localeCompare(b)));
+      if (signature(s.grouping[q.id] ?? {}) !== signature(body.grouping[q.id] ?? {})) {
+        delete s.boards?.[q.id];
+        delete s.mergeUndo?.[q.id];
+      }
+    }
     s.grouping = body.grouping;
     s.reviewed = body.reviewed;
     s.revision++;
     this.save(s);
+    return this.results(id);
+  }
+  merge(id: string, input: unknown) {
+    const body = z
+      .object({
+        revision: z.number().int(),
+        questionId: z.string(),
+        selected: z.array(z.string()).min(2).max(8).optional(),
+        text: z.string().trim().min(1).max(100).optional(),
+        undo: z.boolean().optional(),
+      })
+      .parse(input);
+    const s = this.results(id),
+      qid = body.questionId;
+    if (s.open) throw new Error("Close the survey before merging.");
+    if (s.revision !== body.revision)
+      throw new Error("The survey changed. Refresh before merging.");
+    const q = s.results.find((q) => q.id === qid);
+    if (!q) throw new Error("Unknown question.");
+    if (body.undo) {
+      const previous = s.mergeUndo?.[qid];
+      if (!previous) throw new Error("No merge to undo.");
+      s.grouping[qid] = previous.grouping;
+      s.boards = { ...s.boards };
+      if (previous.board) s.boards[qid] = previous.board;
+      else delete s.boards[qid];
+      s.reviewed = s.reviewed.filter((id) => id !== qid);
+      if (previous.reviewed) s.reviewed.push(qid);
+      delete s.mergeUndo![qid];
+    } else {
+      if (!body.selected || !body.text)
+        throw new Error("Select answers and name the merged answer.");
+      const keys = new Set(body.selected.map(normalize));
+      const board = savedSurveyBoard(q.groups, s.boards?.[qid]);
+      const chosen = board.filter((g) => keys.has(normalize(g.text)));
+      if (keys.size < 2 || chosen.length !== keys.size)
+        throw new Error("Select at least two answers currently on the board.");
+      if (board.length - chosen.length + 1 < 2)
+        throw new Error("Keep at least two answer groups on the board.");
+      if (
+        q.groups.some(
+          (g) => !keys.has(normalize(g.text)) && normalize(g.text) === normalize(body.text!),
+        )
+      )
+        throw new Error(
+          "That name belongs to an unselected answer. Select it too or choose another name.",
+        );
+      s.mergeUndo = {
+        ...s.mergeUndo,
+        [qid]: {
+          grouping: { ...s.grouping[qid] },
+          board: s.boards?.[qid],
+          reviewed: s.reviewed.includes(qid),
+        },
+      };
+      const mapping = Object.fromEntries([
+        ...Object.entries(s.grouping[qid] ?? {}),
+        ...chosen.flatMap((g) =>
+          g.alternatives.map((raw) => [normalize(raw), body.text!] as const),
+        ),
+      ]);
+      s.grouping = { ...s.grouping, [qid]: mapping };
+      const replacement = { text: body.text, points: chosen.reduce((n, g) => n + g.points, 0) };
+      let inserted = false;
+      const next = [];
+      for (const g of board) {
+        if (keys.has(normalize(g.text))) {
+          if (!inserted) next.push(replacement);
+          inserted = true;
+        } else next.push({ text: g.text, points: g.points });
+      }
+      s.boards = { ...s.boards, [qid]: next };
+      s.reviewed = s.reviewed.filter((id) => id !== qid);
+    }
+    s.revision++;
+    const { results, responseCount, ...stored } = s;
+    this.save(stored);
     return this.results(id);
   }
   export(id: string) {
@@ -163,14 +257,14 @@ export class Surveys {
     if (s.open || s.questions.some((q) => !s.reviewed.includes(q.id)))
       throw new Error("Close the survey and review every question before exporting.");
     const questions = s.results.map((q) => {
-      const top = playableSurveyGroups(q.groups);
+      const top = savedSurveyBoard(q.groups, s.boards?.[q.id]);
       if (top.length < 2) throw new Error(`At least two answer groups are required: ${q.prompt}`);
       const shown = top.reduce((sum, group) => sum + group.count, 0);
       return {
         id: `survey-${s.id}-${q.id}`,
         category: "survey",
         prompt: q.prompt,
-        hostNotes: `Survey ${s.id}. ${q.answered} nonblank responses. ${s.responseCount - q.answered} skipped. Shown answer groups cover ${shown} of ${q.answered} nonblank responses. Points are rounded shares of responses in the shown groups, with at least one point per group and 100 points total. Counts: ${top.map((g) => `${g.text}: ${g.count}`).join("; ")}`,
+        hostNotes: `Survey ${s.id}. ${q.answered} nonblank responses. ${s.responseCount - q.answered} skipped. Shown answer groups cover ${shown} of ${q.answered} nonblank responses. Points start as rounded shares; confirmed merges add existing points without changing other answers, with at least one point per group and 100 points total. Counts: ${top.map((g) => `${g.text}: ${g.count}`).join("; ")}`,
         answers: top.map((g, i) => ({
           id: `a${i + 1}`,
           text: g.text,
