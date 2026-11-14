@@ -2,6 +2,43 @@ import { DatabaseSync } from "node:sqlite";
 import { expect, it } from "vitest";
 import { Surveys } from "../apps/server/src/surveys";
 import { savedSurveyBoard } from "@naija/contracts";
+it("exports lower-ranked merged answers in descending points, including existing saved boards", () => {
+  const db = new DatabaseSync(":memory:");
+  try {
+    const store = new Surveys(db);
+    const s = store.create({
+      title: "Rank regression",
+      roundType: "regular",
+      questions: Array.from({ length: 5 }, (_, i) => ({ prompt: `Rank question ${i}` })),
+    });
+    for (let i = 1; i <= 6; i++)
+      store.submit(s.id, String(i), {
+        answers: Object.fromEntries(s.questions.map((q) => [q.id, `Answer ${i}`])),
+      });
+    let current = store.setOpen(s.id, false, store.get(s.id).revision);
+    current = store.merge(s.id, {
+      revision: current.revision,
+      questionId: "q1",
+      selected: ["Answer 4", "Answer 5", "Answer 6"],
+      text: "Combined",
+    });
+    current = store.review(s.id, {
+      revision: current.revision,
+      grouping: current.grouping,
+      reviewed: s.questions.map((q) => q.id),
+    });
+    const before = JSON.stringify(store.get(s.id));
+    const bank = new Surveys(db).export(s.id);
+    expect(bank.questions[0].answers.map((a) => a.points)).toEqual([49, 17, 17, 17]);
+    expect(bank.questions[0].answers[0].text).toBe("Combined");
+    expect(JSON.stringify(store.get(s.id))).toBe(before);
+    expect(
+      savedSurveyBoard(current.results[0].groups, current.boards?.q1).map((a) => a.points),
+    ).toEqual([49, 17, 17, 17]);
+  } finally {
+    db.close();
+  }
+});
 it("adds points, persists merge/undo, validates conflicts and preserves original answers", () => {
   const db = new DatabaseSync(":memory:");
   try {
