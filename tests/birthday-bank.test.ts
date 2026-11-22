@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, expect, it } from "vitest";
+import { randomUUID } from "node:crypto";
 import { birthdayBank } from "@naija/content";
 import { createApplication } from "../apps/server/src/app";
 
@@ -37,14 +38,20 @@ it("lets a signed-in host select the birthday bank and keeps unrevealed answers 
   const audience = await (await fetch(base + `/api/games/${id}/audience`)).json();
   expect(audience.question.prompt).toBe("Players to the stage");
   expect(JSON.stringify(audience)).not.toContain(birthdayBank.questions[0].prompt);
-  await fetch(base + `/api/games/${id}/buzzers`, {
+  const reveal = await fetch(base + `/api/games/${id}/commands`, {
     method: "POST",
     headers: { Cookie: cookie, "Content-Type": "application/json" },
-    body: JSON.stringify({ action: "arm" }),
+    body: JSON.stringify({
+      id: randomUUID(),
+      revision: server.store.host(id).revision,
+      command: { type: "openQuestion" },
+    }),
   });
+  expect(reveal.status).toBe(200);
+  expect(server.buzzers.public(id).armed).toBe(false);
   const opened = await (await fetch(base + `/api/games/${id}/audience`)).json();
   expect(opened.question.prompt).toBe(birthdayBank.questions[0].prompt);
-  expect(audience.question.answers.every((answer: { text: unknown }) => answer.text === null)).toBe(
+  expect(opened.question.answers.every((answer: { text: unknown }) => answer.text === null)).toBe(
     true,
   );
   expect(birthdayBank.questions).toHaveLength(30);

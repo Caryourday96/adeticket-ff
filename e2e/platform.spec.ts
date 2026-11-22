@@ -253,6 +253,7 @@ test("owner invites separate admins, mobile player joins a lobby and plays remot
   }
   await admin.getByRole("button", { name: "Start game", exact: true }).click();
   await expect(admin.getByRole("region", { name: "Game lobby" })).toHaveCount(0);
+  await admin.getByRole("button", { name: "Reveal question", exact: true }).click();
   await admin.getByRole("button", { name: "Open buzzers", exact: true }).click();
   const buzz = phone.getByRole("button", { name: /BUZZ TAP TO ANSWER/ });
   await expect(buzz).toBeEnabled();

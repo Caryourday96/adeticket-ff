@@ -73,6 +73,7 @@ test("small phone keeps buzzer visible and clearly ends the game", async ({
     await page
       .getByRole("button", { name: "Put Player With A Longer Name on stage", exact: true })
       .click();
+    await page.getByRole("button", { name: "Reveal question", exact: true }).click();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeEnabled();
     for (const [width, height] of [

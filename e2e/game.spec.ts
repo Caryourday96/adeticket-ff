@@ -115,7 +115,7 @@ test("ended-game cleanup filters rehearsals, confirms deletion and protects acti
   expect((await page.request.get(`/api/games/${active}/host`)).ok()).toBeTruthy();
 });
 
-test("survey collects phone answers and exports a reviewed question bank", async ({
+test("survey collects ranked phone answers and exports a reviewed question bank", async ({
   page,
   browser,
 }) => {
@@ -129,7 +129,16 @@ test("survey collects phone answers and exports a reviewed question bank", async
     try {
       const phone = await context.newPage();
       await phone.goto(link);
-      for (const field of await phone.getByRole("textbox").all()) await field.fill(answer);
+      const second = phone.getByLabel("Optional second choice for question 1", { exact: true });
+      await expect(second).toBeDisabled();
+      for (const field of await phone.getByPlaceholder("Your first answer", { exact: true }).all())
+        await field.fill(answer);
+      if (answer === "Rice") {
+        await second.fill(" rice ");
+        await phone.getByRole("button", { name: "Submit answers", exact: true }).click();
+        await expect(phone.getByRole("alert")).toContainText("Choose a different second answer");
+        await second.fill("Beans");
+      }
       await phone.getByRole("button", { name: "Submit answers", exact: true }).click();
       await expect(phone.getByRole("heading", { name: "Thank you!" })).toBeVisible();
       await phone.reload();
@@ -141,6 +150,9 @@ test("survey collects phone answers and exports a reviewed question bank", async
   await page.getByRole("button", { name: "Refresh results", exact: true }).click();
   await expect(page.getByText("2 submissions · Open for responses", { exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Close survey for review", exact: true }).click();
+  const preview = page.getByRole("region", { name: /Combined preview:/ }).first();
+  await expect(preview.getByText(/Beans: 1 first \/ 1 second/)).toBeVisible();
+  await expect(preview.locator("li").first()).toContainText("Beans: 2 choices / 60 points");
   for (const checkbox of await page
     .getByRole("checkbox", { name: "I reviewed this question’s answer groups" })
     .all())
@@ -413,9 +425,11 @@ test("players enter their names and only buzz on stage with saved team names", a
       .filter({ hasText: /^\d+ phones · \d+ awaiting approval$/ })
       .click();
     await page.getByRole("button", { name: "Approve Funke", exact: true }).click();
-    await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Open buzzers", exact: true })).toBeDisabled();
     await expect(phone.locator(".phone-buzzer")).toBeDisabled();
     await page.getByRole("button", { name: "Put Funke on stage", exact: true }).click();
+    await page.getByRole("button", { name: "Reveal question", exact: true }).click();
+    await expect(phone.locator(".phone-buzzer")).toBeDisabled();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeEnabled();
     await expect(phone.getByLabel("Buzzer readiness checklist")).toContainText(
@@ -494,6 +508,9 @@ test("rehearsal buzz reaches the host and an independent audience", async ({ pag
       screen.getByRole("heading", { name: "Players to the stage", exact: true }),
     ).toBeVisible();
     await expect(screen.getByRole("button", { name: "Open buzzers" })).toHaveCount(0);
+    await page.getByRole("button", { name: "Reveal question", exact: true }).click();
+    await expect(screen.getByRole("heading", { name: prompt, exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Open buzzers", exact: true })).toBeEnabled();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(page.getByRole("heading", { name: "Buzzers are open" })).toBeVisible();
     await expect(screen.getByRole("heading", { name: prompt, exact: true })).toBeVisible();
@@ -572,6 +589,7 @@ test("a second signed-in host desk can safely take over", async ({ page, browser
     await secondDiagnostics.locator("summary").click();
     await expect(secondDiagnostics).toContainText("Host sockets:");
 
+    await page.getByRole("button", { name: "Reveal question", exact: true }).click();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
     await expect(
       secondPage.getByRole("button", { name: "Lock buzzers", exact: true }),

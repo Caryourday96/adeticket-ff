@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import type { Command, HostBuzzers, HostState } from "@naija/contracts";
+import type { Command, HostBuzzers, HostState, Side } from "@naija/contracts";
 import { useBuzzers } from "../hooks/useBuzzers";
 import { phoneStatus } from "../lib/phoneStatus";
 import { api } from "../lib/api";
@@ -10,9 +10,11 @@ import { eventReadiness } from "../lib/eventReadiness";
 export function BuzzerControls({
   state: s,
   send,
+  commandPending,
 }: {
   state: HostState;
   send: (c: Command) => Promise<boolean>;
+  commandPending: boolean;
 }) {
   const { data, error, connected, busy, act, lastUpdated } = useBuzzers<HostBuzzers>(s.id, true);
   const [invite, setInvite] = useState(false),
@@ -66,6 +68,9 @@ export function BuzzerControls({
     buzzerConnected: connected && !error && Boolean(data),
     stagedTeams,
   });
+  const waitingForBuzz = !s.lobby && s.phase === "faceoff" && s.face.first === null;
+  const canChangeGate = waitingForBuzz && !s.paused && connected && !busy && !commandPending;
+  const questionVisible = s.questionRevealed === true;
   useEffect(() => {
     let alive = true;
     const refresh = () =>
@@ -289,17 +294,14 @@ export function BuzzerControls({
           Remove all player phones
         </button>
       ) : null}
-      <h3>
+      <h3 aria-live="polite">
         {data?.winner
           ? `${data.winner.name} buzzed first`
           : data?.armed
             ? "Buzzers are open"
             : "Buzzers locked"}
       </h3>
-      <p>
-        Only the current face-off player on each team can buzz. Bring players on stage, then open
-        buzzers to reveal the question on the audience screen.
-      </p>
+      <p>Only the current face-off player on each team can buzz.</p>
       <p>
         Players join at{" "}
         <a href="/play" target="_blank" rel="noreferrer">
@@ -308,17 +310,26 @@ export function BuzzerControls({
         · Game code <strong>{s.id}</strong>. Approve their names, then put one player from each team
         on stage.
       </p>
+      {waitingForBuzz && !data?.armed && (
+        <p className="host-note" role="status">
+          {questionVisible
+            ? "Read the full question aloud, then open the buzzers."
+            : "Bring the contestants on stage, then reveal the question."}
+        </p>
+      )}
       <div className="button-row">
+        {waitingForBuzz && (
+          <button
+            className={"button" + (!questionVisible ? " primary" : "")}
+            disabled={!canChangeGate || questionVisible}
+            onClick={() => void send({ type: "openQuestion" })}
+          >
+            Reveal question
+          </button>
+        )}
         <button
-          className="button primary"
-          disabled={
-            busy ||
-            !connected ||
-            !!s.lobby ||
-            s.paused ||
-            s.phase !== "faceoff" ||
-            s.face.first !== null
-          }
+          className={"button" + (questionVisible ? " primary" : "")}
+          disabled={!canChangeGate || !questionVisible || !data}
           onClick={() => act({ action: data?.armed ? "lock" : "arm" })}
         >
           {data?.armed ? "Lock buzzers" : "Open buzzers"}
@@ -327,6 +338,22 @@ export function BuzzerControls({
           Invite phones
         </button>
       </div>
+      {waitingForBuzz && (
+        <details className="manual-buzz">
+          <summary>Manual buzzer fallback</summary>
+          <p>Open the buzzers, then select the team that buzzed first.</p>
+          {s.teams.map((team, index) => (
+            <button
+              className="button wide"
+              key={index}
+              disabled={!canChangeGate || !questionVisible || !data?.armed}
+              onClick={() => void send({ type: "buzz", team: index as Side })}
+            >
+              {team.name}
+            </button>
+          ))}
+        </details>
+      )}
       {invite && (
         <div className="buzzer-invite">
           <div className="qr">

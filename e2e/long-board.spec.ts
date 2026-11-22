@@ -25,7 +25,7 @@ test("long custom board text wraps without clipping answers, names or points", a
           j === 0
             ? "LongUnbrokenAnswer".repeat(5)
             : "A thoughtful present chosen especially for the birthday guest and their friends",
-        points: 30 - j,
+        points: j < 2 ? 30 : 30 - j,
       })),
     })),
   };
@@ -48,21 +48,38 @@ test("long custom board text wraps without clipping answers, names or points", a
   });
   expect(create.status(), await create.text()).toBe(201);
   const { id } = await create.json();
+  await page.goto(`/audience/${id}`);
+  await expect(page.locator(".answer-tile.hidden-answer").first()).toHaveText("1");
+  await expect(page.getByText(bank.questions[0].answers[0].text, { exact: true })).toHaveCount(0);
   for (const command of [
     { type: "openQuestion" },
     { type: "buzz", team: 0 },
+    { type: "answer", answerId: "answer-1" },
     { type: "answer", answerId: "answer-0" },
     { type: "choice", pass: false },
-    ...Array.from({ length: 7 }, (_, i) => ({ type: "answer", answerId: `answer-${i + 1}` })),
+    ...Array.from({ length: 6 }, (_, i) => ({ type: "answer", answerId: `answer-${i + 2}` })),
   ]) {
     const state = await (await page.request.get(`/api/games/${id}/host`)).json();
     const response = await page.request.post(`/api/games/${id}/commands`, {
       data: { id: crypto.randomUUID(), revision: state.revision, command },
     });
     expect(response.ok(), await response.text()).toBe(true);
+    if (command.answerId === "answer-0") {
+      const ranked = await response.json();
+      expect(ranked.control).toBe(1);
+      expect(ranked.phase).toBe("choice");
+    }
   }
-  await page.goto(`/audience/${id}`);
   await expect(page.locator(".answer-tile.revealed")).toHaveCount(8);
+  const revealed = page.locator(".answer-tile.revealed");
+  await expect(revealed.nth(0).locator("span")).toHaveText(
+    `#1 · ${bank.questions[0].answers[0].text}`,
+  );
+  await expect(revealed.nth(1).locator("span")).toHaveText(
+    `#2 · ${bank.questions[0].answers[1].text}`,
+  );
+  await expect(revealed.nth(0).locator("strong")).toHaveText("30");
+  await expect(revealed.nth(1).locator("strong")).toHaveText("30");
   for (const [width, height] of [
     [1366, 768],
     [1920, 1080],

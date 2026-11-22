@@ -34,6 +34,7 @@ function fixture(duplicates = false) {
 it("keeps a unique phone paired through reorder, team move and Undo; clears staging and old buzzer epoch", () => {
   const { store, buzzers, token, id, act } = fixture();
   buzzers.control("ABC123", "stage", id);
+  act({ type: "openQuestion" });
   buzzers.control("ABC123", "arm");
   const epoch = buzzers.public("ABC123").epoch;
   let teams = structuredClone(store.host("ABC123").teams);
@@ -84,11 +85,12 @@ it("unapproves removed identities and does not silently restore approval on Undo
 });
 
 it("does not bench the first team when approving a new player on the other team", () => {
-  const { store, buzzers, token, id } = fixture();
+  const { store, buzzers, token, id, act } = fixture();
   buzzers.control("ABC123", "stage", id);
   const second = buzzers.register("ABC123", 1, "New player");
   buzzers.control("ABC123", "approve", store.player("ABC123", second)!.id);
   expect(store.player("ABC123", token)).toMatchObject({ approved: true, onStage: true, member: 1 });
+  act({ type: "openQuestion" });
   buzzers.control("ABC123", "arm");
   expect(() => buzzers.buzz("ABC123", token, buzzers.public("ABC123").epoch)).not.toThrow();
 });

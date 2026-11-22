@@ -177,7 +177,7 @@ export function Host({ id }: { id: string }) {
             <h2>Gather your teams</h2>
             <p>
               Share the player link, approve your players in Phone buzzers, and check the team
-              lineup. The question stays hidden until you start and open buzzers.
+              lineup. Start the game before revealing the question.
             </p>
             <a className="button" href={`/play/${id}`} target="_blank" rel="noreferrer">
               Open player invitation
@@ -388,26 +388,9 @@ export function Host({ id }: { id: string }) {
                   </div>
                 )}
                 {!s.lobby && s.phase === "faceoff" && s.face.first === null && (
-                  <>
-                    <p>
-                      Bring players on stage, then Open buzzers below to reveal the audience
-                      question. You can then select a team manually if needed.
-                    </p>
-                    <details className="manual-buzz">
-                      <summary>Manual buzzer fallback</summary>
-                      {s.teams.map((t, i) => (
-                        <button
-                          className="button wide"
-                          key={i}
-                          disabled={busy || s.paused || s.questionRevealed !== true}
-                          onClick={() => send({ type: "buzz", team: i as Side })}
-                        >
-                          {t.name}
-                          <ArrowRight size={15} />
-                        </button>
-                      ))}
-                    </details>
-                  </>
+                  <p>
+                    Bring contestants on stage, then reveal and read the question in Phone buzzers.
+                  </p>
                 )}
                 {s.phase === "choice" && (
                   <>
@@ -538,7 +521,7 @@ export function Host({ id }: { id: string }) {
                 )}
               </section>
             )}
-            <BuzzerControls state={s} send={send} />
+            <BuzzerControls state={s} send={send} commandPending={busy || !connected} />
             <ScoreCorrection state={s} busy={busy || !connected} send={send} />
             {!s.lobby && !["fast", "finished", "champion"].includes(s.phase) && (
               <RemoteAnswerPanel state={s} />

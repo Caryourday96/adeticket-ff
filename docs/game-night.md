@@ -33,4 +33,4 @@ The audience join QR remains visible during regular rounds, Fast Money and resul
 
 ## Reveal the question when ready
 
-For each regular round, the public audience and player feed show **Players to the stage** until the host selects **Open buzzers**. The host can read the private question first, bring the contestants on stage, then open buzzers to reveal it. Manual buzzer fallback becomes available after opening. The reveal is saved, so locking buzzers, refreshing or reconnecting keeps the question visible; the next round hides its new question again. Fast Money keeps its existing private-question and answer-reveal flow.
+For each regular round, bring the contestants on stage and select **Reveal question**. The audience and player feed show the question while phones stay locked. Read the full question aloud, then select **Open buzzers**. Manual buzzer fallback becomes available after opening. The reveal survives a refresh or reconnect, and the next round starts with its question hidden. The higher board rank wins a face-off when two answers are worth the same points.

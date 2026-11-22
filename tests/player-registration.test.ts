@@ -56,6 +56,19 @@ it("registers player names, keeps host team names and enforces stage selection o
     ).toBe(200);
     expect(server.store.host(id).teams[0].members).toEqual(["Ada"]);
     expect(server.store.host(id).teams[0].name).toBe("Team Lagos");
+    expect(
+      (
+        await post(
+          path + "/commands",
+          {
+            id: randomUUID(),
+            revision: server.store.host(id).revision,
+            command: { type: "openQuestion" },
+          },
+          host,
+        )
+      ).status,
+    ).toBe(200);
     await post(path + "/buzzers", { action: "arm" }, host);
     expect(
       (await post(path + "/player/buzz", { epoch: server.buzzers.public(id).epoch }, phone)).status,

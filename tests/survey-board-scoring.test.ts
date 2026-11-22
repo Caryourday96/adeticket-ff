@@ -3,6 +3,87 @@ import { expect, it } from "vitest";
 import { Surveys } from "../apps/server/src/surveys";
 import { groupSurveyVariants, playableSurveyGroups } from "@naija/contracts";
 
+it("combines legacy ballots and optional second choices without counting extra respondents", () => {
+  const db = new DatabaseSync(":memory:");
+  try {
+    const surveys = new Surveys(db);
+    const survey = surveys.create({
+      title: "Ranked survey",
+      roundType: "regular",
+      questions: Array.from({ length: 5 }, (_, index) => ({
+        prompt: `Favorite item ${index + 1}`,
+      })),
+    });
+    const answerEveryQuestion = (answer: string) =>
+      Object.fromEntries(survey.questions.map((question) => [question.id, answer]));
+    surveys.submit(survey.id, "one", { answers: answerEveryQuestion("Rice") });
+    expect(() =>
+      surveys.submit(survey.id, "invalid", {
+        answers: { q1: "Rice" },
+        secondAnswers: { q2: "Beans" },
+      }),
+    ).toThrow(/first answer before a second/);
+    expect(() =>
+      surveys.submit(survey.id, "invalid", {
+        answers: { q1: "Rice" },
+        secondAnswers: { q1: " ＲＩＣＥ " },
+      }),
+    ).toThrow(/different second answer/);
+    expect(() =>
+      surveys.submit(survey.id, "invalid", {
+        answers: { q1: "Rice" },
+        secondAnswers: { q99: "Beans" },
+      }),
+    ).toThrow(/Unknown survey question/);
+    surveys.submit(survey.id, "two", {
+      answers: answerEveryQuestion("Beans"),
+      secondAnswers: answerEveryQuestion("Beans & peas"),
+    });
+    const closed = surveys.setOpen(survey.id, false, surveys.get(survey.id).revision);
+    expect(closed.responseCount).toBe(2);
+    expect(closed.results[0].answered).toBe(2);
+    expect(closed.results[0].variants).toContainEqual({
+      key: "beans & peas",
+      text: "Beans & peas",
+      count: 1,
+      secondChoices: 1,
+    });
+    const reviewed = surveys.review(survey.id, {
+      revision: closed.revision,
+      grouping: Object.fromEntries(
+        survey.questions.map((question) => [question.id, { "beans & peas": "Beans" }]),
+      ),
+      reviewed: survey.questions.map((question) => question.id),
+    });
+    expect(reviewed.results[0].groups[0]).toMatchObject({
+      text: "Beans",
+      count: 2,
+      secondChoices: 1,
+      points: 60,
+    });
+    const exported = new Surveys(db).export(survey.id).questions[0];
+    expect(exported.answers.map(({ text, points }) => ({ text, points }))).toEqual([
+      { text: "Beans", points: 60 },
+      { text: "Rice", points: 40 },
+    ]);
+    expect(exported.hostNotes).toContain("2 nonblank responses");
+    expect(exported.hostNotes).toContain("cover 3 of 3 choices");
+  } finally {
+    db.close();
+  }
+});
+
+it("prefers first choices when the total voting weight is tied", () => {
+  const board = playableSurveyGroups([
+    { text: "Alphabetically first", count: 2, secondChoices: 2 },
+    { text: "Preferred first choice", count: 1 },
+  ]);
+  expect(board.map(({ text, points }) => ({ text, points }))).toEqual([
+    { text: "Preferred first choice", points: 50 },
+    { text: "Alphabetically first", points: 50 },
+  ]);
+});
+
 it.each([
   {
     name: "retains a rare answer that rounds to zero before export",

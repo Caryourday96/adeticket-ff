@@ -38,7 +38,7 @@ export function RehearsalControls({ state: s, busy }: { state: HostState; busy: 
   const guides: Record<string, string> = {
     faceoff:
       s.face.first === null
-        ? "Read the question. Open buzzers below, then choose a simulated contestant."
+        ? "Reveal the question and read it aloud. Open buzzers below, then choose a simulated contestant."
         : "Ask for an answer. Use a suggestion below and judge it with your normal answer controls.",
     choice: "Choose Play or Pass in the normal controls to decide which team plays.",
     play: "Practice revealing answers, marking misses and Undo. Three misses open a steal; clearing the board wins the round.",

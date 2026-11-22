@@ -145,7 +145,7 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
       "Approve at least one player for each team before starting.",
     );
     s.lobby = false;
-    s.message = "Game started. Bring contestants on stage, then open buzzers.";
+    s.message = "Game started. Bring contestants on stage, then reveal the question.";
     return s;
   }
   if (s.lobby)
@@ -243,10 +243,11 @@ export function transition(input: GameState, cmd: Command, now = Date.now()): Ga
     case "openQuestion":
       requireThat(
         s.phase === "faceoff" && s.face.first === null,
-        "Open the question before the face-off starts.",
+        "Reveal the question before the face-off starts.",
       );
+      requireThat(s.questionRevealed !== true, "The question is already revealed.");
       s.questionRevealed = true;
-      s.message = "Question revealed. Buzzers are opening.";
+      s.message = "Question revealed. Read it aloud, then open buzzers.";
       break;
     case "buzz":
       requireThat(

@@ -14,7 +14,7 @@ export function createRehearsal(id: string, scenario: "round" | "fast", selected
   });
   let state = createGame(id, setup, starterBank.questions, practiceQuestions, starterBank.notice);
   state.rehearsal = true;
-  state.message = "Rehearsal: read the question, open buzzers, then simulate a contestant.";
+  state.message = "Rehearsal: reveal and read the question, then open buzzers.";
   if (scenario === "fast") {
     state.phase = "champion";
     state.winner = 0;

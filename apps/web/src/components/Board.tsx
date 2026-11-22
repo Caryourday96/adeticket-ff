@@ -89,7 +89,9 @@ export function Board({ state, compact = false }: { state: PublicState; compact?
                 >
                   {a.revealed ? (
                     <>
-                      <span>{a.text}</span>
+                      <span>
+                        #{a.rank} · {a.text}
+                      </span>
                       <strong>{a.points}</strong>
                     </>
                   ) : (

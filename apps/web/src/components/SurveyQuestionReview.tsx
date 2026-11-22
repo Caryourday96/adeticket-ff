@@ -19,6 +19,7 @@ export function SurveyQuestionReview({
     [name, setName] = useState("");
   const q = survey.results[index];
   const groups = groupSurveyVariants(q.variants, survey.grouping[q.id] ?? {});
+  const hasSecondChoices = groups.some((group) => group.secondChoices);
   const signature = (mapping: Record<string, string>) =>
     JSON.stringify(Object.entries(mapping).sort(([a], [b]) => a.localeCompare(b)));
   const board = savedSurveyBoard(
@@ -96,7 +97,11 @@ export function SurveyQuestionReview({
             }}
           />
           <span>
-            {g.text} · {g.count} responses · {g.points} points
+            {g.text} ·{" "}
+            {hasSecondChoices
+              ? `${g.count - (g.secondChoices ?? 0)} first / ${g.secondChoices ?? 0} second`
+              : `${g.count} responses`}{" "}
+            · {g.points} points
           </span>
         </label>
       ))}
@@ -119,7 +124,7 @@ export function SurveyQuestionReview({
           </label>
           <p>
             Merge preview: {name.trim() || "Choose a name"} —{" "}
-            {chosen.reduce((n, g) => n + g.count, 0)} responses —{" "}
+            {chosen.reduce((n, g) => n + g.count, 0)} {hasSecondChoices ? "choices" : "responses"} —{" "}
             {chosen.reduce((n, g) => n + g.points, 0)} points.
           </p>
           <button
@@ -151,7 +156,10 @@ export function SurveyQuestionReview({
         <ul>
           {q.variants.map((v) => (
             <li key={v.key}>
-              {v.text}: {v.count}
+              {v.text}:{" "}
+              {hasSecondChoices
+                ? `${v.count - (v.secondChoices ?? 0)} first / ${v.secondChoices ?? 0} second`
+                : v.count}
             </li>
           ))}
         </ul>

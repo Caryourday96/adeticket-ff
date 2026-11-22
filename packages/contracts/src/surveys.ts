@@ -13,6 +13,7 @@ export const surveyCreateSchema = z
     "Remove repeated questions.",
   );
 export type SurveyQuestion = { id: string; prompt: string };
+export type SurveyChoiceCount = { count: number; secondChoices?: number };
 export type Survey = {
   id: string;
   title: string;
@@ -39,8 +40,8 @@ export type SurveyResults = Survey & {
     id: string;
     prompt: string;
     answered: number;
-    variants: { key: string; text: string; count: number }[];
-    groups: { text: string; count: number; points: number; alternatives: string[] }[];
+    variants: (SurveyChoiceCount & { key: string; text: string })[];
+    groups: (SurveyChoiceCount & { text: string; points: number; alternatives: string[] })[];
   }[];
 };
 export type PublicSurvey = Pick<Survey, "id" | "title" | "roundType" | "questions" | "open"> & {

@@ -16,6 +16,16 @@ const reviewSchema = z.object({
   grouping: z.record(z.string(), z.record(z.string(), z.string().trim().min(1).max(100))),
   reviewed: z.array(z.string()).max(30),
 });
+const ballotAnswers = z.record(z.string(), z.string().trim().max(100));
+type Answers = Record<string, string>;
+type RankedBallot = { answers: Answers; secondAnswers: Answers };
+
+function readBallot(body: string): RankedBallot {
+  const data = JSON.parse(body) as Answers | RankedBallot;
+  return typeof data.answers === "object"
+    ? (data as RankedBallot)
+    : { answers: data as Answers, secondAnswers: {} };
+}
 
 export class Surveys {
   constructor(private db: DatabaseSync) {
@@ -76,21 +86,39 @@ export class Surveys {
   }
   submit(id: string, token: string, input: unknown) {
     const body = z
-      .object({ answers: z.record(z.string(), z.string().trim().max(100)) })
+      .object({ answers: ballotAnswers, secondAnswers: ballotAnswers.default({}) })
       .parse(input);
     const s = this.get(id);
     if (!s.open) throw new Error("This survey is closed.");
     if (this.submitted(id, token)) return;
     if (this.count(id) >= 2000) throw new Error("This survey has reached its response limit.");
-    if (Object.keys(body.answers).some((key) => !s.questions.some((q) => q.id === key)))
+    const questionIds = new Set(s.questions.map((q) => q.id));
+    if (
+      [...Object.keys(body.answers), ...Object.keys(body.secondAnswers)].some(
+        (id) => !questionIds.has(id),
+      )
+    )
       throw new Error("Unknown survey question.");
     if (!Object.values(body.answers).some((answer) => answer.trim()))
       throw new Error("Answer at least one question.");
+    for (const [questionId, second] of Object.entries(body.secondAnswers)) {
+      if (!second) continue;
+      const first = body.answers[questionId];
+      const question = s.questions.find((q) => q.id === questionId)!;
+      if (!first)
+        throw new Error(`Enter a first answer before a second answer for “${question.prompt}”.`);
+      if (normalize(first) === normalize(second))
+        throw new Error(`Choose a different second answer for “${question.prompt}”.`);
+    }
     this.db.exec("BEGIN IMMEDIATE");
     try {
       this.db
         .prepare("INSERT INTO survey_responses VALUES (?,?,?)")
-        .run(id, this.hash(token), JSON.stringify(body.answers));
+        .run(
+          id,
+          this.hash(token),
+          JSON.stringify(Object.values(body.secondAnswers).some(Boolean) ? body : body.answers),
+        );
       s.revision++;
       s.reviewed = [];
       this.save(s);
@@ -119,21 +147,28 @@ export class Surveys {
       this.db.prepare("SELECT body FROM survey_responses WHERE survey=?").all(id) as {
         body: string;
       }[]
-    ).map((r) => JSON.parse(r.body) as Record<string, string>);
+    ).map((r) => readBallot(r.body));
     return {
       ...s,
       responseCount: responses.length,
       results: s.questions.map((q) => {
-        const variants = new Map<string, { key: string; text: string; count: number }>();
-        for (const response of responses) {
-          const text = response[q.id]?.trim();
-          if (!text) continue;
-          const key = normalize(text),
-            existing = variants.get(key);
-          if (existing) existing.count++;
-          else variants.set(key, { key, text, count: 1 });
+        const variants = new Map<string, SurveyResults["results"][number]["variants"][number]>();
+        let answered = 0;
+        function tally(text: string | undefined, second: boolean) {
+          if (!text) return;
+          const key = normalize(text);
+          const choice = variants.get(key) ?? { key, text, count: 0 };
+          choice.count++;
+          if (second) choice.secondChoices = (choice.secondChoices ?? 0) + 1;
+          variants.set(key, choice);
         }
-        const answered = [...variants.values()].reduce((n, v) => n + v.count, 0);
+        for (const response of responses) {
+          const first = response.answers[q.id]?.trim();
+          if (!first) continue;
+          answered++;
+          tally(first, false);
+          tally(response.secondAnswers[q.id]?.trim(), true);
+        }
         const groups = groupSurveyVariants([...variants.values()], s.grouping[q.id] ?? {});
         return {
           id: q.id,
@@ -260,11 +295,23 @@ export class Surveys {
       const top = savedSurveyBoard(q.groups, s.boards?.[q.id]);
       if (top.length < 2) throw new Error(`At least two answer groups are required: ${q.prompt}`);
       const shown = top.reduce((sum, group) => sum + group.count, 0);
+      const totalChoices = q.variants.reduce((sum, variant) => sum + variant.count, 0);
+      const ranked = totalChoices > q.answered;
+      const coverage = ranked
+        ? `Shown answer groups cover ${shown} of ${totalChoices} choices. First choices have twice the weight of second choices.`
+        : `Shown answer groups cover ${shown} of ${q.answered} nonblank responses.`;
+      const counts = top
+        .map((g) =>
+          ranked
+            ? `${g.text}: ${g.count - (g.secondChoices ?? 0)} first, ${g.secondChoices ?? 0} second`
+            : `${g.text}: ${g.count}`,
+        )
+        .join("; ");
       return {
         id: `survey-${s.id}-${q.id}`,
         category: "survey",
         prompt: q.prompt,
-        hostNotes: `Survey ${s.id}. ${q.answered} nonblank responses. ${s.responseCount - q.answered} skipped. Shown answer groups cover ${shown} of ${q.answered} nonblank responses. Points start as rounded shares; confirmed merges add existing points without changing other answers, with at least one point per group and 100 points total. Counts: ${top.map((g) => `${g.text}: ${g.count}`).join("; ")}`,
+        hostNotes: `Survey ${s.id}. ${q.answered} nonblank responses. ${s.responseCount - q.answered} skipped. ${coverage} Points start as rounded shares and confirmed merges add existing points. Each board totals 100. Counts: ${counts}`,
         answers: top.map((g, i) => ({
           id: `a${i + 1}`,
           text: g.text,

@@ -195,6 +195,7 @@ describe("multi-group HTTP and live boundaries", () => {
       await json(`/games/${gameA}/buzzers`, adminA, { action: "stage", playerId: player.id });
     }
     await command(gameA, adminA, { type: "startGame" });
+    await command(gameA, adminA, { type: "openQuestion" });
     await json(`/games/${gameA}/buzzers`, adminA, { action: "arm" });
     const epoch = server.buzzers.public(gameA).epoch;
     const results = await Promise.all(

@@ -15,6 +15,7 @@ import type { SurveyGroupSuggestion } from "../lib/surveyReview";
 export function SurveyForm({ id }: { id: string }) {
   const [survey, setSurvey] = useState<PublicSurvey | null>(null),
     [answers, setAnswers] = useState<Record<string, string>>({});
+  const [secondAnswers, setSecondAnswers] = useState<Record<string, string>>({});
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -26,7 +27,7 @@ export function SurveyForm({ id }: { id: string }) {
     setBusy(true);
     setError("");
     try {
-      await api(`/surveys/${id}/responses`, { answers });
+      await api(`/surveys/${id}/responses`, { answers, secondAnswers });
       setSurvey((s) => (s ? { ...s, submitted: true } : s));
     } catch (e) {
       setError((e as Error).message);
@@ -59,24 +60,45 @@ export function SurveyForm({ id }: { id: string }) {
           }}
         >
           <p>
-            Give your first answer to each question. One answer per question; you can skip any
-            question. Please do not include personal or sensitive information.
+            Give your top answer and, if you have one, a different second choice. You can skip any
+            question. First choices count twice as much as second choices. Please do not include
+            personal or sensitive information.
           </p>
           <p className="muted">
             No name or email is requested. Answers are stored for the host to review and use in a
             game. Please submit once; this browser remembers your submission.
           </p>
           {survey.questions.map((q, i) => (
-            <label className="settings-card" key={q.id}>
-              {i + 1}. {q.prompt}
-              <input
-                aria-label={q.prompt}
-                maxLength={100}
-                value={answers[q.id] ?? ""}
-                onChange={(e) => setAnswers((old) => ({ ...old, [q.id]: e.target.value }))}
-                placeholder="Your first answer"
-              />
-            </label>
+            <section className="settings-card" key={q.id} aria-labelledby={`prompt-${q.id}`}>
+              <h2 id={`prompt-${q.id}`}>
+                {i + 1}. {q.prompt}
+              </h2>
+              <label>
+                First choice
+                <input
+                  aria-label={q.prompt}
+                  maxLength={100}
+                  value={answers[q.id] ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setAnswers((old) => ({ ...old, [q.id]: value }));
+                    if (!value.trim()) setSecondAnswers((old) => ({ ...old, [q.id]: "" }));
+                  }}
+                  placeholder="Your first answer"
+                />
+              </label>
+              <label>
+                Second choice (optional)
+                <input
+                  aria-label={`Optional second choice for question ${i + 1}`}
+                  disabled={!answers[q.id]?.trim()}
+                  maxLength={100}
+                  value={secondAnswers[q.id] ?? ""}
+                  onChange={(e) => setSecondAnswers((old) => ({ ...old, [q.id]: e.target.value }))}
+                  placeholder="A different answer"
+                />
+              </label>
+            </section>
           ))}
           <button
             className="button primary"
@@ -469,7 +491,11 @@ export function Surveys() {
                   {q.variants.map((v) => (
                     <label key={v.key} className="survey-choice">
                       <span>
-                        {v.text} ({v.count}) → Group
+                        {v.text} ({v.count}
+                        {v.secondChoices
+                          ? `, ${v.count - v.secondChoices} first / ${v.secondChoices} second`
+                          : ""}
+                        ) → Group
                       </span>
                       <input
                         aria-label={`Group ${q.id} ${v.text}`}

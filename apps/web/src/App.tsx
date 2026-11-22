@@ -74,7 +74,7 @@ function Rules() {
           [
             "01",
             "Face off",
-            "Select who buzzed first. Judge their answer, then the other contestant's if needed. The higher answer wins the choice to play or pass. A top answer wins immediately; a tied answer favours the first contestant.",
+            "Reveal the question, read it aloud, then open the buzzers. Judge the first contestant's answer, then ask the other contestant if needed. The #1 answer wins immediately. If both contestants answer, the higher board rank wins the choice to play or pass, even when two answers have equal points.",
           ],
           [
             "02",

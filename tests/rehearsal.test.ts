@@ -43,6 +43,11 @@ it("simulates through the real buzzer lock and winner checks, only in rehearsals
     expect(state.rehearsal).toBe(true);
     const locked = server.buzzers.public(state.id);
     expect(() => server.buzzers.simulate(state.id, 0, locked.epoch)).toThrow("locked");
+    server.store.apply(state.id, {
+      id: randomUUID(),
+      revision: state.revision,
+      command: { type: "openQuestion" },
+    });
     server.buzzers.control(state.id, "arm");
     const epoch = server.buzzers.public(state.id).epoch;
     server.buzzers.simulate(state.id, 1, epoch);

@@ -41,7 +41,15 @@ it("pairs phones without revealing answers and requires host approval", async ()
     .get("set-cookie")!
     .split(";")[0];
   expect((await post(path("buzzers"), { action: "arm" }, a)).status).toBe(401);
-  await post(path("buzzers"), { action: "arm" });
+  expect((await post(path("buzzers"), { action: "arm" })).status).toBe(400);
+  const reveal = await post(path("commands"), {
+    id: randomUUID(),
+    revision: server.store.host(id).revision,
+    command: { type: "openQuestion" },
+  });
+  expect(reveal.status).toBe(200);
+  expect(server.buzzers.public(id).armed).toBe(false);
+  expect((await post(path("buzzers"), { action: "arm" })).status).toBe(200);
   expect(
     (await post(path("player/buzz"), { epoch: server.buzzers.public(id).epoch }, a)).status,
   ).toBe(400);
