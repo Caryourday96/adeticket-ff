@@ -690,7 +690,16 @@ export function createApplication(options: {
   app.post("/api/games/:id/buzzers", auth, (req, res) => {
     const body = z
       .object({
-        action: z.enum(["arm", "lock", "approve", "remove", "removeAll", "stage", "bench"]),
+        action: z.enum([
+          "arm",
+          "lock",
+          "approve",
+          "remove",
+          "removeAll",
+          "stage",
+          "bench",
+          "autoStage",
+        ]),
         playerId: z.string().uuid().optional(),
       })
       .parse(req.body);

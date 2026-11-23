@@ -523,7 +523,7 @@ export function audience(s: GameState): PublicState {
       category: s.lobby
         ? "Join your team and get ready"
         : hidden
-          ? "Question appears when buzzers open"
+          ? "The host will reveal the question"
           : q.category,
       answers: q.answers.map((a, i) => {
         const visible = !s.lobby && (s.showAll || revealed.includes(a.id));

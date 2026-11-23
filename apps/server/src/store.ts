@@ -22,6 +22,7 @@ type Saved = {
   history: string[];
   commands: string[];
 };
+type StoredBuzzerPlayer = BuzzerPlayer & { autoStageBenchedRound?: number };
 export class Store {
   private db: DatabaseSync;
   readonly surveys: Surveys;
@@ -72,9 +73,11 @@ export class Store {
       throw error;
     }
   }
-  players(game: string): BuzzerPlayer[] {
+  players(game: string): StoredBuzzerPlayer[] {
     return (
-      this.db.prepare("SELECT body FROM players WHERE game=?").all(game) as { body: string }[]
+      this.db.prepare("SELECT body FROM players WHERE game=? ORDER BY rowid").all(game) as {
+        body: string;
+      }[]
     ).map((r) => JSON.parse(r.body));
   }
   player(game: string, token?: string): BuzzerPlayer | null {
@@ -107,15 +110,19 @@ export class Store {
       if (groupId) this.platform.assignResource("game", state.id, groupId);
       if (replayBy && this.platform.enabled())
         this.platform.carryReplayHost(replayBy, source, state.id);
-      const rows = this.db.prepare("SELECT hash,body FROM players WHERE game=?").all(source) as {
-        hash: string;
-        body: string;
-      }[];
+      const rows = this.db
+        .prepare("SELECT hash,body FROM players WHERE game=? ORDER BY rowid")
+        .all(source) as { hash: string; body: string }[];
       for (const row of rows) {
-        const player = JSON.parse(row.body) as BuzzerPlayer;
+        const player = JSON.parse(row.body) as StoredBuzzerPlayer;
         if (!player.approved || previous.teams[player.team].members[player.member] !== player.name)
           continue;
-        const copied = { ...player, id: randomUUID(), onStage: false };
+        const copied = {
+          ...player,
+          id: randomUUID(),
+          onStage: false,
+          autoStageBenchedRound: undefined,
+        };
         this.db
           .prepare("INSERT INTO players VALUES (?,?,?,?)")
           .run(copied.id, state.id, row.hash, JSON.stringify(copied));
@@ -127,7 +134,7 @@ export class Store {
       throw error;
     }
   }
-  updatePlayer(game: string, player: BuzzerPlayer) {
+  updatePlayer(game: string, player: StoredBuzzerPlayer) {
     this.db
       .prepare("UPDATE players SET body=? WHERE game=? AND id=?")
       .run(JSON.stringify(player), game, player.id);
@@ -150,17 +157,18 @@ export class Store {
       const unchangedPlaces = JSON.stringify(oldPlaces) === JSON.stringify(nextPlaces);
       if (wasPaired && (unique || unchangedPlaces)) {
         const target = unique ? nextPlaces[0] : { team: player.team, member: player.member };
-        const sameTeamLineup =
+        const keepsExistingLineup =
           target.team === player.team &&
           target.member === player.member &&
           before[player.team].captain === after[player.team].captain &&
           before[player.team].awaitingPlayers === after[player.team].awaitingPlayers &&
-          JSON.stringify(before[player.team].members) ===
-            JSON.stringify(after[player.team].members);
+          before[player.team].members.every(
+            (member, index) => after[player.team].members[index] === member,
+          );
         this.updatePlayer(game, {
           ...player,
           ...target,
-          onStage: sameTeamLineup ? player.onStage : false,
+          onStage: keepsExistingLineup ? player.onStage : false,
         });
       } else {
         // Keep the same cookie/name for review; removed/ambiguous names lose permission.

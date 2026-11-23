@@ -74,7 +74,7 @@ export function Player({ id }: { id: string }) {
           <p>
             {s.joinsLocked
               ? "The host has locked new joins for this game. Ask them to reopen joining when ready."
-              : "Enter your name and select your team. Your host will approve you and choose who goes on stage."}
+              : "Choose your team and enter the name you want on the game screen. It will appear after the host approves you."}
           </p>
           <form
             onSubmit={(e) => {

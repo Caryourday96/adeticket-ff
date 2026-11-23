@@ -51,6 +51,7 @@ it("registers player names, keeps host team names and enforces stage selection o
     expect(
       (await post(path + "/buzzers", { action: "stage", playerId: player.id }, phone)).status,
     ).toBe(401);
+    expect((await post(path + "/buzzers", { action: "autoStage" }, phone)).status).toBe(401);
     expect(
       (await post(path + "/buzzers", { action: "approve", playerId: player.id }, host)).status,
     ).toBe(200);
@@ -70,9 +71,7 @@ it("registers player names, keeps host team names and enforces stage selection o
       ).status,
     ).toBe(200);
     await post(path + "/buzzers", { action: "arm" }, host);
-    expect(
-      (await post(path + "/player/buzz", { epoch: server.buzzers.public(id).epoch }, phone)).status,
-    ).toBe(400);
+    expect(server.store.players(id).find((entry) => entry.id === player.id)?.onStage).toBe(true);
     expect(
       (await post(path + "/buzzers", { action: "stage", playerId: player.id }, host)).status,
     ).toBe(200);

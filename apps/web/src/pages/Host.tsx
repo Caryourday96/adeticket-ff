@@ -389,7 +389,8 @@ export function Host({ id }: { id: string }) {
                 )}
                 {!s.lobby && s.phase === "faceoff" && s.face.first === null && (
                   <p>
-                    Bring contestants on stage, then reveal and read the question in Phone buzzers.
+                    Choose face-off captains in Phone buzzers, then reveal and read the question.
+                    Opening buzzers automatically fills any unassigned phone spots.
                   </p>
                 )}
                 {s.phase === "choice" && (

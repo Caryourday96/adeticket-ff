@@ -68,8 +68,11 @@ export function BuzzerControls({
     buzzerConnected: connected && !error && Boolean(data),
     stagedTeams,
   });
-  const waitingForBuzz = !s.lobby && s.phase === "faceoff" && s.face.first === null;
+  const selectingCaptains = s.phase === "faceoff" && s.face.first === null;
+  const waitingForBuzz = !s.lobby && selectingCaptains;
   const canChangeGate = waitingForBuzz && !s.paused && connected && !busy && !commandPending;
+  const canChooseCaptains =
+    selectingCaptains && !s.paused && connected && !busy && !commandPending && !data?.armed;
   const questionVisible = s.questionRevealed === true;
   useEffect(() => {
     let alive = true;
@@ -301,23 +304,35 @@ export function BuzzerControls({
             ? "Buzzers are open"
             : "Buzzers locked"}
       </h3>
-      <p>Only the current face-off player on each team can buzz.</p>
+      <p>
+        Only the face-off captain on each team can buzz. Opening buzzers fills any unassigned spot
+        with the earliest approved phone on that team, in join order.
+      </p>
       <p>
         Players join at{" "}
         <a href="/play" target="_blank" rel="noreferrer">
           {gameOrigin()}/play
         </a>{" "}
-        · Game code <strong>{s.id}</strong>. Approve their names, then put one player from each team
-        on stage.
+        · Game code <strong>{s.id}</strong>. Approve players before choosing face-off captains. You
+        can still put a different approved player on stage.
       </p>
       {waitingForBuzz && !data?.armed && (
         <p className="host-note" role="status">
           {questionVisible
             ? "Read the full question aloud, then open the buzzers."
-            : "Bring the contestants on stage, then reveal the question."}
+            : "Choose face-off captains if you want them shown before you reveal the question."}
         </p>
       )}
       <div className="button-row">
+        {selectingCaptains && !!data?.players.some((p) => p.approved) && (
+          <button
+            className="button"
+            disabled={!canChooseCaptains}
+            onClick={() => void act({ action: "autoStage" })}
+          >
+            Auto-select face-off captains
+          </button>
+        )}
         {waitingForBuzz && (
           <button
             className={"button" + (!questionVisible ? " primary" : "")}

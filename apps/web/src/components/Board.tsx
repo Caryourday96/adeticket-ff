@@ -1,8 +1,35 @@
-import type { PublicState } from "@naija/contracts";
+import type { PublicState, Side } from "@naija/contracts";
 import { Brand } from "./Brand";
 import { Trophy } from "lucide-react";
+
+function answeringPlayer(state: PublicState): { team: Side; member: number } | null {
+  if (state.lobby || state.paused) return null;
+  if (state.phase === "play") return { team: state.control, member: state.turns[state.control] };
+  if (state.phase === "steal") {
+    const team = state.control === 0 ? 1 : 0;
+    return { team, member: state.teams[team].captain };
+  }
+  if (state.phase === "faceoff" && state.face.first !== null) {
+    const team = state.face.current;
+    return { team, member: state.turns[team] };
+  }
+  if (state.phase === "fast" && state.fast && state.winner !== null) {
+    if (state.fast.stage === "between")
+      return { team: state.winner, member: state.fast.players[1] };
+    if (state.fast.stage === "ready" || state.fast.stage === "running")
+      return { team: state.winner, member: state.fast.players[state.fast.player] };
+  }
+  return null;
+}
+
 export function Board({ state, compact = false }: { state: PublicState; compact?: boolean }) {
   const winner = state.winner !== null ? state.teams[state.winner] : null;
+  const answering = answeringPlayer(state);
+  const activeTeam = answering ? state.teams[answering.team] : null;
+  const speaker =
+    answering && !activeTeam?.awaitingPlayers ? activeTeam?.members[answering.member] : null;
+  const waitingForFaceOff =
+    !state.lobby && !state.paused && state.phase === "faceoff" && state.face.first === null;
   return (
     <div
       className={
@@ -117,33 +144,56 @@ export function Board({ state, compact = false }: { state: PublicState; compact?
         </>
       )}
       <div className="stage-scores">
-        {state.teams.map((t, i) => (
-          <div key={i} className={"stage-team " + (state.control === i ? "active" : "")}>
-            <div>
-              <small>{state.control === i ? "IN CONTROL" : "CHALLENGERS"}</small>
-              <strong>{t.name}</strong>
+        {state.teams.map((t, i) => {
+          const hasControl =
+            !state.lobby &&
+            state.control === i &&
+            (state.phase === "play" || state.phase === "choice");
+          const isStealing = state.phase === "steal" && state.control !== i;
+          return (
+            <div
+              key={i}
+              className={
+                "stage-team " + (hasControl || isStealing || answering?.team === i ? "active" : "")
+              }
+              role="group"
+              aria-label={t.name}
+            >
+              <div>
+                {hasControl && (
+                  <small>{state.phase === "choice" ? "PLAY OR PASS" : "IN CONTROL"}</small>
+                )}
+                {isStealing && <small>STEAL CHANCE</small>}
+                <strong>{t.name}</strong>
+                {t.awaitingPlayers ? (
+                  <p className="stage-roster-empty">Waiting for players</p>
+                ) : (
+                  <ul className="stage-roster" aria-label={`${t.name} players`}>
+                    {t.members.map((name, member) => {
+                      const isAnswering = answering?.team === i && answering.member === member;
+                      const isFaceOff = waitingForFaceOff && state.turns[i] === member;
+                      return (
+                        <li key={member} className={isAnswering ? "stage-roster-next" : ""}>
+                          <span>{name}</span>
+                          {isAnswering && <span className="stage-roster-role">Next to answer</span>}
+                          {isFaceOff && <span className="stage-roster-role">Face-off</span>}
+                          {member === t.captain && (
+                            <span className="stage-roster-role">Team captain</span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+              <b>{state.scores[i]}</b>
             </div>
-            <b>{state.scores[i]}</b>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      {["play", "steal", "faceoff"].includes(state.phase) && (
-        <div className="stage-contestant">
-          AT THE MIC ·{" "}
-          {(() => {
-            const side =
-              state.phase === "steal"
-                ? state.control === 0
-                  ? 1
-                  : 0
-                : state.phase === "faceoff"
-                  ? state.face.current
-                  : state.control;
-            const team = state.teams[side];
-            return state.phase === "faceoff" && state.face.first === null
-              ? "Face-off contestants, get ready"
-              : team.members[state.phase === "steal" ? team.captain : state.turns[side]];
-          })()}
+      {!compact && (
+        <div className="stage-turn-announcement" role="status">
+          {speaker ? `Next to answer: ${speaker} from ${activeTeam?.name}` : ""}
         </div>
       )}
       {state.paused && <div className="paused-overlay">GAME PAUSED</div>}

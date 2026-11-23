@@ -2497,15 +2497,57 @@ small {
   }
 }
 
-.stage-contestant {
-  text-align: center;
-  font-size: 8px;
-  letter-spacing: 1.5px;
-  color: #a8bad7;
-  margin-top: 14px;
+.stage-roster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  list-style: none;
+  margin: 5px 0 0;
+  padding: 0;
 }
-.audience-page .stage-contestant {
-  font-size: 11px;
+.stage-roster li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 5px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 2px 6px;
+  border: 1px solid #465775;
+  border-radius: 5px;
+  color: #dbe6f8;
+  background: #0c1931;
+  font-size: clamp(11px, 1vw, 15px);
+}
+.stage-roster li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.stage-roster .stage-roster-next {
+  border-color: #ffd88a;
+  background: #3b2d17;
+  color: #fff1cb;
+  font-weight: 700;
+}
+.stage-roster-role {
+  color: #d5bc8c;
+  font-size: 0.82em;
+}
+.stage-roster-next .stage-roster-role {
+  color: #ffe2a4;
+}
+.stage-roster-empty {
+  color: #b5c7e3;
+  margin: 5px 0 0;
+  font-size: 12px;
+}
+.stage-turn-announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .fast-reference h2 {
   margin: 12px 0 18px;
@@ -3470,8 +3512,8 @@ fieldset.team-editors {
     margin: 0;
   }
   .audience-page .fast-public-row {
-    padding-top: 4px;
-    padding-bottom: 4px;
+    padding-top: 3px;
+    padding-bottom: 3px;
   }
   .audience-page .stage-scores {
     margin-top: 10px;
@@ -3544,8 +3586,7 @@ fieldset.team-editors {
   flex-shrink: 0;
 }
 .question-plaque h2,
-.event-brand,
-.stage-contestant {
+.event-brand {
   overflow-wrap: anywhere;
 }
 .stage-team {

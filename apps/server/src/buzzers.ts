@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import type { BuzzerState, Side } from "@naija/contracts";
+import type { BuzzerPlayer, BuzzerState, HostState, Side } from "@naija/contracts";
 import { Store } from "./store";
 
 // Deliberately process-local: a restart always locks the buttons. Run one server instance.
@@ -118,6 +118,47 @@ export class Buzzers {
     );
     return token;
   }
+  private stage(id: string, state: HostState, player: BuzzerPlayer, manual: boolean) {
+    if (
+      !player.approved ||
+      state.teams[player.team].awaitingPlayers ||
+      state.teams[player.team].members[player.member] !== player.name
+    )
+      throw new Error("Approve this player and check their roster place first.");
+    if (manual || state.turns[player.team] !== player.member)
+      this.store.apply(id, {
+        id: randomUUID(),
+        revision: state.revision,
+        command: { type: "faceoffPlayer", team: player.team, member: player.member },
+      });
+    for (const other of this.store.players(id).filter((other) => other.team === player.team)) {
+      const onStage = other.id === player.id;
+      this.store.updatePlayer(id, {
+        ...other,
+        onStage,
+        autoStageBenchedRound: onStage ? undefined : other.autoStageBenchedRound,
+      });
+    }
+  }
+  private fillFaceoffStage(id: string) {
+    for (const team of [0, 1] as const) {
+      const state = this.store.host(id);
+      if (state.teams[team].awaitingPlayers) continue;
+      const eligible = this.store
+        .players(id)
+        .filter(
+          (player) =>
+            player.team === team &&
+            player.approved &&
+            player.autoStageBenchedRound !== state.round &&
+            state.teams[team].members[player.member] === player.name,
+        );
+      if (eligible.some((player) => player.onStage === true && state.turns[team] === player.member))
+        continue;
+      const firstJoin = eligible[0];
+      if (firstJoin) this.stage(id, state, firstJoin, false);
+    }
+  }
   control(id: string, action: string, playerId?: string) {
     const s = this.store.host(id);
     if (action === "arm") {
@@ -125,8 +166,15 @@ export class Buzzers {
         throw new Error("Buzzers can only open for a waiting face-off.");
       if (s.questionRevealed !== true)
         throw new Error("Reveal the question, then read it aloud before opening buzzers.");
+      if (this.public(id).armed) return;
+      this.fillFaceoffStage(id);
       this.lock(id);
       this.gates.get(id)!.armed = true;
+    } else if (action === "autoStage") {
+      if (s.paused || s.phase !== "faceoff" || s.face.first !== null || this.public(id).armed)
+        throw new Error("Select face-off captains while the buzzers are locked before play.");
+      this.fillFaceoffStage(id);
+      this.lock(id);
     } else if (action === "lock") this.lock(id);
     else if (action === "removeAll") {
       for (const p of this.store.players(id)) this.store.removePlayer(id, p.id);
@@ -135,18 +183,10 @@ export class Buzzers {
       const p = this.store.players(id).find((p) => p.id === playerId);
       if (!p) throw new Error("Phone registration not found.");
       if (action === "remove") this.store.removePlayer(id, p.id);
-      else if (action === "bench") this.store.updatePlayer(id, { ...p, onStage: false });
-      else if (action === "stage") {
-        if (!p.approved || s.teams[p.team].members[p.member] !== p.name)
-          throw new Error("Approve this player and check their roster place first.");
-        this.store.apply(id, {
-          id: randomUUID(),
-          revision: s.revision,
-          command: { type: "faceoffPlayer", team: p.team, member: p.member },
-        });
-        for (const other of this.store.players(id).filter((other) => other.team === p.team))
-          this.store.updatePlayer(id, { ...other, onStage: other.id === p.id });
-      } else {
+      else if (action === "bench")
+        this.store.updatePlayer(id, { ...p, onStage: false, autoStageBenchedRound: s.round });
+      else if (action === "stage") this.stage(id, s, p, true);
+      else {
         const teams = structuredClone(s.teams);
         const t = teams[p.team];
         const matches = t.awaitingPlayers

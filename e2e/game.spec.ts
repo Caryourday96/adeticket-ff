@@ -427,7 +427,10 @@ test("players enter their names and only buzz on stage with saved team names", a
     await page.getByRole("button", { name: "Approve Funke", exact: true }).click();
     await expect(page.getByRole("button", { name: "Open buzzers", exact: true })).toBeDisabled();
     await expect(phone.locator(".phone-buzzer")).toBeDisabled();
-    await page.getByRole("button", { name: "Put Funke on stage", exact: true }).click();
+    await page.getByRole("button", { name: "Auto-select face-off captains" }).click();
+    await expect(
+      page.getByRole("button", { name: "Take Funke off stage", exact: true }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Reveal question", exact: true }).click();
     await expect(phone.locator(".phone-buzzer")).toBeDisabled();
     await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
@@ -458,6 +461,60 @@ test("players enter their names and only buzz on stage with saved team names", a
     await expect(page.getByRole("heading", { name: "Funke buzzed first" })).toBeVisible();
   } finally {
     await context.close();
+  }
+});
+
+test("opening buzzers picks the earliest approved phone for each team", async ({
+  page,
+  browser,
+}) => {
+  await signIn(page);
+  await page.getByRole("button", { name: "Create game", exact: true }).click();
+  await expect(page).toHaveURL(/\/host\/[A-F0-9]{6}$/);
+  const id = page.url().split("/").pop()!;
+  const origin = new URL(page.url()).origin;
+  const contexts = [];
+  try {
+    const phones = [];
+    for (const [team, name] of [
+      [0, "Waiting Guest"],
+      [0, "Early Captain"],
+      [0, "Late Captain"],
+      [1, "Other Captain"],
+    ] as const) {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      contexts.push(context);
+      const joined = await context.request.post(`${origin}/api/games/${id}/player`, {
+        data: { team, name },
+      });
+      expect(joined.ok()).toBe(true);
+      phones.push(await context.newPage());
+    }
+    const audience = await browser.newContext();
+    contexts.push(audience);
+    const screen = await audience.newPage();
+    await screen.goto(`${origin}/audience/${id}`);
+    await page
+      .locator(".buzzer-controls > details > summary")
+      .filter({ hasText: /^4 phones/ })
+      .click();
+    for (const name of ["Late Captain", "Early Captain", "Other Captain"]) {
+      await page.getByRole("button", { name: `Approve ${name}`, exact: true }).click();
+    }
+    await Promise.all(phones.map((phone) => phone.goto(`${origin}/play/${id}`)));
+    await page.getByRole("button", { name: "Reveal question", exact: true }).click();
+    for (const phone of phones) await expect(phone.locator(".phone-buzzer")).toBeDisabled();
+    await page.getByRole("button", { name: "Open buzzers", exact: true }).click();
+    await expect(phones[1].locator(".phone-buzzer")).toBeEnabled();
+    await expect(phones[3].locator(".phone-buzzer")).toBeEnabled();
+    await expect(phones[0].locator(".phone-buzzer")).toBeDisabled();
+    await expect(phones[2].locator(".phone-buzzer")).toBeDisabled();
+    await expect(screen.getByText("Waiting Guest", { exact: true })).toHaveCount(0);
+    await phones[1].locator(".phone-buzzer").click();
+    await expect(page.getByRole("heading", { name: "Early Captain buzzed first" })).toBeVisible();
+    await expect(screen.locator(".stage-roster-next")).toContainText("Early Captain");
+  } finally {
+    await Promise.all(contexts.map((context) => context.close()));
   }
 });
 
